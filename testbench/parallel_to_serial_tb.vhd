@@ -83,7 +83,8 @@ ARCHITECTURE behavior OF parallel_to_serial_tb IS
    signal data_out : std_logic;
 
    -- Clock period definitions
-   constant clk_period : time := 10 ns;
+   constant clk_period : time := 24 ns;
+   constant cpu_clk_period : time := 10 ns;
 	
 	signal full, almost_full : std_logic;
 	signal overflow, underflow : std_logic;
@@ -131,6 +132,13 @@ BEGIN
 		wait for clk_period/2;
    end process;
  
+   cpu_clk_process :process
+   begin
+		trig_clk <= '0';
+		wait for cpu_clk_period/2;
+		trig_clk <= '1';
+		wait for cpu_clk_period/2;
+   end process;
 
    -- Stimulus process
    stim_proc: process
@@ -139,26 +147,31 @@ BEGIN
       -- hold reset state for 30 ns.
 		cpu_wren <= '0';
 		cpu_data <= X"A5B5CD0A";
-      wait for 30 ns;	
+      wait for clk_period * 2;	
 		reset <= '0';
 		wait for clk_period * 3;
 		cpu_wren <= '1';
-      trigger <= '1';
-      trig_clk <= '1';
-      wait for clk_period;
-		cpu_wren <= '0';
-		cpu_data <= X"5AAA555A";
-		wait for clk_period;
-		cpu_wren <= '1';
-		wait for clk_period;
-		cpu_wren <= '0';
-		
-		wait for clk_period * 6;
+
+
+
+    wait for clk_period;
+    cpu_wren <= '0';
+    cpu_data <= X"5AAA555A";
+    wait for clk_period;
+    cpu_wren <= '1';
+    wait for clk_period;
+    cpu_wren <= '0';
+	
+    wait for clk_period * 6;
       
 		-- insert cpu stimulus here 
+    wait for cpu_clk_period;
+    trigger <= '1';
+    wait for cpu_clk_period;
+    trigger <= '0';
 		
 
-      wait;
+    wait;
    end process;
 
 END;

@@ -43,3 +43,25 @@
 # NET "clk1_dbg"  LOC = "AD9";    # BANK = 22,  Pin name = IO_L9N_CC_22,    Sch name = JA2
 # NET "clk2_dbg"  LOC = "AM13";   # BANK = 22,  Pin name = IO_L2N_22,       Sch name = JA3
 # NET "clk3_dbg"  LOC = "AM12";   # BANK = 22,  Pin name = IO_L6P_22,       Sch name = JA4
+
+# onBoard USB controller
+
+ NET "UsbEmpty"  LOC = "B13"; # Bank = 20, Pin name = IO_L11P_CC_20,    Sch name = U1-FLAGA
+ NET "UsbFull"	 LOC = "A13"; # Bank = 20, Pin name = IO_L8P_CC_20,     Sch name = U1-FLAGB
+ NET "UsbRD"	 LOC = "N10"; # Bank = 20, Pin name = IO_L18P_20,       Sch name = U1-SLRD
+ NET "UsbDB<0>"  LOC = "G12"; # Bank = 20, Pin name = IO_L13N_20,       Sch name = U1-FD0
+ NET "UsbDB<1>"  LOC = "G11"; # Bank = 20, Pin name = IO_L13P_20,       Sch name = U1-FD1
+ NET "UsbDB<2>"  LOC = "G13"; # Bank = 20, Pin name = IO_L19N_20,       Sch name = U1-FD2
+ NET "UsbDB<3>"  LOC = "L10"; # Bank = 20, Pin name = IO_L12P_VRN_20,   Sch name = U1-FD3
+ NET "UsbDB<4>"  LOC = "K9";  # Bank = 20, Pin name = IO_L10N_CC_20,    Sch name = U1-FD4
+ NET "UsbDB<5>"  LOC = "L9";  # Bank = 20, Pin name = IO_L16N_20,       Sch name = U1-FD5
+ NET "UsbDB<6>"  LOC = "C13"; # Bank = 20, Pin name = IO_L11N_CC_20,    Sch name = U1-FD6
+ NET "UsbDB<7>"  LOC = "E13"; # Bank = 20, Pin name = IO_L17N_20,       Sch name = U1-FD7
+
+ NET "UsbClk"    LOC = "J10"; # Bank = 20, Pin name = IO_L9P_CC_20,     Sch name = U1-IFCLK 
+ NET "UsbOE"     LOC = "F11"; # Bank = 20, Pin name = IO_L15P_20,       Sch name = U1-SLOE
+ NET "UsbWR"     LOC = "M10"; # Bank = 20, Pin name = IO_L16P_20,       Sch name = U1-SLWR
+ NET "UsbPktEnd" LOC = "M8";  # Bank = 20, Pin name = IO_L14P_20,       Sch name = U1-PKTEND
+ NET "UsbEN"	 LOC = "N9";  # Bank = 20, Pin name = IO_L18N_20,       Sch name = U1-SLCS
+ NET "UsbAdr<0>" LOC = "L11"; # Bank = 20, Pin name = IO_L12N_VRP_20,   Sch name = U1-FIFOAD0
+ NET "UsbAdr<1>" LOC = "L8";  # Bank = 20, Pin name = IO_L14N_VREF_20,  Sch name = U1-FIFOAD1

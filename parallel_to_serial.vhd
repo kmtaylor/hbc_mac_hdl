@@ -43,7 +43,9 @@ begin
 	if reset = '1' or en_reset = '1' then
 	    enabled <= '0'; 
 	elsif trig_clk'event and trig_clk = '1' then
-	    enabled <= trigger;
+	    if trigger = '1' then
+		enabled <= '1';
+	    end if;
 	end if;
     end process trigger_proc;
 
@@ -111,7 +113,6 @@ begin
 	    when st_finish_2 =>
 		en_reset <= '1';
 		next_state <= st_reset;
-	    when others =>
 	end case;      
     end process;
 
