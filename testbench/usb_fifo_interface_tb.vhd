@@ -53,7 +53,7 @@ ARCHITECTURE behavior OF usb_fifo_interface_tb IS
          io_ready : OUT  std_logic;
          pkt_end : IN  std_logic;
 	 UsbIRQ : OUT std_logic;
-	 UsbDB : IN std_logic_vector(7 downto 0);
+	 UsbDB : INOUT std_logic_vector(7 downto 0);
          UsbAdr : OUT  std_logic_vector(1 downto 0);
          UsbOE : OUT  std_logic;
          UsbWR : OUT  std_logic;

@@ -14,7 +14,7 @@ entity usb_fifo is
 		io_ready : out std_logic;
 		pkt_end : in std_logic;
 		UsbIRQ : out std_logic;
-		UsbDB : in std_logic_vector (7 downto 0); --fixme
+		UsbDB : inout std_logic_vector (7 downto 0); --fixme
 		UsbAdr : out std_logic_vector (1 downto 0);
 		UsbOE : out std_logic;
 		UsbWR : out std_logic;
@@ -29,7 +29,7 @@ architecture Behavioral of usb_fifo is
 	-- USB_ADDR must be word aligned
 	constant USB_ADDR : std_logic_vector := X"10";
 
-	signal UsbDB_sim : std_logic_vector (7 downto 0); --fixme
+--	signal UsbDB_sim : std_logic_vector (7 downto 0); --fixme
 			
 	signal io_addr_reg : std_logic_vector (7 downto 0);
 	signal usb_read_data : std_logic_vector (31 downto 0);
@@ -61,7 +61,7 @@ architecture Behavioral of usb_fifo is
 
 begin
 -------------------------- USB FIFO State machine -----------------------------
-    output_decode : process (state, byte_counter) begin
+    output_decode : process (state, byte_counter, usb_write_data) begin
 
 	UsbPktEnd <= '1';
 	UsbAdr <= "00";
@@ -70,7 +70,7 @@ begin
 	UsbWR <= '1';
 	do_read_data <= '0';
 	UsbIRQ <= '0';
-	UsbDB_sim <= (others => 'Z');
+	UsbDB <= (others => 'Z');
 
 	case (state) is
 	    -- Packet End
@@ -86,17 +86,16 @@ begin
 	    when st_wr_addr =>
 		UsbAdr <= "10";
 	    when st_wr_byte =>
-		--UsbDB <= UsbDB_sim;
 		UsbAdr <= "10";
 		UsbWR <= '0';
 		if byte_counter = 3 then
-		    UsbDB_sim <= usb_write_data (31 downto 24);
+		    UsbDB <= usb_write_data (31 downto 24);
 		elsif byte_counter = 2 then
-		    UsbDB_sim <= usb_write_data (23 downto 16);
+		    UsbDB <= usb_write_data (23 downto 16);
 		elsif byte_counter = 1 then
-		    UsbDB_sim <= usb_write_data (15 downto 8);
+		    UsbDB <= usb_write_data (15 downto 8);
 		elsif byte_counter = 0 then
-		    UsbDB_sim <= usb_write_data (7 downto 0);
+		    UsbDB <= usb_write_data (7 downto 0);
 		end if;
 	    when others =>
 	end case;
@@ -131,9 +130,9 @@ begin
 
         case (state) is
             when st_reset =>
-		if UsbEN = '1' then
+		--if UsbEN = '1' then
 		    next_state <= st_idle;
-		end if;
+		--end if;
             when st_idle =>
 		if UsbEmpty = '0' then
 		    next_state <= st_rd_addr;
@@ -196,7 +195,7 @@ begin
 	end if;
     end process trigger_proc;
 
---	-- Get IO data
+    -- Get IO data
     io_proc : process(cpu_clk, reset, reset_cpu_read, reset_cpu_write) begin
 	if reset = '1' then
 	    do_ack <= '0';
@@ -245,7 +244,7 @@ begin
             end if;
         end if;
     end process ack_proc;
---    
+
     -- Get address from IO bus
     get_io_addr : process(cpu_clk, reset) begin
         if reset = '1' then
