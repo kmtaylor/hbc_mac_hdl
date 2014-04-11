@@ -53,7 +53,6 @@ architecture Behavioral of usb_fifo is
                         st_wr_byte,
                         st_rd_addr,
                         st_rd_byte,
-                        st_rd_int,
                         st_rd_ack);
     	signal state, next_state : state_type;
 	signal byte_counter : unsigned (1 downto 0);
@@ -81,7 +80,7 @@ begin
 		UsbRD <= '0';
 		UsbOE <= '0';
 		do_read_data <= '1';
-	    when st_rd_int =>
+	    when st_rd_ack =>
 		UsbIRQ <= '1';
 	    when st_wr_addr =>
 		UsbAdr <= "10";
@@ -152,10 +151,8 @@ begin
 		byte_counter_i <= TO_UNSIGNED(3, 2);
 	    when st_rd_byte =>
 		if byte_counter = 0 then
-		    next_state <= st_rd_int;
+		    next_state <= st_rd_ack;
 		end if;
-	    when st_rd_int =>
-		next_state <= st_rd_ack;
 	    when st_rd_ack =>
 		if (do_cpu_read = '1') and (enabled = '1') then
 		    next_state <= st_idle;
@@ -172,13 +169,15 @@ begin
 	end case;
     end process next_state_decode;
 
-    sync_proc : process (usb_clk, reset) begin
-	if reset = '1' then
-	    state <= st_reset;
-	    byte_counter <= "00";
-	elsif usb_clk'event and usb_clk = '1' then
-	    state <= next_state;
-	    byte_counter <= byte_counter_i;
+    sync_proc : process (usb_clk) begin
+	if usb_clk'event and usb_clk = '1' then
+	    if UsbEN = '0' then
+		state <= st_idle;
+		byte_counter <= "00";
+	    else
+		state <= next_state;
+		byte_counter <= byte_counter_i;
+	    end if;
 	end if;
     end process sync_proc;
 	
