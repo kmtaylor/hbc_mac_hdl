@@ -58,7 +58,6 @@
  NET "UsbDB<6>"  LOC = "C13"; # Bank = 20, Pin name = IO_L11N_CC_20,    Sch name = U1-FD6
  NET "UsbDB<7>"  LOC = "E13"; # Bank = 20, Pin name = IO_L17N_20,       Sch name = U1-FD7
  NET "UsbClk"    LOC = "J10"; # Bank = 20, Pin name = IO_L9P_CC_20,     Sch name = U1-IFCLK 
- NET "UsbClk"    CLOCK_DEDICATED_ROUTE = FALSE; 
  NET "UsbOE"     LOC = "F11"; # Bank = 20, Pin name = IO_L15P_20,       Sch name = U1-SLOE
  NET "UsbWR"     LOC = "M10"; # Bank = 20, Pin name = IO_L16P_20,       Sch name = U1-SLWR
  NET "UsbPktEnd" LOC = "M8";  # Bank = 20, Pin name = IO_L14P_20,       Sch name = U1-PKTEND

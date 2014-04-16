@@ -14,7 +14,7 @@ entity usb_fifo is
 		io_ready : out std_logic;
 		pkt_end : in std_logic;
 		UsbIRQ : out std_logic;
-		UsbDB : inout std_logic_vector (7 downto 0); --fixme
+		UsbDB : inout std_logic_vector (7 downto 0);
 		UsbAdr : out std_logic_vector (1 downto 0);
 		UsbOE : out std_logic;
 		UsbWR : out std_logic;
@@ -27,10 +27,8 @@ end usb_fifo;
 architecture Behavioral of usb_fifo is
 
 	-- USB_ADDR must be word aligned
-	constant USB_ADDR : std_logic_vector := X"10";
+	constant USB_ADDR : std_logic_vector (7 downto 0) := X"10";
 
---	signal UsbDB_sim : std_logic_vector (7 downto 0); --fixme
-			
 	signal io_addr_reg : std_logic_vector (7 downto 0);
 	signal usb_read_data : std_logic_vector (31 downto 0);
 	signal usb_write_data : std_logic_vector (31 downto 0);
@@ -42,9 +40,11 @@ architecture Behavioral of usb_fifo is
 	signal do_pkt_end : std_logic;
 	signal do_cpu_write : std_logic;
 	signal do_cpu_read : std_logic;
+	signal do_byte_counter : std_logic;
 	signal reset_pkt_end : std_logic;
 	signal reset_cpu_write : std_logic;
 	signal reset_cpu_read : std_logic;
+	signal UsbEmpty_r : std_logic;
 
    	type state_type is (st_reset,
                         st_idle,
@@ -60,7 +60,8 @@ architecture Behavioral of usb_fifo is
 
 begin
 -------------------------- USB FIFO State machine -----------------------------
-    output_decode : process (state, byte_counter, usb_write_data) begin
+    output_decode : process (state, byte_counter,
+			    usb_write_data, UsbEmpty_r) begin
 
 	UsbPktEnd <= '1';
 	UsbAdr <= "00";
@@ -79,7 +80,7 @@ begin
 	    when st_rd_byte =>
 		UsbRD <= '0';
 		UsbOE <= '0';
-		do_read_data <= '1';
+		do_read_data <= not UsbEmpty_r;
 	    when st_rd_ack =>
 		UsbIRQ <= '1';
 	    when st_wr_addr =>
@@ -120,12 +121,13 @@ begin
 
     next_state_decode : process (state, UsbEmpty, do_pkt_end, do_cpu_write,
 				 byte_counter, do_cpu_read, enabled,
-				 UsbEN) begin
+				 UsbEN, UsbEmpty_r) begin
         next_state <= state;
 	byte_counter_i <= byte_counter - 1;
 	reset_pkt_end <= '0';
 	reset_cpu_read <= '0';
 	reset_cpu_write <= '0';
+	do_byte_counter <= '0';
 
         case (state) is
             when st_reset =>
@@ -148,9 +150,11 @@ begin
 	    when st_rd_addr =>
 		reset_cpu_read <= '1';
 		next_state <= st_rd_byte;
-		byte_counter_i <= TO_UNSIGNED(3, 2);
 	    when st_rd_byte =>
-		if byte_counter = 0 then
+		do_byte_counter <= not UsbEmpty_r;
+		if UsbEmpty_r = '1' then
+		    next_state <= st_idle;
+		elsif byte_counter = 0 then
 		    next_state <= st_rd_ack;
 		end if;
 	    when st_rd_ack =>
@@ -160,9 +164,11 @@ begin
 	    -- Write FIFO
 	    when st_wr_addr =>
 		next_state <= st_wr_byte;
-		byte_counter_i <= TO_UNSIGNED(3, 2);
+		--do_byte_counter <= '1';
+		--byte_counter_i <= TO_UNSIGNED(3, 2);
 		reset_cpu_write <= '1';
 	    when st_wr_byte =>
+		do_byte_counter <= '1';
 		if byte_counter = 0 then
 		    next_state <= st_idle;
 		end if;
@@ -171,12 +177,15 @@ begin
 
     sync_proc : process (usb_clk) begin
 	if usb_clk'event and usb_clk = '1' then
+	    UsbEmpty_r <= UsbEmpty;
 	    if UsbEN = '0' then
 		state <= st_idle;
-		byte_counter <= "00";
+		byte_counter <= TO_UNSIGNED(3, 2);
 	    else
 		state <= next_state;
-		byte_counter <= byte_counter_i;
+		if do_byte_counter = '1' then
+		    byte_counter <= byte_counter_i;
+		end if;
 	    end if;
 	end if;
     end process sync_proc;

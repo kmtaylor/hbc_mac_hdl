@@ -128,8 +128,8 @@ architecture Behavioral of toplevel is
 	signal usb_pkt_end : std_logic;
 	
 	signal reset : std_logic;
-	signal pll_clk, cpu_clk, serial_clk : std_logic;
-	signal pll_locked, mem_pll_locked : std_logic;
+	signal pll_clk, cpu_clk, serial_clk, usb_clk : std_logic;
+	signal pll_locked, mem_pll_locked, usb_pll_locked : std_logic;
 	signal serial_dcm_locked : std_logic;
 	signal cpu_dcm_locked : std_logic;
 
@@ -145,7 +145,8 @@ begin
 	reset <= not rstbtn;
 
 	clk_lock_int <= not(pll_locked and serial_dcm_locked and 
-			    cpu_dcm_locked and mem_pll_locked);
+			    cpu_dcm_locked and mem_pll_locked and
+			    usb_pll_locked);
 
 	mem_fifo_full <= app_af_afull or app_wdf_afull;
 
@@ -166,6 +167,11 @@ begin
 			CLKOUT2_OUT => mem_clkdiv0,
 			CLKOUT3_OUT => mem_clk200,
 			LOCKED_OUT => mem_pll_locked);
+
+	usb_bufio : component BUFR
+		port map (
+			I => UsbClk,
+			O => usb_clk);
 
 	cpu_clk_dcm : entity work.dcm_cpu
 		port map (
@@ -351,7 +357,7 @@ begin
 
 	usb_0 : entity work.usb_fifo
 		port map (
-			usb_clk => UsbClk,
+			usb_clk => usb_clk,
 			cpu_clk => cpu_clk,
 			reset => reset,
 			io_addr => io_address (7 downto 0),

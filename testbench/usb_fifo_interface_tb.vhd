@@ -182,17 +182,19 @@ BEGIN
    usb_stim_proc: process
    begin		
 
+      UsbEN <= '0';
       UsbEmpty <= '1';
+      wait for usb_clk_period * 1.5;
       UsbEN <= '1';
       UsbDB <= (others => 'Z');
       -- Simulate USB read
-      wait for usb_clk_period*12.5;
+      wait for usb_clk_period*11;
       UsbEmpty <= '0';
-      wait for usb_clk_period;
-      UsbEmpty <= '1';
 
+      wait for usb_clk_period * 2;
+
+      -- Simulate set up time
       wait for 11 ns;
-      wait for usb_clk_period * 1;
       UsbDB <= X"12";
       wait for usb_clk_period;
       UsbDB <= X"34";
@@ -200,6 +202,7 @@ BEGIN
       UsbDB <= X"56";
       wait for usb_clk_period;
       UsbDB <= X"78";
+      UsbEmpty <= '1';
       wait for usb_clk_period;
       UsbDB <= (others => 'Z');
 
