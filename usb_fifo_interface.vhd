@@ -152,10 +152,12 @@ begin
 		next_state <= st_rd_byte;
 	    when st_rd_byte =>
 		do_byte_counter <= not UsbEmpty_r;
-		if UsbEmpty_r = '1' then
-		    next_state <= st_idle;
-		elsif byte_counter = 0 then
-		    next_state <= st_rd_ack;
+		if byte_counter = 0 then
+		    if UsbEmpty_r = '1' then
+			next_state <= st_idle;
+		    else
+			next_state <= st_rd_ack;
+		    end if;
 		end if;
 	    when st_rd_ack =>
 		if (do_cpu_read = '1') and (enabled = '1') then
