@@ -168,7 +168,7 @@ begin
 			CLKOUT3_OUT => mem_clk200,
 			LOCKED_OUT => mem_pll_locked);
 
-	usb_bufio : component BUFR
+	usb_bufr : component BUFR
 		port map (
 			I => UsbClk,
 			O => usb_clk);

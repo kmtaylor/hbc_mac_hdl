@@ -67,7 +67,7 @@ begin
 -------------------------- USB FIFO State machine -----------------------------
     last_byte <= UsbEmpty and (not UsbEmpty_r);
     
-    debug : process (state) begin
+    debug : process (state, next_state) begin
 	UsbDBG <= (others => '0');
 	case (state) is
 	    when st_idle =>
@@ -91,8 +91,7 @@ begin
     end process debug;
 
     output_decode : process (state, byte_counter, UsbEmpty, UsbFull,
-			    usb_write_data, UsbEmpty_r, last_byte) begin
-
+			    usb_write_data, last_byte) begin
 	UsbPktEnd <= '1';
 	UsbAdr <= "00";
 	UsbRD <= '1';
@@ -154,8 +153,8 @@ begin
     end process fifo_read_proc;
 
     next_state_decode : process (state, UsbEmpty, do_pkt_end, do_cpu_write,
-				 byte_counter, do_cpu_read, enabled, UsbFull,
-				 UsbEN, UsbEmpty_r, last_byte) begin
+				 byte_counter, do_cpu_read, UsbFull,
+				 last_byte) begin
         next_state <= state;
 	byte_counter_i <= byte_counter - 1;
 	reset_pkt_end <= '0';

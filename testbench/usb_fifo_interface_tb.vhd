@@ -153,10 +153,15 @@ BEGIN
       UsbDB <= X"12";
       wait for usb_clk_period;
       UsbDB <= X"34";
-      --UsbEmpty <= '1';
-      --wait for usb_clk_period*3;
+
+      -- Insert stall
+      UsbEmpty <= '1';
+      wait for usb_clk_period*3;
+      UsbEmpty <= '0';
+
       wait for usb_clk_period;
       UsbEmpty <= '0';
+
       UsbDB <= X"56";
       wait for usb_clk_period;
       UsbDB <= X"78";
