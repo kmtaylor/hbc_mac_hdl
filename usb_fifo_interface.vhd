@@ -21,7 +21,9 @@ entity usb_fifo is
 		UsbRD : out std_logic;
 		UsbPktEnd : out std_logic;
 		UsbEmpty : in std_logic;
-		UsbEN : in std_logic);
+		UsbFull : in std_logic;
+		UsbEN : in std_logic;
+		UsbDBG : out std_logic_vector (7 downto 0));
 end usb_fifo;
 
 architecture Behavioral of usb_fifo is
@@ -39,14 +41,17 @@ architecture Behavioral of usb_fifo is
 	signal do_ack : std_logic;
 	signal do_pkt_end : std_logic;
 	signal do_cpu_write : std_logic;
+	signal do_cpu_write_i : std_logic;
 	signal do_cpu_read : std_logic;
+	signal do_cpu_read_i : std_logic;
 	signal do_byte_counter : std_logic;
 	signal reset_pkt_end : std_logic;
 	signal reset_cpu_write : std_logic;
 	signal reset_cpu_read : std_logic;
 	signal UsbEmpty_r : std_logic;
+	signal last_byte : std_logic;
 
-   	type state_type is (st_reset,
+   	type state_type is (
                         st_idle,
                         st_pktend,
                         st_wr_addr,
@@ -60,8 +65,33 @@ architecture Behavioral of usb_fifo is
 
 begin
 -------------------------- USB FIFO State machine -----------------------------
-    output_decode : process (state, byte_counter,
-			    usb_write_data, UsbEmpty_r) begin
+    last_byte <= UsbEmpty and (not UsbEmpty_r);
+    
+    debug : process (state) begin
+	UsbDBG <= (others => '0');
+	case (state) is
+	    when st_idle =>
+		UsbDBG(0) <= '1';
+	    when st_pktend =>
+		UsbDBG(1) <= '1';
+	    when st_wr_addr =>
+		UsbDBG(2) <= '1';
+	    when st_wr_byte =>
+		UsbDBG(3) <= '1';
+	    when st_rd_addr =>
+		UsbDBG(4) <= '1';
+	    when st_rd_byte =>
+		UsbDBG(5) <= '1';
+	    when st_rd_ack =>
+		UsbDBG(6) <= '1';
+	end case;
+	if next_state /= state then
+	    UsbDBG(7) <= '1';
+	end if;
+    end process debug;
+
+    output_decode : process (state, byte_counter, UsbEmpty, UsbFull,
+			    usb_write_data, UsbEmpty_r, last_byte) begin
 
 	UsbPktEnd <= '1';
 	UsbAdr <= "00";
@@ -78,16 +108,20 @@ begin
 		UsbPktEnd <= '0';
 	    -- Read FIFO
 	    when st_rd_byte =>
-		UsbRD <= '0';
+		if UsbEmpty = '0' then
+		    UsbRD <= '0';
+		end if;
 		UsbOE <= '0';
-		do_read_data <= not UsbEmpty_r;
+		do_read_data <= (not UsbEmpty) or last_byte;
 	    when st_rd_ack =>
 		UsbIRQ <= '1';
 	    when st_wr_addr =>
 		UsbAdr <= "10";
 	    when st_wr_byte =>
 		UsbAdr <= "10";
-		UsbWR <= '0';
+		if UsbFull = '0' then
+		    UsbWR <= '0';
+		end if;
 		if byte_counter = 3 then
 		    UsbDB <= usb_write_data (31 downto 24);
 		elsif byte_counter = 2 then
@@ -120,8 +154,8 @@ begin
     end process fifo_read_proc;
 
     next_state_decode : process (state, UsbEmpty, do_pkt_end, do_cpu_write,
-				 byte_counter, do_cpu_read, enabled,
-				 UsbEN, UsbEmpty_r) begin
+				 byte_counter, do_cpu_read, enabled, UsbFull,
+				 UsbEN, UsbEmpty_r, last_byte) begin
         next_state <= state;
 	byte_counter_i <= byte_counter - 1;
 	reset_pkt_end <= '0';
@@ -130,16 +164,12 @@ begin
 	do_byte_counter <= '0';
 
         case (state) is
-            when st_reset =>
-		--if UsbEN = '1' then
-		    next_state <= st_idle;
-		--end if;
             when st_idle =>
 		if UsbEmpty = '0' then
 		    next_state <= st_rd_addr;
 		elsif do_pkt_end = '1' then
 		    next_state <= st_pktend;
-		elsif (do_cpu_write = '1') and (enabled = '1') then
+		elsif do_cpu_write = '1' then
 		    next_state <= st_wr_addr;
 		end if;
 	    -- Packet End
@@ -151,26 +181,20 @@ begin
 		reset_cpu_read <= '1';
 		next_state <= st_rd_byte;
 	    when st_rd_byte =>
-		do_byte_counter <= not UsbEmpty_r;
+		do_byte_counter <= (not UsbEmpty) or last_byte;
 		if byte_counter = 0 then
-		    if UsbEmpty_r = '1' then
-			next_state <= st_idle;
-		    else
-			next_state <= st_rd_ack;
-		    end if;
+		    next_state <= st_rd_ack;
 		end if;
 	    when st_rd_ack =>
-		if (do_cpu_read = '1') and (enabled = '1') then
+		if do_cpu_read = '1' then
 		    next_state <= st_idle;
 		end if;
 	    -- Write FIFO
 	    when st_wr_addr =>
 		next_state <= st_wr_byte;
-		--do_byte_counter <= '1';
-		--byte_counter_i <= TO_UNSIGNED(3, 2);
 		reset_cpu_write <= '1';
 	    when st_wr_byte =>
-		do_byte_counter <= '1';
+		do_byte_counter <= not UsbFull;
 		if byte_counter = 0 then
 		    next_state <= st_idle;
 		end if;
@@ -210,7 +234,9 @@ begin
 	if reset = '1' then
 	    do_ack <= '0';
 	    do_cpu_read <= '0';
+	    do_cpu_read_i <= '0';
 	    do_cpu_write <= '0';
+	    do_cpu_write_i <= '0';
 	    usb_write_data <= (others => '0');
 	elsif reset_cpu_read = '1' then
 	    do_cpu_read <= '0';
@@ -222,12 +248,20 @@ begin
 		do_ack <= '1';
 		reading <= '0';
 		usb_write_data <= io_d_in;
-		do_cpu_write <= '1';
+		do_cpu_write_i <= '1';
 	    elsif io_read_strobe = '1' then
 		do_ack <= '1';
 		reading <= '1';
-		do_cpu_read <= '1';
+		do_cpu_read_i <= '1';
 	    else
+		if do_cpu_write_i = '1' and enabled = '1' then
+		    do_cpu_write <= '1';
+		end if;
+		if do_cpu_read_i = '1' and enabled = '1' then
+		    do_cpu_read <= '1';
+		end if;
+		do_cpu_read_i <= '0';
+		do_cpu_write_i <= '0';
 		do_ack <= '0';
 	    end if;
 	end if;

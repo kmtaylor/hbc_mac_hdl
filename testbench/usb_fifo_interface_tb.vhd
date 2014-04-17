@@ -1,30 +1,3 @@
---------------------------------------------------------------------------------
--- Company: 
--- Engineer:
---
--- Create Date:   18:45:39 04/09/2014
--- Design Name:   
--- Module Name:   /home/kmtaylor/Xilinx/Projects/transceiver_ise/usb_fifo_interface_tb.vhd
--- Project Name:  transceiver_ise
--- Target Device:  
--- Tool versions:  
--- Description:   
--- 
--- VHDL Test Bench Created by ISE for module: usb_fifo
--- 
--- Dependencies:
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
---
--- Notes: 
--- This testbench has been automatically generated using types std_logic and
--- std_logic_vector for the ports of the unit under test.  Xilinx recommends
--- that these types always be used for the top-level I/O of a design in order
--- to guarantee that the testbench will bind correctly to the post-implementation 
--- simulation model.
---------------------------------------------------------------------------------
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
  
@@ -35,36 +8,8 @@ USE ieee.std_logic_1164.ALL;
 ENTITY usb_fifo_interface_tb IS
 END usb_fifo_interface_tb;
  
-ARCHITECTURE behavior OF usb_fifo_interface_tb IS 
+ARCHITECTURE behaviour OF usb_fifo_interface_tb IS 
  
-    -- Component Declaration for the Unit Under Test (UUT)
- 
-    COMPONENT usb_fifo
-    PORT(
-         usb_clk : IN  std_logic;
-         cpu_clk : IN  std_logic;
-         reset : IN  std_logic;
-         io_addr : IN  std_logic_vector(7 downto 0);
-         io_d_in : IN  std_logic_vector(31 downto 0);
-         io_d_out : OUT  std_logic_vector(31 downto 0);
-         io_addr_strobe : IN  std_logic;
-         io_read_strobe : IN  std_logic;
-         io_write_strobe : IN  std_logic;
-         io_ready : OUT  std_logic;
-         pkt_end : IN  std_logic;
-	 UsbIRQ : OUT std_logic;
-	 UsbDB : INOUT std_logic_vector(7 downto 0);
-         UsbAdr : OUT  std_logic_vector(1 downto 0);
-         UsbOE : OUT  std_logic;
-         UsbWR : OUT  std_logic;
-         UsbRD : OUT  std_logic;
-         UsbPktEnd : OUT  std_logic;
-         UsbEmpty : IN  std_logic;
-         UsbEN : IN  std_logic
-        );
-    END COMPONENT;
-    
-
    --Inputs
    signal usb_clk : std_logic := '0';
    signal cpu_clk : std_logic := '0';
@@ -76,6 +21,7 @@ ARCHITECTURE behavior OF usb_fifo_interface_tb IS
    signal io_write_strobe : std_logic := '0';
    signal pkt_end : std_logic := '0';
    signal UsbEmpty : std_logic := '0';
+   signal UsbFull : std_logic := '0';
    signal UsbEN : std_logic := '0';
 
  	--Outputs
@@ -97,7 +43,7 @@ ARCHITECTURE behavior OF usb_fifo_interface_tb IS
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
-   uut: usb_fifo PORT MAP (
+   uut: entity work.usb_fifo PORT MAP (
           usb_clk => usb_clk,
           cpu_clk => cpu_clk,
           reset => reset,
@@ -117,6 +63,7 @@ BEGIN
           UsbRD => UsbRD,
           UsbPktEnd => UsbPktEnd,
           UsbEmpty => UsbEmpty,
+          UsbFull => UsbFull,
           UsbEN => UsbEN
         );
 
@@ -169,6 +116,14 @@ BEGIN
 
       -- Simulate USB write
       wait for cpu_clk_period * 5;
+      io_addr <= X"00";
+      io_d_in <= X"ABCDEF12";
+      io_addr_strobe <= '1';
+      io_write_strobe <= '1';
+      wait for cpu_clk_period;
+      io_addr_strobe <= '0';
+      io_write_strobe <= '0';
+      wait for cpu_clk_period * 5;
       io_addr <= X"10";
       io_d_in <= X"ABCDEF12";
       io_addr_strobe <= '1';
@@ -198,8 +153,9 @@ BEGIN
       UsbDB <= X"12";
       wait for usb_clk_period;
       UsbDB <= X"34";
-      UsbEmpty <= '1';
-      wait for usb_clk_period*3;
+      --UsbEmpty <= '1';
+      --wait for usb_clk_period*3;
+      wait for usb_clk_period;
       UsbEmpty <= '0';
       UsbDB <= X"56";
       wait for usb_clk_period;
@@ -208,6 +164,10 @@ BEGIN
       wait for usb_clk_period;
       UsbDB <= (others => 'Z');
 
+      wait for usb_clk_period * 10;
+      UsbEN <= '0';
+      wait for usb_clk_period;
+      UsbEN <= '1';
       wait;
    end process;
 

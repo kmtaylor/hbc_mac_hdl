@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.45 (w)1999-2012 BSI
-[*] Thu Apr 17 00:50:22 2014
+[*] Thu Apr 17 05:10:22 2014
 [*]
 [dumpfile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/usb_fifo_interface_tb.ghw"
-[dumpfile_mtime] "Thu Apr 17 00:49:58 2014"
-[dumpfile_size] 4542
+[dumpfile_mtime] "Thu Apr 17 05:10:03 2014"
+[dumpfile_size] 4706
 [savefile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/usb_fifo_interface_tb.gtkw"
-[timestart] 34700000
+[timestart] 158000000
 [size] 1680 1024
 [pos] -1 -1
-*-27.000000 430500000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-27.000000 227700000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] top.
 [treeopen] top.usb_fifo_interface_tb.
 [treeopen] top.usb_fifo_interface_tb.uut.
@@ -38,13 +38,26 @@ top.usb_fifo_interface_tb.uut.usboe
 top.usb_fifo_interface_tb.uut.pkt_end
 top.usb_fifo_interface_tb.uut.usbempty
 top.usb_fifo_interface_tb.uut.usbempty_r
-@29
-top.usb_fifo_interface_tb.uut.usbempty_d
-@28
+top.usb_fifo_interface_tb.uut.last_byte
 top.usb_fifo_interface_tb.uut.usbirq
 #{top.usb_fifo_interface_tb.uut.byte_counter[1:0]} top.usb_fifo_interface_tb.uut.byte_counter[1] top.usb_fifo_interface_tb.uut.byte_counter[0]
 @22
 #{top.usb_fifo_interface_tb.uut.usb_write_data[31:0]} top.usb_fifo_interface_tb.uut.usb_write_data[31] top.usb_fifo_interface_tb.uut.usb_write_data[30] top.usb_fifo_interface_tb.uut.usb_write_data[29] top.usb_fifo_interface_tb.uut.usb_write_data[28] top.usb_fifo_interface_tb.uut.usb_write_data[27] top.usb_fifo_interface_tb.uut.usb_write_data[26] top.usb_fifo_interface_tb.uut.usb_write_data[25] top.usb_fifo_interface_tb.uut.usb_write_data[24] top.usb_fifo_interface_tb.uut.usb_write_data[23] top.usb_fifo_interface_tb.uut.usb_write_data[22] top.usb_fifo_interface_tb.uut.usb_write_data[21] top.usb_fifo_interface_tb.uut.usb_write_data[20] top.usb_fifo_interface_tb.uut.usb_write_data[19] top.usb_fifo_interface_tb.uut.usb_write_data[18] top.usb_fifo_interface_tb.uut.usb_write_data[17] top.usb_fifo_interface_tb.uut.usb_write_data[16] top.usb_fifo_interface_tb.uut.usb_write_data[15] top.usb_fifo_interface_tb.uut.usb_write_data[14] top.usb_fifo_interface_tb.uut.usb_write_data[13] top.usb_fifo_interface_tb.uut.usb_write_data[12] top.usb_fifo_interface_tb.uut.usb_write_data[11] top.usb_fifo_interface_tb.uut.usb_write_data[10] top.usb_fifo_interface_tb.uut.usb_write_data[9] top.usb_fifo_interface_tb.uut.usb_write_data[8] top.usb_fifo_interface_tb.uut.usb_write_data[7] top.usb_fifo_interface_tb.uut.usb_write_data[6] top.usb_fifo_interface_tb.uut.usb_write_data[5] top.usb_fifo_interface_tb.uut.usb_write_data[4] top.usb_fifo_interface_tb.uut.usb_write_data[3] top.usb_fifo_interface_tb.uut.usb_write_data[2] top.usb_fifo_interface_tb.uut.usb_write_data[1] top.usb_fifo_interface_tb.uut.usb_write_data[0]
 #{top.usb_fifo_interface_tb.uut.usb_read_data[31:0]} top.usb_fifo_interface_tb.uut.usb_read_data[31] top.usb_fifo_interface_tb.uut.usb_read_data[30] top.usb_fifo_interface_tb.uut.usb_read_data[29] top.usb_fifo_interface_tb.uut.usb_read_data[28] top.usb_fifo_interface_tb.uut.usb_read_data[27] top.usb_fifo_interface_tb.uut.usb_read_data[26] top.usb_fifo_interface_tb.uut.usb_read_data[25] top.usb_fifo_interface_tb.uut.usb_read_data[24] top.usb_fifo_interface_tb.uut.usb_read_data[23] top.usb_fifo_interface_tb.uut.usb_read_data[22] top.usb_fifo_interface_tb.uut.usb_read_data[21] top.usb_fifo_interface_tb.uut.usb_read_data[20] top.usb_fifo_interface_tb.uut.usb_read_data[19] top.usb_fifo_interface_tb.uut.usb_read_data[18] top.usb_fifo_interface_tb.uut.usb_read_data[17] top.usb_fifo_interface_tb.uut.usb_read_data[16] top.usb_fifo_interface_tb.uut.usb_read_data[15] top.usb_fifo_interface_tb.uut.usb_read_data[14] top.usb_fifo_interface_tb.uut.usb_read_data[13] top.usb_fifo_interface_tb.uut.usb_read_data[12] top.usb_fifo_interface_tb.uut.usb_read_data[11] top.usb_fifo_interface_tb.uut.usb_read_data[10] top.usb_fifo_interface_tb.uut.usb_read_data[9] top.usb_fifo_interface_tb.uut.usb_read_data[8] top.usb_fifo_interface_tb.uut.usb_read_data[7] top.usb_fifo_interface_tb.uut.usb_read_data[6] top.usb_fifo_interface_tb.uut.usb_read_data[5] top.usb_fifo_interface_tb.uut.usb_read_data[4] top.usb_fifo_interface_tb.uut.usb_read_data[3] top.usb_fifo_interface_tb.uut.usb_read_data[2] top.usb_fifo_interface_tb.uut.usb_read_data[1] top.usb_fifo_interface_tb.uut.usb_read_data[0]
+@28
+top.usb_fifo_interface_tb.uut.usben
+@29
+top.usb_fifo_interface_tb.uut.enabled
+@28
+top.usb_fifo_interface_tb.uut.do_cpu_write
+top.usb_fifo_interface_tb.uut.do_cpu_write_i
+top.usb_fifo_interface_tb.uut.reset_cpu_write
+top.usb_fifo_interface_tb.uut.do_cpu_read
+top.usb_fifo_interface_tb.uut.do_cpu_read_i
+top.usb_fifo_interface_tb.uut.reset_cpu_read
+@22
+#{top.usb_fifo_interface_tb.uut.usbdbg[7:0]} top.usb_fifo_interface_tb.uut.usbdbg[7] top.usb_fifo_interface_tb.uut.usbdbg[6] top.usb_fifo_interface_tb.uut.usbdbg[5] top.usb_fifo_interface_tb.uut.usbdbg[4] top.usb_fifo_interface_tb.uut.usbdbg[3] top.usb_fifo_interface_tb.uut.usbdbg[2] top.usb_fifo_interface_tb.uut.usbdbg[1] top.usb_fifo_interface_tb.uut.usbdbg[0]
+@28
+top.usb_fifo_interface_tb.uut.do_byte_counter
 [pattern_trace] 1
 [pattern_trace] 0

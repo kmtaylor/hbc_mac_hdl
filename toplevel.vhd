@@ -205,7 +205,7 @@ begin
 			GPO1 (0) => parallel_to_serial_enable,
 			GPO1 (1) => usb_pkt_end,
 			GPO1 (7 downto 2) => open,
-			GPO2 => Led,
+			GPO2 => open, --Led,
 			INTC_Interrupt (0) => btn1_d,
 			INTC_Interrupt (1) => fifo_full,
 			INTC_Interrupt (2) => fifo_almost_full,
@@ -376,7 +376,9 @@ begin
 			UsbRD => UsbRD,
 			UsbPktEnd => UsbPktEnd,
 			UsbEmpty => UsbEmpty,
-			UsbEN => UsbEN);
+			UsbFull => UsbFull,
+			UsbEN => UsbEN,
+			UsbDBG => Led);
 
 	lcd_0 : entity work.lcd_interface
 		port map (
