@@ -1,18 +1,29 @@
+SCRAMBLER_TB_OBJS += \
+	scrambler.o \
+	scrambler_tb.o
+
+SCRAMBLER_SIM_FLAGS += \
+	--stop-time=1000ns
+
 USB_TB_OBJS += \
 	usb_fifo_interface.o \
 	usb_fifo_interface_tb.o
 
-USB_SYNTH_FLAGS += \
+USB_SIM_FLAGS += \
 	--stop-time=1000ns
 
-# All Target
-all: usb_fifo_interface_tb
+all: usb_fifo_interface_tb scrambler_tb
 
-# Tool invocations
+# Test Benches (Elaboration)
+scrambler_tb:  $(SCRAMBLER_TB_OBJS)
+	ghdl -e "$@"
+	./"$@" $(SCRAMBLER_SIM_FLAGS) --wave="$@".ghw
+
 usb_fifo_interface_tb:  $(USB_TB_OBJS)
 	ghdl -e "$@"
-	./"$@" $(USB_SYNTH_FLAGS) --wave="$@".ghw
+	./"$@" $(USB_SIM_FLAGS) --wave="$@".ghw
 
+# Analysis
 %.o: ../%.vhd
 	ghdl -a "$<"
 

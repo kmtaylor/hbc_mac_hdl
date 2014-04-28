@@ -1,0 +1,31 @@
+[*]
+[*] GTKWave Analyzer v3.3.45 (w)1999-2012 BSI
+[*] Mon Apr 28 03:38:04 2014
+[*]
+[dumpfile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/scrambler_tb.ghw"
+[dumpfile_mtime] "Mon Apr 28 03:37:46 2014"
+[dumpfile_size] 2046
+[savefile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/scrambler_tb.gtkw"
+[timestart] 0
+[size] 1680 1024
+[pos] -1 -1
+*-26.000000 38900000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.scrambler_tb.
+[treeopen] top.scrambler_tb.uut.
+[sst_width] 224
+[signals_width] 150
+[sst_expanded] 1
+[sst_vpaned_height] 291
+@28
+top.scrambler_tb.clk
+top.scrambler_tb.d_in
+top.scrambler_tb.d_out
+top.scrambler_tb.seed
+top.scrambler_tb.en
+@22
+#{top.scrambler_tb.uut.scram_reg[31:0]} top.scrambler_tb.uut.scram_reg[31] top.scrambler_tb.uut.scram_reg[30] top.scrambler_tb.uut.scram_reg[29] top.scrambler_tb.uut.scram_reg[28] top.scrambler_tb.uut.scram_reg[27] top.scrambler_tb.uut.scram_reg[26] top.scrambler_tb.uut.scram_reg[25] top.scrambler_tb.uut.scram_reg[24] top.scrambler_tb.uut.scram_reg[23] top.scrambler_tb.uut.scram_reg[22] top.scrambler_tb.uut.scram_reg[21] top.scrambler_tb.uut.scram_reg[20] top.scrambler_tb.uut.scram_reg[19] top.scrambler_tb.uut.scram_reg[18] top.scrambler_tb.uut.scram_reg[17] top.scrambler_tb.uut.scram_reg[16] top.scrambler_tb.uut.scram_reg[15] top.scrambler_tb.uut.scram_reg[14] top.scrambler_tb.uut.scram_reg[13] top.scrambler_tb.uut.scram_reg[12] top.scrambler_tb.uut.scram_reg[11] top.scrambler_tb.uut.scram_reg[10] top.scrambler_tb.uut.scram_reg[9] top.scrambler_tb.uut.scram_reg[8] top.scrambler_tb.uut.scram_reg[7] top.scrambler_tb.uut.scram_reg[6] top.scrambler_tb.uut.scram_reg[5] top.scrambler_tb.uut.scram_reg[4] top.scrambler_tb.uut.scram_reg[3] top.scrambler_tb.uut.scram_reg[2] top.scrambler_tb.uut.scram_reg[1] top.scrambler_tb.uut.scram_reg[0]
+@29
+top.scrambler_tb.uut.tmp_bit
+[pattern_trace] 1
+[pattern_trace] 0
