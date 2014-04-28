@@ -20,7 +20,7 @@ end fifo_interface;
 architecture Behavioral of fifo_interface is
 
 	-- FIFO_ADDR must be word aligned
-	constant FIFO_ADDR	: std_logic_vector := X"00";
+	constant FIFO_ADDR	: std_logic_vector (7 downto 0) := X"00";
 			
 	signal io_addr_reg : std_logic_vector (7 downto 0);
 		

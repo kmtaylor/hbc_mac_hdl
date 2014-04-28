@@ -3,6 +3,9 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity scrambler is
+    generic (
+	C_RD_PNTR_WIDTH                : integer := 8;
+	C_SYNCHRONIZER_STAGE           : integer := 2);
     port (
 	clk, en, reset, seed : in std_logic;
 	d_in : in std_logic;
@@ -17,8 +20,15 @@ architecture behavioural of scrambler is
     signal scram_reg : std_logic_vector (31 downto 0);
     signal tmp_bit : std_logic;
 
-begin
 
+    TYPE rd_sync_array IS ARRAY (C_SYNCHRONIZER_STAGE-1 DOWNTO 0) OF std_logic_vector(C_RD_PNTR_WIDTH-1 DOWNTO 0);
+    SIGNAL rd_pntr_q : rd_sync_array := (OTHERS => (OTHERS => '0'));
+    SIGNAL rd_pntr_wr_d1    : std_logic_vector(C_RD_PNTR_WIDTH-1 DOWNTO 0)
+	                    := (OTHERS=>'0');
+
+begin
+    rd_pntr_q       <= rd_pntr_q(C_SYNCHRONIZER_STAGE-2 downto 0) & rd_pntr_wr_d1;
+    
     d_out <= d_in xor scram_reg(0);
 
     -- Polynomial is z^32 + z^31 + z^11 + 1

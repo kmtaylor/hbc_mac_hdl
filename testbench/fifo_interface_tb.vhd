@@ -28,13 +28,7 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 
-LIBRARY unisim;
-use UNISIM.VComponents.all;
 LIBRARY XilinxCoreLib;
- 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---USE ieee.numeric_std.ALL;
  
 ENTITY fifo_interface_tb IS
 END fifo_interface_tb;
