@@ -95,6 +95,8 @@ architecture Behavioral of toplevel is
 	signal bus3_ready : std_logic;
 	signal bus4_data : std_logic_vector (31 downto 0);
 	signal bus4_ready : std_logic;
+	signal bus5_data : std_logic_vector (31 downto 0);
+	signal bus5_ready : std_logic;
 	
 	-- Internal memory signals
 	signal phy_init_done	: std_logic;
@@ -125,18 +127,20 @@ architecture Behavioral of toplevel is
 	signal fifo_underflow : std_logic;
 
 	signal parallel_to_serial_enable : std_logic;
+
 	signal usb_pkt_end : std_logic;
 	
+	signal reseed, seed_val, seed_clk : std_logic;
+
 	signal reset : std_logic;
+	signal clk_debounce, clkin_ibufg : std_logic;
 	signal pll_clk, cpu_clk, serial_clk, usb_clk : std_logic;
+	signal mem_clk0, mem_clk90, mem_clkdiv0, mem_clk200 : std_logic;
 	signal pll_locked, mem_pll_locked, usb_pll_locked : std_logic;
 	signal serial_dcm_locked : std_logic;
 	signal cpu_dcm_locked : std_logic;
 
 	signal btn1_d : std_logic;
-
-	signal clk_debounce, clkin_ibufg : std_logic;
-	signal mem_clk0, mem_clk90, mem_clkdiv0, mem_clk200 : std_logic;
 
 begin
 
@@ -204,7 +208,10 @@ begin
 			GPI2 => sw,
 			GPO1 (0) => parallel_to_serial_enable,
 			GPO1 (1) => usb_pkt_end,
-			GPO1 (7 downto 2) => open,
+			GPO1 (2) => reseed,
+			GPO1 (3) => seed_val,
+			GPO1 (4) => seed_clk,
+			GPO1 (7 downto 5) => open,
 			GPO2 => open, --Led,
 			INTC_Interrupt (0) => btn1_d,
 			INTC_Interrupt (1) => fifo_full,
@@ -248,7 +255,9 @@ begin
 			bus3_d_in => bus3_data,
 			bus3_ready => bus3_ready,
 			bus4_d_in => bus4_data,
-			bus4_ready => bus4_ready);
+			bus4_ready => bus4_ready,
+			bus5_d_in => bus5_data,
+			bus5_ready => bus5_ready);
 			
 	mem_if : entity work.mem_interface
 		port map (
@@ -397,6 +406,19 @@ begin
 			lcd_rw => LCDRW,
 			lcd_rs => LCDRS);
 		
+	scrambler : entity work.scrambler
+		port map (
+			cpu_clk => cpu_clk,
+			reset => reset,
+			reseed => reseed,
+			seed_val => seed_val,
+			seed_clk => seed_clk,
+			io_addr => io_address (7 downto 0),
+			io_d_out => bus5_data,
+			io_addr_strobe => io_addr_strobe,
+			io_read_strobe => io_read_strobe,
+			io_ready => bus5_ready);
+
 	db_btn1 : entity work.debounce
 		port map(
 			clk => clk_debounce,

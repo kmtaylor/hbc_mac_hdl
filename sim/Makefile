@@ -20,7 +20,7 @@ FIFO_TB_FILES += \
 	fifo_tx_sim.vhd
 FIFO_SIM_FLAGS += --stop-time=1000ns
 
-all: usb_fifo_interface_tb scrambler_tb fifo_interface_tb
+all: usb_fifo_interface_tb scrambler_tb # fifo_interface_tb
 
 # Test Benches (Elaboration)
 scrambler_tb: $(XILINX_OBJS) $(SCRAMBLER_TB_FILES:.vhd=.o)
@@ -33,7 +33,7 @@ usb_fifo_interface_tb: $(XILINX_OBJS) $(USB_TB_FILES:.vhd=.o)
 
 fifo_interface_tb: $(XILINX_OBJS) $(FIFO_TB_FILES:.vhd=.o)
 	ghdl -m $(XILINX_FLAGS) "$@"
-	./"$@" $(FIFO_SIM_FLAGS) --wave="$@".ghw
+#	./"$@" $(FIFO_SIM_FLAGS) --wave="$@".ghw
 
 # Xilinx libraries
 xilinxcorelib-obj93.cf:
