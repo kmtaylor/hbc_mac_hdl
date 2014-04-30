@@ -15,8 +15,8 @@ end entity scrambler;
 
 architecture behavioural of scrambler is
 
-    constant SCRAMBLER_SEED_0 : std_logic_vector (31 downto 0) := X"4A802A96";
-    constant SCRAMBLER_SEED_1 : std_logic_vector (31 downto 0) := X"F846FA51";
+    constant SCRAMBLER_SEED_0 : std_logic_vector (31 downto 0) := X"69540152";
+    constant SCRAMBLER_SEED_1 : std_logic_vector (31 downto 0) := X"8A5F621F";
 
     constant SCRAMBLER_ADDR  : std_logic_vector (7 downto 0) := X"14";
 
@@ -49,12 +49,12 @@ begin
 		scram_reg_i := scram_reg;
 		for i in 31 downto 0 loop
 		    -- Polynomial is z^32 + z^31 + z^11 + 1
-		    tmp_bit :=	scram_reg_i(10) xor
-				scram_reg_i(30) xor
-				scram_reg_i(31);
+		    tmp_bit :=	scram_reg_i(32 - 11) xor
+				scram_reg_i(32 - 31) xor
+				scram_reg_i(32 - 32);
 		    scram_reg_i := std_logic_vector(
-				shift_left(unsigned(scram_reg_i), 1));
-		    scram_reg_i(0) := tmp_bit;
+				shift_right(unsigned(scram_reg_i), 1));
+		    scram_reg_i(31) := tmp_bit;
 		end loop;
 		scram_reg <= scram_reg_i;
 	    end if;
