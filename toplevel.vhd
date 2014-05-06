@@ -9,6 +9,7 @@ entity toplevel is
 		LCDD : inout std_logic_vector (7 downto 0);
 		LCDEN, LCDRW, LCDRS : out std_logic;
 		clkin, rstbtn, btn1 : in std_logic;
+		serial_clk_out : out std_logic;
 		s_data_out : out std_logic;
 		-- Physical memory interface
 		ddr2_dq		: inout std_logic_vector (63 downto 0);
@@ -136,21 +137,23 @@ architecture Behavioral of toplevel is
 	signal clk_debounce, clkin_ibufg : std_logic;
 	signal pll_clk, cpu_clk, serial_clk, usb_clk : std_logic;
 	signal mem_clk0, mem_clk90, mem_clkdiv0, mem_clk200 : std_logic;
-	signal pll_locked, mem_pll_locked, usb_pll_locked : std_logic;
+	signal pll_locked, mem_pll_locked : std_logic;
 	signal serial_dcm_locked : std_logic;
 	signal cpu_dcm_locked : std_logic;
+
+	signal clk_debug : std_logic;
 
 	signal btn1_d : std_logic;
 
 begin
+	serial_clk_out <= clk_debug;
 
 	cpu_clk <= mem_clk0;
 
 	reset <= not rstbtn;
 
 	clk_lock_int <= not(pll_locked and serial_dcm_locked and 
-			    cpu_dcm_locked and mem_pll_locked and
-			    usb_pll_locked);
+			    cpu_dcm_locked and mem_pll_locked);
 
 	mem_fifo_full <= app_af_afull or app_wdf_afull;
 
@@ -192,7 +195,13 @@ begin
 			LOCKED_OUT => serial_dcm_locked);
 			
 	clk_div_0 : entity work.clock_divider
+		generic map (DIV_BY => 20E3)
 		port map (clk => cpu_clk, clk_div => clk_debounce);
+			
+	clk_div_1 : entity work.clock_divider
+		generic map (DIV_BY => 1)
+		port map (clk => serial_clk, clk_div => clk_debug);
+--	clk_debug <= serial_clk;
 			
 	cpu_0 : component mcs_0
 		port map (
@@ -212,7 +221,7 @@ begin
 			GPO1 (3) => seed_val,
 			GPO1 (4) => seed_clk,
 			GPO1 (7 downto 5) => open,
-			GPO2 => open, --Led,
+			GPO2 => Led,
 			INTC_Interrupt (0) => btn1_d,
 			INTC_Interrupt (1) => fifo_full,
 			INTC_Interrupt (2) => fifo_almost_full,
@@ -335,13 +344,13 @@ begin
 			fifo_wren => fifo_wren,
 			fifo_d_in => from_fifo,
 			-- Disabled
-			fifo_rden => open);
+			fifo_rden => fifo_rden);--open);
 			
 	tx_fifo : component fifo_tx
 		port map (
 			rst => reset,
 			wr_clk => cpu_clk,
-			rd_clk => serial_clk,
+			rd_clk => cpu_clk, --clk_debug, --serial_clk,
 			din => to_fifo,
 			wr_en => fifo_wren,
 			rd_en => fifo_rden,
@@ -355,12 +364,12 @@ begin
 
 	p_to_s : entity work.parallel_to_serial
 		port map (
-			clk => serial_clk,
+			clk => clk_debug, --serial_clk,
 			reset => reset,
 			trigger => parallel_to_serial_enable,
 			trig_clk => cpu_clk,
 			fifo_d_in => from_fifo,
-			fifo_rden => fifo_rden,
+			fifo_rden => open, --fifo_rden, (debug push)
 			fifo_empty => fifo_empty,
 			data_out => s_data_out);
 
@@ -387,7 +396,7 @@ begin
 			UsbEmpty => UsbEmpty,
 			UsbFull => UsbFull,
 			UsbEN => UsbEN,
-			UsbDBG => Led);
+			UsbDBG => open); --Led);
 
 	lcd_0 : entity work.lcd_interface
 		port map (

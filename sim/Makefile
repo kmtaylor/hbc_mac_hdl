@@ -9,6 +9,11 @@ SCRAMBLER_TB_FILES += \
 	scrambler_tb.vhd
 SCRAMBLER_SIM_FLAGS += --stop-time=1000ns
 
+C_TO_VHD_FILES += \
+	c_to_vhd.vhd \
+	c_to_vhd_tb.vhd
+C_TO_VHD_SIM_FLAGS += --stop-time=1000ns
+
 USB_TB_FILES += \
 	usb_fifo_interface.vhd \
 	usb_fifo_interface_tb.vhd
@@ -20,9 +25,18 @@ FIFO_TB_FILES += \
 	fifo_tx_sim.vhd
 FIFO_SIM_FLAGS += --stop-time=1000ns
 
+CLK_DIV_TB_FILES += \
+	clk_div.vhd \
+	clk_div_tb.vhd
+CLK_DIV_SIM_FLAGS += --stop-time=100ns
+
 all: usb_fifo_interface_tb scrambler_tb # fifo_interface_tb
 
 # Test Benches (Elaboration)
+c_to_vhd_tb: $(XILINX_OBJS) $(C_TO_VHD_FILES:.vhd=.o)
+	ghdl -m $(XILINX_FLAGS) "$@"
+	./"$@" $(C_TO_VHD_SIM_FLAGS) --wave="$@".ghw
+
 scrambler_tb: $(XILINX_OBJS) $(SCRAMBLER_TB_FILES:.vhd=.o)
 	ghdl -m $(XILINX_FLAGS) "$@"
 	./"$@" $(SCRAMBLER_SIM_FLAGS) --wave="$@".ghw
@@ -34,6 +48,10 @@ usb_fifo_interface_tb: $(XILINX_OBJS) $(USB_TB_FILES:.vhd=.o)
 fifo_interface_tb: $(XILINX_OBJS) $(FIFO_TB_FILES:.vhd=.o)
 	ghdl -m $(XILINX_FLAGS) "$@"
 #	./"$@" $(FIFO_SIM_FLAGS) --wave="$@".ghw
+
+clk_div_tb: $(XILINX_OBJS) $(CLK_DIV_TB_FILES:.vhd=.o)
+	ghdl -m $(XILINX_FLAGS) "$@"
+	./"$@" $(CLK_DIV_SIM_FLAGS) --wave="$@".ghw
 
 # Xilinx libraries
 xilinxcorelib-obj93.cf:
