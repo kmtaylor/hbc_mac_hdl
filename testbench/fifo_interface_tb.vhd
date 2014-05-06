@@ -31,6 +31,7 @@ architecture behaviour of c_to_vhd_tb is
     signal io_read_strobe : std_logic := '0';
     signal io_write_strobe : std_logic := '0';
     signal fifo_d_in : std_logic_vector(31 downto 0) := (others => '0');
+    signal trigger : std_logic := '0';
 
      --Outputs
     signal io_d_out : std_logic_vector(31 downto 0);
@@ -52,6 +53,7 @@ begin
     uut: entity work.fifo_interface port map (
 	clk => clk,
 	reset => reset,
+	trigger => trigger,
 	io_addr => io_addr,
 	io_d_in => io_d_in,
 	io_d_out => io_d_out,
@@ -100,15 +102,15 @@ begin
 	-- Set bits at address 0x01
 	io_write_strobe <= '1';
 	io_addr_strobe <= '1';
-	io_d_in <= X"00000020";
+	io_d_in <= X"00000018";
 	io_addr <= X"01";
 	wait for clk_period;
 	io_write_strobe <= '0';
 	io_addr_strobe <= '0';
 	
 	wait for clk_period * 6;
-	
-	-- Write at address 0x00
+
+	-- Write at address 0x00 (1)
 	io_write_strobe <= '1';
 	io_addr_strobe <= '1';
 	io_d_in <= X"12345678";
@@ -119,65 +121,195 @@ begin
 	
 	wait for clk_period * 6;
 	
-	-- Write at address 0x00
-	io_write_strobe <= '1';
-	io_addr_strobe <= '1';
-	io_d_in <= X"12345678";
-	io_addr <= X"00";
+	-- Trigger early
+	trigger <= '1';
 	wait for clk_period;
-	io_write_strobe <= '0';
-	io_addr_strobe <= '0';
-	
+	trigger <= '0';
 	wait for clk_period * 6;
-	
-	-- Write at address 0x00
-	io_write_strobe <= '1';
-	io_addr_strobe <= '1';
-	io_d_in <= X"12345678";
-	io_addr <= X"00";
-	wait for clk_period;
-	io_write_strobe <= '0';
-	io_addr_strobe <= '0';
-	
-	wait for clk_period * 6;
-	
-	-- Write at address 0x00
-	io_write_strobe <= '1';
-	io_addr_strobe <= '1';
-	io_d_in <= X"12345678";
-	io_addr <= X"00";
-	wait for clk_period;
-	io_write_strobe <= '0';
-	io_addr_strobe <= '0';
-	
-	wait for clk_period * 6;
-	
+
 	-- Read at address 0x00---------------------------------------------
 	io_read_strobe <= '1';
 	io_addr_strobe <= '1';
 	wait for clk_period;
 	io_read_strobe <= '0';
 	io_addr_strobe <= '0';
-	
+      
 	wait for clk_period * 6;
 	
-	 -- Write at address 0x05
+	-- Write at address 0x00 (1)
 	io_write_strobe <= '1';
 	io_addr_strobe <= '1';
-	io_addr <= X"05";
 	io_d_in <= X"12345678";
+	io_addr <= X"00";
 	wait for clk_period;
 	io_write_strobe <= '0';
 	io_addr_strobe <= '0';
 	
-	wait for clk_period * 2;
+	wait for clk_period * 6;
 	
-	-- Read at address 0x05
+	-- Trigger early
+	trigger <= '1';
+	wait for clk_period;
+	trigger <= '0';
+	wait for clk_period * 6;
+
+	-- Read at address 0x00---------------------------------------------
 	io_read_strobe <= '1';
 	io_addr_strobe <= '1';
 	wait for clk_period;
 	io_read_strobe <= '0';
 	io_addr_strobe <= '0';
+      
+	wait for clk_period * 6;
+	
+--	-- Write at address 0x00 (2)
+--	io_write_strobe <= '1';
+--	io_addr_strobe <= '1';
+--	io_d_in <= X"12345678";
+--	io_addr <= X"00";
+--	wait for clk_period;
+--	io_write_strobe <= '0';
+--	io_addr_strobe <= '0';
+--	
+--	wait for clk_period * 6;
+--	
+--	-- Write at address 0x00 (3)
+--	io_write_strobe <= '1';
+--	io_addr_strobe <= '1';
+--	io_d_in <= X"12345678";
+--	io_addr <= X"00";
+--	wait for clk_period;
+--	io_write_strobe <= '0';
+--	io_addr_strobe <= '0';
+--	
+--	wait for clk_period * 6;
+--	
+--	-- Write at address 0x00 (4)
+--	io_write_strobe <= '1';
+--	io_addr_strobe <= '1';
+--	io_d_in <= X"12345678";
+--	io_addr <= X"00";
+--	wait for clk_period;
+--	io_write_strobe <= '0';
+--	io_addr_strobe <= '0';
+--	
+--	wait for clk_period * 6;
+--	
+--	-- Read at address 0x00---------------------------------------------
+--	io_read_strobe <= '1';
+--	io_addr_strobe <= '1';
+--	wait for clk_period;
+--	io_read_strobe <= '0';
+--	io_addr_strobe <= '0';
+--	
+--	wait for clk_period * 6;
+--	
+--	-- Read at address 0x00---------------------------------------------
+--	io_read_strobe <= '1';
+--	io_addr_strobe <= '1';
+--	wait for clk_period;
+--	io_read_strobe <= '0';
+--	io_addr_strobe <= '0';
+--	
+--	wait for clk_period * 6;
+--	
+--	-- Read at address 0x00---------------------------------------------
+--	io_read_strobe <= '1';
+--	io_addr_strobe <= '1';
+--	wait for clk_period;
+--	io_read_strobe <= '0';
+--	io_addr_strobe <= '0';
+--	
+--	wait for clk_period * 6;
+--	
+--	-- Write at address 0x00 (1)
+--	io_write_strobe <= '1';
+--	io_addr_strobe <= '1';
+--	io_d_in <= X"12345678";
+--	io_addr <= X"00";
+--	wait for clk_period;
+--	io_write_strobe <= '0';
+--	io_addr_strobe <= '0';
+--	
+--	wait for clk_period * 6;
+--	
+--	-- Write at address 0x00 (2)
+--	io_write_strobe <= '1';
+--	io_addr_strobe <= '1';
+--	io_d_in <= X"12345678";
+--	io_addr <= X"00";
+--	wait for clk_period;
+--	io_write_strobe <= '0';
+--	io_addr_strobe <= '0';
+--	
+--	wait for clk_period * 6;
+--	
+--	-- Write at address 0x00 (3)
+--	io_write_strobe <= '1';
+--	io_addr_strobe <= '1';
+--	io_d_in <= X"12345678";
+--	io_addr <= X"00";
+--	wait for clk_period;
+--	io_write_strobe <= '0';
+--	io_addr_strobe <= '0';
+--	
+--	wait for clk_period * 6;
+--	
+--	-- Write at address 0x00 (4)
+--	io_write_strobe <= '1';
+--	io_addr_strobe <= '1';
+--	io_d_in <= X"12345678";
+--	io_addr <= X"00";
+--	wait for clk_period;
+--	io_write_strobe <= '0';
+--	io_addr_strobe <= '0';
+--	
+--	wait for clk_period * 6;
+--
+--	-- Read at address 0x00---------------------------------------------
+--	io_read_strobe <= '1';
+--	io_addr_strobe <= '1';
+--	wait for clk_period;
+--	io_read_strobe <= '0';
+--	io_addr_strobe <= '0';
+--	
+--	wait for clk_period * 6;
+--	
+--	-- Read at address 0x00---------------------------------------------
+--	io_read_strobe <= '1';
+--	io_addr_strobe <= '1';
+--	wait for clk_period;
+--	io_read_strobe <= '0';
+--	io_addr_strobe <= '0';
+--	
+--	wait for clk_period * 6;
+--	
+--	-- Read at address 0x00---------------------------------------------
+--	io_read_strobe <= '1';
+--	io_addr_strobe <= '1';
+--	wait for clk_period;
+--	io_read_strobe <= '0';
+--	io_addr_strobe <= '0';
+--	
+--	wait for clk_period * 6;
+--	
+--	 -- Write at address 0x05
+--	io_write_strobe <= '1';
+--	io_addr_strobe <= '1';
+--	io_addr <= X"05";
+--	io_d_in <= X"12345678";
+--	wait for clk_period;
+--	io_write_strobe <= '0';
+--	io_addr_strobe <= '0';
+--	
+--	wait for clk_period * 2;
+--	
+--	-- Read at address 0x05
+--	io_read_strobe <= '1';
+--	io_addr_strobe <= '1';
+--	wait for clk_period;
+--	io_read_strobe <= '0';
+--	io_addr_strobe <= '0';
 
 	wait;
     end process;

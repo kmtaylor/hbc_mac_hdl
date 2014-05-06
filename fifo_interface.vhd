@@ -5,17 +5,18 @@ use ieee.numeric_std.all;
 
 entity fifo_interface is
     port (
-	clk, reset : in std_logic;
-	io_addr    : in std_logic_vector (7 downto 0);
-	io_d_in    : in std_logic_vector (31 downto 0);
+	clk, reset  : in std_logic;
+	trigger	    : in std_logic;
+	io_addr	    : in std_logic_vector (7 downto 0);
+	io_d_in	    : in std_logic_vector (31 downto 0);
 	io_d_out    : out std_logic_vector (31 downto 0);
 	io_addr_strobe : in std_logic;
 	io_read_strobe, io_write_strobe : in std_logic;
-	io_ready : out std_logic;
-	fifo_d_out : out std_logic_vector (31 downto 0);
-	fifo_wren : out std_logic;
-	fifo_d_in : in std_logic_vector (31 downto 0);
-	fifo_rden : out std_logic);
+	io_ready    : out std_logic;
+	fifo_d_out  : out std_logic_vector (31 downto 0);
+	fifo_wren   : out std_logic;
+	fifo_d_in   : in std_logic_vector (31 downto 0);
+	fifo_rden   : out std_logic);
 end fifo_interface;
 
 architecture Behavioural of fifo_interface is
@@ -34,8 +35,10 @@ architecture Behavioural of fifo_interface is
     signal reading : std_logic := '0';
 
     subtype counter_type is unsigned (5 downto 0);
-    signal num_bits : counter_type := to_unsigned(32, 6);
-    signal bit_p : counter_type := to_unsigned(32, 6);
+    constant unity : unsigned (31 downto 0) := to_unsigned(1, 32);
+    constant reset_32 : counter_type := to_unsigned(32, 6);
+    signal num_bits : counter_type := reset_32;
+    signal bit_p : counter_type := reset_32;
     signal bit_p_i : counter_type;
     signal cur_buf : std_logic_vector (31 downto 0);
     signal cur_buf_i : std_logic_vector (31 downto 0);
@@ -44,10 +47,13 @@ architecture Behavioural of fifo_interface is
     signal write_wrap_buf : std_logic;
     signal write_wrap_buf_i : std_logic;
     signal flush_i : std_logic;
+    signal clear_cur_buf : std_logic;
+    signal clear_cur_buf_i : std_logic;
     signal wrap_mask : std_logic_vector (31 downto 0);
     signal nowrap_mask : std_logic_vector (31 downto 0);
     signal new_mask : std_logic_vector (31 downto 0);
-    constant unity : unsigned (31 downto 0) := X"00000001";
+    signal flush_req : std_logic;
+    signal flush_req_reset : std_logic;
 
 begin
     nowrap_mask <= std_logic_vector(
@@ -66,18 +72,30 @@ begin
 	if reset = '1' then
 	    cur_buf <= (others => '0');
 	    wrap_buf <= (others => '0');
-	    bit_p <= to_unsigned(32, 6);
-	    num_bits <= to_unsigned(32, 6);
+	    bit_p <= reset_32;
+	    num_bits <= reset_32;
 	    write_wrap_buf <= '0';
 	    fifo_wren <= '0';
+	    clear_cur_buf <= '0';
+	    flush_req_reset <= '0';
 	elsif clk'event and clk = '0' then
 	    fifo_wren <= '0';
-	    if do_ack = '1' and enabled = '1' and reading = '0' then
+	    flush_req_reset <= '0';
+	    if clear_cur_buf = '1' then
+		cur_buf <= (others => '0');
+		clear_cur_buf <= '0';
+	    elsif flush_req = '1' then
+		fifo_wren <= '1';
+		clear_cur_buf <= '1';
+		flush_req_reset <= '1';
+		bit_p <= reset_32;
+	    elsif do_ack = '1' and enabled = '1' and reading = '0' then
 		if mask_op = '0' then
 		    cur_buf <= cur_buf_i;
 		    wrap_buf <= wrap_buf_i;
 		    bit_p <= bit_p_i;
 		    fifo_wren <= flush_i;
+		    clear_cur_buf <= clear_cur_buf_i;
 		    write_wrap_buf <= write_wrap_buf_i;
 		else
 		    num_bits <= unsigned(io_d_in(5 downto 0));
@@ -93,8 +111,9 @@ begin
 					    to_integer(num_bits - bit_p)));
 	flush_i <= '0';
 	write_wrap_buf_i <= '0';
+	clear_cur_buf_i <= '0';
 	if num_bits > bit_p then
-	    bit_p_i <= to_unsigned(32, 6) - (num_bits - bit_p);
+	    bit_p_i <= reset_32 - (num_bits - bit_p);
 	    cur_buf_i <= std_logic_vector(
 				shift_left( unsigned(io_d_in_r and new_mask),
 					    32 - to_integer(num_bits - bit_p)));
@@ -105,13 +124,22 @@ begin
 				shift_left( unsigned(io_d_in_r and nowrap_mask),
 					    to_integer(bit_p - num_bits)));
 	    if num_bits = bit_p then
-		bit_p_i <= to_unsigned(32, 6);
+		bit_p_i <= reset_32;
 		flush_i <= '1';
+		clear_cur_buf_i <= '1';
 	    else
 		bit_p_i <= bit_p - num_bits;
 	    end if;
 	end if;
     end process push_proc;
+
+    trigger_proc : process(trigger, reset, flush_req_reset) begin
+        if reset = '1' or flush_req_reset = '1' then
+            flush_req <= '0';
+        elsif trigger'event and trigger = '1' then
+            flush_req <= '1';
+        end if;
+    end process trigger_proc;
 
     -- Get IO data
     io_proc : process(clk, reset) begin

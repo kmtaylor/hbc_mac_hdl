@@ -126,6 +126,7 @@ architecture Behavioral of toplevel is
 	signal fifo_empty : std_logic;
 	signal fifo_almost_empty : std_logic;
 	signal fifo_underflow : std_logic;
+	signal fifo_flush : std_logic;
 
 	signal parallel_to_serial_enable : std_logic;
 
@@ -220,7 +221,8 @@ begin
 			GPO1 (2) => reseed,
 			GPO1 (3) => seed_val,
 			GPO1 (4) => seed_clk,
-			GPO1 (7 downto 5) => open,
+			GPO1 (5) => fifo_flush,
+			GPO1 (7 downto 6) => open,
 			GPO2 => Led,
 			INTC_Interrupt (0) => btn1_d,
 			INTC_Interrupt (1) => fifo_full,
@@ -333,6 +335,7 @@ begin
 		port map (
 			clk => cpu_clk,
 			reset => reset,
+			trigger => fifo_flush,
 			io_addr	=> io_address (7 downto 0),
 			io_d_in	=> io_write_data,
 			io_d_out	=> bus1_data,
