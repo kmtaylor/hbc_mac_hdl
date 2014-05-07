@@ -71,10 +71,9 @@ architecture Behavioral of toplevel is
 			rd_en : IN STD_LOGIC;
 			dout : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 			full : OUT STD_LOGIC;
-			almost_full : OUT STD_LOGIC;
+			prog_full : OUT STD_LOGIC;
 			overflow : OUT STD_LOGIC;
 			empty : OUT STD_LOGIC;
-			almost_empty : OUT STD_LOGIC;
 			underflow : OUT STD_LOGIC
 		);
 	END COMPONENT;
@@ -98,6 +97,7 @@ architecture Behavioral of toplevel is
 	signal bus4_ready : std_logic;
 	signal bus5_data : std_logic_vector (31 downto 0);
 	signal bus5_ready : std_logic;
+	signal bus6_ready : std_logic;
 	
 	-- Internal memory signals
 	signal phy_init_done	: std_logic;
@@ -127,6 +127,18 @@ architecture Behavioral of toplevel is
 	signal fifo_almost_empty : std_logic;
 	signal fifo_underflow : std_logic;
 	signal fifo_flush : std_logic;
+
+	signal mod_bus_master : std_logic;
+	signal fifo_bus_addr : std_logic_vector (7 downto 0);
+	signal fifo_d_out : std_logic_vector (31 downto 0);
+	signal fifo_addr_strobe : std_logic;
+	signal fifo_write_strobe : std_logic;
+	signal fifo_io_ready : std_logic;
+	signal mod_bus_addr : std_logic_vector (7 downto 0);
+	signal mod_d_out : std_logic_vector (31 downto 0);
+	signal mod_addr_strobe : std_logic;
+	signal mod_write_strobe : std_logic;
+	signal mod_io_ready : std_logic;
 
 	signal parallel_to_serial_enable : std_logic;
 
@@ -199,10 +211,10 @@ begin
 		generic map (DIV_BY => 20E3)
 		port map (clk => cpu_clk, clk_div => clk_debounce);
 			
-	clk_div_1 : entity work.clock_divider
-		generic map (DIV_BY => 1)
-		port map (clk => serial_clk, clk_div => clk_debug);
---	clk_debug <= serial_clk;
+--	clk_div_1 : entity work.clock_divider
+--		generic map (DIV_BY => 1)
+--		port map (clk => serial_clk, clk_div => clk_debug);
+	clk_debug <= serial_clk;
 			
 	cpu_0 : component mcs_0
 		port map (
@@ -229,7 +241,7 @@ begin
 			INTC_Interrupt (2) => fifo_almost_full,
 			INTC_Interrupt (3) => fifo_overflow,
 			INTC_Interrupt (4) => fifo_empty,
-			INTC_Interrupt (5) => fifo_almost_empty,
+			INTC_Interrupt (5) => '0',
 			INTC_Interrupt (6) => fifo_underflow,
 			INTC_Interrupt (7) => clk_lock_int,
 			INTC_Interrupt (8) => not(phy_init_done),
@@ -244,7 +256,7 @@ begin
 			GPI1 (2) => fifo_almost_full,
 			GPI1 (3) => fifo_overflow,
 			GPI1 (4) => fifo_empty,
-			GPI1 (5) => fifo_almost_empty,
+			GPI1 (5) => '0',
 			GPI1 (6) => fifo_underflow,
 			GPI1 (7) => clk_lock_int,
 			GPI1 (8) => not(phy_init_done),
@@ -268,7 +280,9 @@ begin
 			bus4_d_in => bus4_data,
 			bus4_ready => bus4_ready,
 			bus5_d_in => bus5_data,
-			bus5_ready => bus5_ready);
+			bus5_ready => bus5_ready,
+			bus6_d_in => (others => '0'),
+			bus6_ready => bus6_ready);
 			
 	mem_if : entity work.mem_interface
 		port map (
@@ -336,33 +350,32 @@ begin
 			clk => cpu_clk,
 			reset => reset,
 			trigger => fifo_flush,
-			io_addr	=> io_address (7 downto 0),
-			io_d_in	=> io_write_data,
+			io_addr	=> fifo_bus_addr,
+			io_d_in	=> fifo_d_out,
 			io_d_out	=> bus1_data,
-			io_addr_strobe => io_addr_strobe,
+			io_addr_strobe => fifo_addr_strobe,
 			io_read_strobe => io_read_strobe,
-			io_write_strobe => io_write_strobe,
-			io_ready => bus1_ready,
+			io_write_strobe => fifo_write_strobe,
+			io_ready => fifo_io_ready,
 			fifo_d_out => to_fifo,
 			fifo_wren => fifo_wren,
 			fifo_d_in => from_fifo,
 			-- Disabled
-			fifo_rden => fifo_rden);--open);
+			fifo_rden => open);
 			
 	tx_fifo : component fifo_tx
 		port map (
 			rst => reset,
 			wr_clk => cpu_clk,
-			rd_clk => cpu_clk, --clk_debug, --serial_clk,
+			rd_clk => clk_debug, --serial_clk,
 			din => to_fifo,
 			wr_en => fifo_wren,
 			rd_en => fifo_rden,
 			dout => from_fifo,
 			full => fifo_full,
-			almost_full => fifo_almost_full,
+			prog_full => fifo_almost_full,
 			overflow => fifo_overflow,
 			empty => fifo_empty,
-			almost_empty => fifo_almost_empty,
 			underflow => fifo_underflow);
 
 	p_to_s : entity work.parallel_to_serial
@@ -372,7 +385,7 @@ begin
 			trigger => parallel_to_serial_enable,
 			trig_clk => cpu_clk,
 			fifo_d_in => from_fifo,
-			fifo_rden => open, --fifo_rden, (debug push)
+			fifo_rden => fifo_rden,
 			fifo_empty => fifo_empty,
 			data_out => s_data_out);
 
@@ -431,6 +444,41 @@ begin
 			io_read_strobe => io_read_strobe,
 			io_ready => bus5_ready);
 
+	ba1 : entity work.fifo_bus_arbitrator
+		port map (
+			mod_bus_master => mod_bus_master,
+			io_addr => io_address (7 downto 0),
+			io_d_out => io_write_data,
+			io_addr_strobe => io_addr_strobe,
+			io_write_strobe => io_write_strobe,
+			io_io_ready => bus1_ready,
+			mod_addr => mod_bus_addr,
+			mod_d_out => mod_d_out,
+			mod_addr_strobe => mod_addr_strobe,
+			mod_write_strobe => mod_write_strobe,
+			mod_io_ready => mod_io_ready,
+			fifo_addr => fifo_bus_addr,
+			fifo_d_out => fifo_d_out,
+			fifo_addr_strobe => fifo_addr_strobe,
+			fifo_write_strobe => fifo_write_strobe,
+			fifo_io_ready => fifo_io_ready);
+	
+	modulator : entity work.modulator
+		port map (
+			clk => cpu_clk,
+			reset => reset,
+			io_addr => io_address (7 downto 0),
+                        io_d_in => io_write_data,
+                        io_addr_strobe => io_addr_strobe,
+                        io_write_strobe => io_write_strobe,
+                        io_ready => bus6_ready,
+			bus_master => mod_bus_master,
+			sub_addr_out => mod_bus_addr,
+			sub_d_out => mod_d_out,
+			sub_addr_strobe => mod_addr_strobe,
+			sub_write_strobe => mod_write_strobe,
+			sub_io_ready => mod_io_ready);
+	
 	db_btn1 : entity work.debounce
 		port map(
 			clk => clk_debounce,

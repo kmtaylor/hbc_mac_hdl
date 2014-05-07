@@ -11,8 +11,9 @@ SCRAMBLER_SIM_FLAGS += --stop-time=1000ns
 
 C_TO_VHD_FILES += \
 	c_to_vhd.vhd \
+	fifo_interface.vhd \
 	c_to_vhd_tb.vhd
-C_TO_VHD_SIM_FLAGS += --stop-time=1000ns
+C_TO_VHD_SIM_FLAGS += --stop-time=3000ns
 
 USB_TB_FILES += \
 	usb_fifo_interface.vhd \
