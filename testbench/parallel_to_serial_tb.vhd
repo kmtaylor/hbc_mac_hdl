@@ -61,10 +61,8 @@ ARCHITECTURE behavior OF parallel_to_serial_tb IS
 			rd_en : IN STD_LOGIC;
 			dout : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 			full : OUT STD_LOGIC;
-			almost_full : OUT STD_LOGIC;
 			overflow : OUT STD_LOGIC;
 			empty : OUT STD_LOGIC;
-			almost_empty : OUT STD_LOGIC;
 			underflow : OUT STD_LOGIC
 		);
 	END COMPONENT;
@@ -88,7 +86,6 @@ ARCHITECTURE behavior OF parallel_to_serial_tb IS
 	
 	signal full, almost_full : std_logic;
 	signal overflow, underflow : std_logic;
-	signal almost_empty : std_logic;
 	
 	signal cpu_data : std_logic_vector (31 downto 0);
 	signal cpu_wren : std_logic;
@@ -116,10 +113,8 @@ BEGIN
 			rd_en => fifo_rden,
 			dout => fifo_d_in,
 			full => full,
-			almost_full => almost_full,
 			overflow => overflow,
 			empty => fifo_empty,
-			almost_empty => almost_empty,
 			underflow => underflow
 		);
 		

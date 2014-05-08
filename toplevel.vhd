@@ -154,12 +154,10 @@ architecture Behavioral of toplevel is
 	signal serial_dcm_locked : std_logic;
 	signal cpu_dcm_locked : std_logic;
 
-	signal clk_debug : std_logic;
-
 	signal btn1_d : std_logic;
 
 begin
-	serial_clk_out <= clk_debug;
+	serial_clk_out <= serial_clk;
 
 	cpu_clk <= mem_clk0;
 
@@ -211,11 +209,6 @@ begin
 		generic map (DIV_BY => 20E3)
 		port map (clk => cpu_clk, clk_div => clk_debounce);
 			
---	clk_div_1 : entity work.clock_divider
---		generic map (DIV_BY => 1)
---		port map (clk => serial_clk, clk_div => clk_debug);
-	clk_debug <= serial_clk;
-			
 	cpu_0 : component mcs_0
 		port map (
 			Clk => cpu_clk,
@@ -241,8 +234,8 @@ begin
 			INTC_Interrupt (2) => fifo_almost_full,
 			INTC_Interrupt (3) => fifo_overflow,
 			INTC_Interrupt (4) => fifo_empty,
-			INTC_Interrupt (5) => '0',
-			INTC_Interrupt (6) => fifo_underflow,
+			INTC_Interrupt (5) => fifo_underflow,
+			INTC_Interrupt (6) => '0',
 			INTC_Interrupt (7) => clk_lock_int,
 			INTC_Interrupt (8) => not(phy_init_done),
 			INTC_Interrupt (9) => mem_fifo_full,
@@ -256,8 +249,8 @@ begin
 			GPI1 (2) => fifo_almost_full,
 			GPI1 (3) => fifo_overflow,
 			GPI1 (4) => fifo_empty,
-			GPI1 (5) => '0',
-			GPI1 (6) => fifo_underflow,
+			GPI1 (5) => fifo_underflow,
+			GPI1 (6) => '0',
 			GPI1 (7) => clk_lock_int,
 			GPI1 (8) => not(phy_init_done),
 			GPI1 (9) => mem_fifo_full,
@@ -266,7 +259,7 @@ begin
 			GPI1 (12) => UsbEN,
 			GPI1 (13) => UsbEmpty,
 			GPI1 (15 downto 14) => "00");
-
+	
 	ba_0 : entity work.io_bus_arbitrator
 		port map (
 			io_d_out => io_read_data,
@@ -367,7 +360,7 @@ begin
 		port map (
 			rst => reset,
 			wr_clk => cpu_clk,
-			rd_clk => clk_debug, --serial_clk,
+			rd_clk => serial_clk,
 			din => to_fifo,
 			wr_en => fifo_wren,
 			rd_en => fifo_rden,
@@ -380,14 +373,15 @@ begin
 
 	p_to_s : entity work.parallel_to_serial
 		port map (
-			clk => clk_debug, --serial_clk,
+			clk => serial_clk,
 			reset => reset,
 			trigger => parallel_to_serial_enable,
 			trig_clk => cpu_clk,
 			fifo_d_in => from_fifo,
 			fifo_rden => fifo_rden,
 			fifo_empty => fifo_empty,
-			data_out => s_data_out);
+			data_out => s_data_out,
+			state_debug => open); --Led);
 
 	usb_0 : entity work.usb_fifo
 		port map (

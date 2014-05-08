@@ -43,6 +43,8 @@ architecture Behavioural of modulator is
     signal set_sf_op : std_logic;
     signal got_write : std_logic := '0';
     signal ack_write : std_logic;
+    signal do_ack : std_logic;
+    signal io_ready_s, io_ready_d : std_logic;
 
     type state_type is (st_idle,
 			st_fifo_write,
@@ -61,6 +63,7 @@ architecture Behavioural of modulator is
     signal symbol : std_logic_vector (SYM_SIZE - 1 downto 0);
 
 begin
+    io_ready <= io_ready_s or io_ready_d;
 
     with symbol select walsh_data
 	<=  X"9669" when "1111",
@@ -109,9 +112,9 @@ begin
 	end if;
 	
 	if state = st_bus_ack then
-	    io_ready <= '1';
+	    io_ready_s <= '1';
 	else
-	    io_ready <= '0';
+	    io_ready_s <= '0';
 	end if;
     end process;
 
@@ -175,9 +178,13 @@ begin
     sf_proc : process (clk, reset) begin
 	if reset = '1' then
 	    sf <= (others => '0');
-	elsif clk'event and clk = '1' then
-	    if set_sf_op = '1' then
+	    io_ready_d <= '0';
+	elsif clk'event and clk = '0' then
+	    if io_ready_d = '1' then
+		io_ready_d <= '0';
+	    elsif set_sf_op = '1' and do_ack = '1' then
 		sf <= io_d_in_r(7 downto 0);
+		io_ready_d <= '1';
 	    end if;
 	end if;
     end process sf_proc;
@@ -187,11 +194,15 @@ begin
 	if reset = '1' or ack_write = '1' then
 	    io_d_in_r <= (others => '0');
 	    got_write <= '0';
+	    do_ack <= '0';
 	-- Read IO bus on falling edge
 	elsif clk'event and clk = '0' then
 	    if io_write_strobe = '1' then
 		io_d_in_r <= io_d_in;
 		got_write <= '1';
+		do_ack <= '1';
+	    else
+		do_ack <= '0';
 	    end if;
 	end if;
     end process io_proc;

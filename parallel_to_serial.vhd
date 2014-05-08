@@ -12,7 +12,8 @@ entity parallel_to_serial is
 		fifo_d_in : in std_logic_vector (31 downto 0);
 		fifo_rden : out std_logic;
 		fifo_empty : in std_logic;
-		data_out : out std_logic);
+		data_out : out std_logic;
+		state_debug : out std_logic_vector (7 downto 0));
 end parallel_to_serial;
 
 architecture Behavioral of parallel_to_serial is
@@ -38,6 +39,28 @@ architecture Behavioral of parallel_to_serial is
     signal enabled, en_reset : std_logic;
 	
 begin
+    debug : process (state, next_state) begin
+	case (state) is
+	    when st_reset =>
+		state_debug (3 downto 0) <= X"1";
+	    when st_rd_fifo_1 =>
+		state_debug (3 downto 0) <= X"2";
+	    when st_rd_fifo_2 =>
+		state_debug (3 downto 0) <= X"3";
+	    when st_output_data =>
+		state_debug (3 downto 0) <= X"4";
+	    when st_chain_1 =>
+		state_debug (3 downto 0) <= X"5";
+	    when st_chain_2 =>
+		state_debug (3 downto 0) <= X"6";
+	    when st_chain_3 =>
+		state_debug (3 downto 0) <= X"7";
+	    when st_finish_1 =>
+		state_debug (3 downto 0) <= X"8";
+	    when st_finish_2 =>
+		state_debug (3 downto 0) <= X"9";
+	end case;
+    end process debug;
 
     trigger_proc : process(trig_clk, reset, en_reset) begin
 	if reset = '1' or en_reset = '1' then

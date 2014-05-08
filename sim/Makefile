@@ -15,6 +15,12 @@ C_TO_VHD_FILES += \
 	c_to_vhd_tb.vhd
 C_TO_VHD_SIM_FLAGS += --stop-time=3000ns
 
+MODULATOR_TB_FILES += \
+	modulator.vhd \
+	fifo_interface.vhd \
+	modulator_tb.vhd
+MODULATOR_SIM_FLAGS += --stop-time=3000ns
+
 USB_TB_FILES += \
 	usb_fifo_interface.vhd \
 	usb_fifo_interface_tb.vhd
@@ -31,7 +37,7 @@ CLK_DIV_TB_FILES += \
 	clk_div_tb.vhd
 CLK_DIV_SIM_FLAGS += --stop-time=100ns
 
-all: usb_fifo_interface_tb scrambler_tb # fifo_interface_tb
+all: usb_fifo_interface_tb scrambler_tb modulator_tb
 
 # Test Benches (Elaboration)
 c_to_vhd_tb: $(XILINX_OBJS) $(C_TO_VHD_FILES:.vhd=.o)
@@ -54,6 +60,10 @@ clk_div_tb: $(XILINX_OBJS) $(CLK_DIV_TB_FILES:.vhd=.o)
 	ghdl -m $(XILINX_FLAGS) "$@"
 	./"$@" $(CLK_DIV_SIM_FLAGS) --wave="$@".ghw
 
+modulator_tb: $(XILINX_OBJS) $(MODULATOR_TB_FILES:.vhd=.o)
+	ghdl -m $(XILINX_FLAGS) "$@"
+	./"$@" $(MODULATOR_SIM_FLAGS) --wave="$@".ghw
+
 # Xilinx libraries
 xilinxcorelib-obj93.cf:
 	ghdl -i --ieee=none --work=XilinxCoreLib ../Xilinx/sim/XilinxCoreLib/*.vhd
@@ -75,5 +85,6 @@ cleanall:
 	ghdl --remove
 	rm -f *.ghw
 	rm -f *.cf
+	rm -f *.o
 
 .PHONY: clean cleanall all
