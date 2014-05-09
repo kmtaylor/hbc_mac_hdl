@@ -152,6 +152,8 @@ begin
 	end if;
     end process fifo_read_proc;
 
+    -- do_cpu_read, do_cpu_write and do_pkt_end are asynchronous.
+    -- synthesise fsm with -safe_implementation
     next_state_decode : process (state, UsbEmpty, do_pkt_end, do_cpu_write,
 				 byte_counter, do_cpu_read, UsbFull,
 				 last_byte) begin

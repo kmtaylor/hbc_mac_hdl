@@ -88,6 +88,8 @@ begin
 	end if;
     end process;
  
+    -- enabled is asynchronous
+    -- synthesise fsm with -safe_implementation
     next_state_decode : process (state, fifo_empty, cur_bit,
 				       fifo_d_in, tmp_data, enabled) begin
 	next_state <= state;
