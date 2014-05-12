@@ -98,7 +98,7 @@ begin
 		    clear_cur_buf <= clear_cur_buf_i;
 		    write_wrap_buf <= write_wrap_buf_i;
 		else
-		    num_bits <= unsigned(io_d_in(5 downto 0));
+		    num_bits <= unsigned(io_d_in_r(5 downto 0));
 		end if;
 	    end if;
 	end if;
