@@ -151,7 +151,7 @@ BEGIN
 
     wait for clk_period;
     cpu_wren <= '0';
-    cpu_data <= X"5AAA555A";
+    cpu_data <= X"5AA0555A";
     wait for clk_period;
     cpu_wren <= '1';
     wait for clk_period;

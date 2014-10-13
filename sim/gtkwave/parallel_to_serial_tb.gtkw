@@ -1,0 +1,37 @@
+[*]
+[*] GTKWave Analyzer v3.3.45 (w)1999-2012 BSI
+[*] Sun Oct 12 22:51:48 2014
+[*]
+[dumpfile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/parallel_to_serial_tb.ghw"
+[dumpfile_mtime] "Sun Oct 12 22:50:12 2014"
+[dumpfile_size] 30888
+[savefile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/gtkwave/parallel_to_serial_tb.gtkw"
+[timestart] 0
+[size] 1918 1021
+[pos] 0 53
+*-28.000000 444000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.parallel_to_serial_tb.
+[treeopen] top.parallel_to_serial_tb.uut.
+[sst_width] 224
+[signals_width] 150
+[sst_expanded] 1
+[sst_vpaned_height] 290
+@28
+top.parallel_to_serial_tb.clk
+top.parallel_to_serial_tb.reset
+@22
+#{top.parallel_to_serial_tb.cpu_data[31:0]} top.parallel_to_serial_tb.cpu_data[31] top.parallel_to_serial_tb.cpu_data[30] top.parallel_to_serial_tb.cpu_data[29] top.parallel_to_serial_tb.cpu_data[28] top.parallel_to_serial_tb.cpu_data[27] top.parallel_to_serial_tb.cpu_data[26] top.parallel_to_serial_tb.cpu_data[25] top.parallel_to_serial_tb.cpu_data[24] top.parallel_to_serial_tb.cpu_data[23] top.parallel_to_serial_tb.cpu_data[22] top.parallel_to_serial_tb.cpu_data[21] top.parallel_to_serial_tb.cpu_data[20] top.parallel_to_serial_tb.cpu_data[19] top.parallel_to_serial_tb.cpu_data[18] top.parallel_to_serial_tb.cpu_data[17] top.parallel_to_serial_tb.cpu_data[16] top.parallel_to_serial_tb.cpu_data[15] top.parallel_to_serial_tb.cpu_data[14] top.parallel_to_serial_tb.cpu_data[13] top.parallel_to_serial_tb.cpu_data[12] top.parallel_to_serial_tb.cpu_data[11] top.parallel_to_serial_tb.cpu_data[10] top.parallel_to_serial_tb.cpu_data[9] top.parallel_to_serial_tb.cpu_data[8] top.parallel_to_serial_tb.cpu_data[7] top.parallel_to_serial_tb.cpu_data[6] top.parallel_to_serial_tb.cpu_data[5] top.parallel_to_serial_tb.cpu_data[4] top.parallel_to_serial_tb.cpu_data[3] top.parallel_to_serial_tb.cpu_data[2] top.parallel_to_serial_tb.cpu_data[1] top.parallel_to_serial_tb.cpu_data[0]
+@28
+top.parallel_to_serial_tb.cpu_wren
+top.parallel_to_serial_tb.fifo_rden
+@22
+#{top.parallel_to_serial_tb.fifo_d_in[31:0]} top.parallel_to_serial_tb.fifo_d_in[31] top.parallel_to_serial_tb.fifo_d_in[30] top.parallel_to_serial_tb.fifo_d_in[29] top.parallel_to_serial_tb.fifo_d_in[28] top.parallel_to_serial_tb.fifo_d_in[27] top.parallel_to_serial_tb.fifo_d_in[26] top.parallel_to_serial_tb.fifo_d_in[25] top.parallel_to_serial_tb.fifo_d_in[24] top.parallel_to_serial_tb.fifo_d_in[23] top.parallel_to_serial_tb.fifo_d_in[22] top.parallel_to_serial_tb.fifo_d_in[21] top.parallel_to_serial_tb.fifo_d_in[20] top.parallel_to_serial_tb.fifo_d_in[19] top.parallel_to_serial_tb.fifo_d_in[18] top.parallel_to_serial_tb.fifo_d_in[17] top.parallel_to_serial_tb.fifo_d_in[16] top.parallel_to_serial_tb.fifo_d_in[15] top.parallel_to_serial_tb.fifo_d_in[14] top.parallel_to_serial_tb.fifo_d_in[13] top.parallel_to_serial_tb.fifo_d_in[12] top.parallel_to_serial_tb.fifo_d_in[11] top.parallel_to_serial_tb.fifo_d_in[10] top.parallel_to_serial_tb.fifo_d_in[9] top.parallel_to_serial_tb.fifo_d_in[8] top.parallel_to_serial_tb.fifo_d_in[7] top.parallel_to_serial_tb.fifo_d_in[6] top.parallel_to_serial_tb.fifo_d_in[5] top.parallel_to_serial_tb.fifo_d_in[4] top.parallel_to_serial_tb.fifo_d_in[3] top.parallel_to_serial_tb.fifo_d_in[2] top.parallel_to_serial_tb.fifo_d_in[1] top.parallel_to_serial_tb.fifo_d_in[0]
+@28
+top.parallel_to_serial_tb.uut.state
+top.parallel_to_serial_tb.data_out
+top.parallel_to_serial_tb.uut.cur_bit
+@23
+#{top.parallel_to_serial_tb.uut.tmp_data[31:0]} top.parallel_to_serial_tb.uut.tmp_data[31] top.parallel_to_serial_tb.uut.tmp_data[30] top.parallel_to_serial_tb.uut.tmp_data[29] top.parallel_to_serial_tb.uut.tmp_data[28] top.parallel_to_serial_tb.uut.tmp_data[27] top.parallel_to_serial_tb.uut.tmp_data[26] top.parallel_to_serial_tb.uut.tmp_data[25] top.parallel_to_serial_tb.uut.tmp_data[24] top.parallel_to_serial_tb.uut.tmp_data[23] top.parallel_to_serial_tb.uut.tmp_data[22] top.parallel_to_serial_tb.uut.tmp_data[21] top.parallel_to_serial_tb.uut.tmp_data[20] top.parallel_to_serial_tb.uut.tmp_data[19] top.parallel_to_serial_tb.uut.tmp_data[18] top.parallel_to_serial_tb.uut.tmp_data[17] top.parallel_to_serial_tb.uut.tmp_data[16] top.parallel_to_serial_tb.uut.tmp_data[15] top.parallel_to_serial_tb.uut.tmp_data[14] top.parallel_to_serial_tb.uut.tmp_data[13] top.parallel_to_serial_tb.uut.tmp_data[12] top.parallel_to_serial_tb.uut.tmp_data[11] top.parallel_to_serial_tb.uut.tmp_data[10] top.parallel_to_serial_tb.uut.tmp_data[9] top.parallel_to_serial_tb.uut.tmp_data[8] top.parallel_to_serial_tb.uut.tmp_data[7] top.parallel_to_serial_tb.uut.tmp_data[6] top.parallel_to_serial_tb.uut.tmp_data[5] top.parallel_to_serial_tb.uut.tmp_data[4] top.parallel_to_serial_tb.uut.tmp_data[3] top.parallel_to_serial_tb.uut.tmp_data[2] top.parallel_to_serial_tb.uut.tmp_data[1] top.parallel_to_serial_tb.uut.tmp_data[0]
+[pattern_trace] 1
+[pattern_trace] 0

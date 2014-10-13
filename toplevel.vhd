@@ -168,6 +168,7 @@ begin
 
 	mem_fifo_full <= app_af_afull or app_wdf_afull;
 
+	-- 100MHz XTal to 90MHz PLL
 	core_pll : entity work.pll_core
 		port map (
 			CLKIN1_IN => clkin,
@@ -176,6 +177,7 @@ begin
 			CLKIN_IBUFG => clkin_ibufg,
 			LOCKED_OUT => pll_locked);
 
+	-- 100MHz XTal to 125MHz Mem clock (Also 200MHz and 62.5MHz)
 	mem_pll : entity work.pll_mem
 		port map (
 			CLKIN1_IN => clkin_ibufg,
@@ -190,7 +192,10 @@ begin
 		port map (
 			I => UsbClk,
 			O => usb_clk);
-
+	
+	-- 90MHz PLL to 100MHz cpu clock (unused, operating CPU at MEM HZ)
+	-- To reinstate, two FIFOs are requred between the mem controller and
+	-- the CPU bus.
 	cpu_clk_dcm : entity work.dcm_cpu
 		port map (
 			CLKIN_IN => pll_clk,
@@ -198,6 +203,7 @@ begin
 			CLKFX_OUT => open, --cpu_clk,
 			LOCKED_OUT => cpu_dcm_locked);
 
+	-- 90MHz PLL to 42MHz serial clock for TX
 	serial_clk_dcm : entity work.dcm_serial
 		port map (
 			CLKIN_IN => pll_clk,
@@ -205,6 +211,7 @@ begin
 			CLKFX_OUT => serial_clk,
 			LOCKED_OUT => serial_dcm_locked);
 			
+	-- 125MHz cpu_clk to 6.25kHz clk for pushbutton debouncing 
 	clk_div_0 : entity work.clock_divider
 		generic map (DIV_BY => 20E3)
 		port map (clk => cpu_clk, clk_div => clk_debounce);
@@ -380,8 +387,7 @@ begin
 			fifo_d_in => from_fifo,
 			fifo_rden => fifo_rden,
 			fifo_empty => fifo_empty,
-			data_out => s_data_out,
-			state_debug => open); --Led);
+			data_out => s_data_out);
 
 	usb_0 : entity work.usb_fifo
 		port map (

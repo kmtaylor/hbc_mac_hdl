@@ -1,4 +1,4 @@
-XILINX_FLAGS += --ieee=none -fexplicit -g
+XILINX_FLAGS += --ieee=none -fexplicit --warn-no-binding
 
 XILINX_OBJS += \
 	ieee-obj93.cf \
@@ -37,7 +37,15 @@ CLK_DIV_TB_FILES += \
 	clk_div_tb.vhd
 CLK_DIV_SIM_FLAGS += --stop-time=100ns
 
-all: usb_fifo_interface_tb scrambler_tb modulator_tb
+P2S_TB_FILES += \
+	parallel_to_serial.vhd \
+	parallel_to_serial_tb.vhd \
+	fifo_tx_sim.vhd
+P2S_SIM_FLAGS += --stop-time=5000ns
+
+all:
+	@make -qp | awk -F ':' '/^[a-zA-Z0-9][^$$#\/\t=]*:([^=]|$$)/ \
+	{split($$1,A,/ /); for(i in A) print A[i]}' | sed '/\.o/d' | grep tb
 
 # Test Benches (Elaboration)
 c_to_vhd_tb: $(XILINX_OBJS) $(C_TO_VHD_FILES:.vhd=.o)
@@ -54,7 +62,7 @@ usb_fifo_interface_tb: $(XILINX_OBJS) $(USB_TB_FILES:.vhd=.o)
 
 fifo_interface_tb: $(XILINX_OBJS) $(FIFO_TB_FILES:.vhd=.o)
 	ghdl -m $(XILINX_FLAGS) "$@"
-#	./"$@" $(FIFO_SIM_FLAGS) --wave="$@".ghw
+	./"$@" $(FIFO_SIM_FLAGS) --wave="$@".ghw
 
 clk_div_tb: $(XILINX_OBJS) $(CLK_DIV_TB_FILES:.vhd=.o)
 	ghdl -m $(XILINX_FLAGS) "$@"
@@ -63,6 +71,10 @@ clk_div_tb: $(XILINX_OBJS) $(CLK_DIV_TB_FILES:.vhd=.o)
 modulator_tb: $(XILINX_OBJS) $(MODULATOR_TB_FILES:.vhd=.o)
 	ghdl -m $(XILINX_FLAGS) "$@"
 	./"$@" $(MODULATOR_SIM_FLAGS) --wave="$@".ghw
+
+parallel_to_serial_tb: $(XILINX_OBJS) $(P2S_TB_FILES:.vhd=.o)
+	ghdl -m $(XILINX_FLAGS) "$@"
+	./"$@" $(P2S_SIM_FLAGS) --wave="$@".ghw
 
 # Xilinx libraries
 xilinxcorelib-obj93.cf:
@@ -88,3 +100,5 @@ cleanall:
 	rm -f *.o
 
 .PHONY: clean cleanall all
+
+#ghdl -e -Wc,-fdump-tree-gimple
