@@ -1,0 +1,18 @@
+#include <boost/preprocessor/tuple/elem.hpp>
+#include <boost/preprocessor/control/if.hpp>
+#include <boost/preprocessor/comparison/less.hpp>
+#include <boost/preprocessor/comparison/equal.hpp>
+
+#define LT(n) n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n
+#define LOG_TUP ( \
+    0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, LT(5), LT(6), LT(6) )
+
+/* Determine the number of bits required to count to n (inclusive) */
+#define BITS_FOR_VAL(n) \
+    BOOST_PP_IF(				\
+	BOOST_PP_LESS(n, 64),			\
+	BOOST_PP_TUPLE_ELEM(64, n, LOG_TUP),	\
+	BOOST_PP_IF(				\
+	    BOOST_PP_LESS(n, 128), 7,		\
+	    BOOST_PP_IF(			\
+		BOOST_PP_EQUAL(n, 256), 9, 8)))

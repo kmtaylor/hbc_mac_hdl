@@ -26,10 +26,10 @@ entity usb_fifo is
 		UsbDBG : out std_logic_vector (7 downto 0));
 end usb_fifo;
 
-architecture Behavioral of usb_fifo is
+architecture usb_fifo_arch of usb_fifo is
 
 	-- USB_ADDR must be word aligned
-	constant USB_ADDR : std_logic_vector (7 downto 0) := X"10";
+	constant USB_ADDR : std_logic_vector (7 downto 0) := HEX(USB_ADDR);
 
 	signal io_addr_reg : std_logic_vector (7 downto 0);
 	signal usb_read_data : std_logic_vector (31 downto 0);
@@ -306,5 +306,5 @@ begin
         <=  '1' when USB_ADDR,
 	    '0' when others;
 
-end Behavioral;
+end usb_fifo_arch;
 

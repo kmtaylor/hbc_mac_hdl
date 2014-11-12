@@ -1,3 +1,4 @@
+#include <preprocessor/constants.vhh>
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -19,11 +20,12 @@ entity fifo_interface is
 	fifo_rden   : out std_logic);
 end fifo_interface;
 
-architecture Behavioural of fifo_interface is
+architecture fifo_interface_arch of fifo_interface is
 
     -- FIFO_ADDR must be word aligned
-    constant FIFO_ADDR : std_logic_vector (7 downto 0) := X"00";
-    constant FIFO_MASK_ADDR : std_logic_vector (7 downto 0) := X"01";
+    constant FIFO_ADDR : std_logic_vector (7 downto 0) :=   HEX(FIFO_ADDR);
+    constant FIFO_MASK_ADDR : std_logic_vector (7 downto 0) := 
+							    HEX(FIFO_MASK_ADDR);
 	    
     signal io_addr_reg : std_logic_vector (7 downto 0);
     signal io_d_in_r : std_logic_vector (31 downto 0);
@@ -215,5 +217,5 @@ begin
 	end if;
     end process fifo_enable;
 
-end Behavioural;
+end fifo_interface_arch;
 

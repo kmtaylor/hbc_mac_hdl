@@ -1,0 +1,40 @@
+#define _QUOTE "
+#define PRINT(x) x
+
+#define V_VAL(val) PRINT(X)PRINT(_QUOTE)PRINT(val)PRINT(_QUOTE)
+
+#define _C_VAL(val) 0x##val
+#define C_VAL(val) _C_VAL(val)
+
+#ifdef VHDL
+#define HEX(val) V_VAL(CONST_HEX_##val)
+#else
+#define HEX(val) C_VAL(CONST_HEX_##val)
+#endif
+
+#define INT(val) CONST_INT_##val
+
+/* ---------------------- IEEE 802.15.6 Constants ------------------------- */
+#define CONST_HEX_PREAMBLE		C4CA5018FAE4B982
+#define CONST_HEX_SFD			565DDBCA58267ACD
+
+#define CONST_INT_COMMA_THRESHOLD	50
+
+/* ----------------------- Module Memory Map ------------------------------ */
+#define CONST_HEX_FIFO_ADDR		00
+#define CONST_HEX_FIFO_MASK_ADDR	01
+
+#define CONST_HEX_LCD_CMD_ADDR		02
+#define CONST_HEX_LCD_DATA_ADDR		03
+
+#define CONST_HEX_MEM_RD_WR_ADDR	04
+#define CONST_HEX_MEM_FLAGS_ADDR	05
+#define CONST_HEX_MEM_RD_P_ADDR		08
+#define CONST_HEX_MEM_WR_P_ADDR		0C
+
+#define CONST_HEX_USB_ADDR		10
+
+#define CONST_HEX_SCRAMBLER_ADDR	14
+
+#define CONST_HEX_MODULATOR_ADDR	18
+#define CONST_HEX_MODULATOR_SF_ADDR	19

@@ -26,7 +26,7 @@ entity io_bus_arbitrator is
 		bus6_ready	: in std_logic);
 end io_bus_arbitrator;
 
-architecture Behavioral of io_bus_arbitrator is
+architecture io_bus_arbitrator_arch of io_bus_arbitrator is
 
 begin
 
@@ -60,5 +60,5 @@ begin
 		end if;
 	end process;
 	
-end Behavioral;
+end io_bus_arbitrator_arch;
 

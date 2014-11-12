@@ -40,7 +40,7 @@ entity toplevel is
 		);
 end toplevel;
 
-architecture Behavioral of toplevel is
+architecture toplevel_arch of toplevel is
 
 	COMPONENT mcs_0
 		PORT (
@@ -485,5 +485,5 @@ begin
 			d_in => btn1,
 			q_out => btn1_d);
 
-end Behavioral;
+end toplevel_arch;
 

@@ -9,7 +9,7 @@ entity debounce is
 		q_out : out std_logic);
 end debounce;
 
-architecture Behavioral of debounce is
+architecture debounce_arch of debounce is
 	
 	signal q1, q2, q3 : std_logic := '0';
 
@@ -25,4 +25,4 @@ begin
  
 	q_out <= q1 and q2 and (not q3);
 
-end Behavioral;
+end debounce_arch;

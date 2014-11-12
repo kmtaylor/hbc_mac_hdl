@@ -13,12 +13,13 @@ entity scrambler is
 	io_ready : out std_logic);
 end entity scrambler;
 
-architecture behavioural of scrambler is
+architecture scrambler_arch of scrambler is
 
     constant SCRAMBLER_SEED_0 : std_logic_vector (31 downto 0) := X"69540152";
     constant SCRAMBLER_SEED_1 : std_logic_vector (31 downto 0) := X"8A5F621F";
 
-    constant SCRAMBLER_ADDR  : std_logic_vector (7 downto 0) := X"14";
+    constant SCRAMBLER_ADDR  : std_logic_vector (7 downto 0) :=
+							HEX(SCRAMBLER_ADDR);
 
     signal io_addr_reg : std_logic_vector (7 downto 0);
     signal enabled : std_logic;
@@ -112,4 +113,4 @@ begin
 	<=  '1' when SCRAMBLER_ADDR,
 	    '0' when others;
 
-end architecture behavioural;
+end architecture scrambler_arch;

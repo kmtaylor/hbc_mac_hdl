@@ -17,8 +17,7 @@ architecture behaviour of modulator_tb is
         full : OUT STD_LOGIC;
         overflow : OUT STD_LOGIC;
         empty : OUT STD_LOGIC;
-        underflow : OUT STD_LOGIC;
-	prog_full : OUT STD_LOGIC);
+        underflow : OUT STD_LOGIC);
     end component fifo_tx;
 
    --Inputs
@@ -58,6 +57,13 @@ architecture behaviour of modulator_tb is
     -- P2S
     signal serial_clk, parallel_to_serial_enable : std_logic;
     signal s_data_out : std_logic;
+
+    -- S2P
+    signal serial_clk_90 : std_logic;
+    signal s_data_sync : std_logic;
+    signal s2p_fifo_wren : std_logic;
+    signal s2p_fifo_data : std_logic_vector (31 downto 0);
+    signal s2p_fifo_full : std_logic;
  
     -- Clock period definitions
     constant clk_period : time := 10 ns;
@@ -121,8 +127,7 @@ begin
 	fifo_d_in => from_fifo,
 	fifo_rden => fifo_rden,
 	fifo_empty => empty,
-	data_out => s_data_out,
-	state_debug => open);
+	data_out => s_data_out);
 
     tx_fifo : component fifo_tx port map (
         rst => reset,
@@ -135,8 +140,22 @@ begin
         full => full,
         overflow => overflow,
         empty => empty,
-        underflow => underflow,
-	prog_full => prog_full);
+        underflow => underflow);
+
+    sync : entity work.data_synchroniser port map (
+	reset => reset,
+	serial_clk => serial_clk,
+	serial_clk_90 => serial_clk_90,
+	data_in => s_data_out,
+	data_out => s_data_sync);
+
+    s_to_p : entity work.serial_to_parallel port map (
+	reset => reset,
+	serial_clk => serial_clk,
+	fifo_d_out => s2p_fifo_data,
+	fifo_wren => s2p_fifo_wren,
+	fifo_full => s2p_fifo_full,
+	data_in => s_data_sync);
 
     -- Clock process definitions
     clk_process : process begin
@@ -153,6 +172,8 @@ begin
 	wait for s_clk_period/2;
     end process;
 
+    serial_clk_90 <= serial_clk after s_clk_period/4;
+
     -- Stimulus process
     stim_proc: process begin	
 	-- hold reset state for 20 ns.
@@ -163,21 +184,10 @@ begin
 
 	wait for clk_period * 5.5;
 
-	-- Set SF
-	io_write_strobe <= '1';
-	io_addr_strobe <= '1';
-	io_d_in <= X"00000001";
-	io_addr <= X"19";
-	wait for clk_period;
-	io_write_strobe <= '0';
-	io_addr_strobe <= '0';
-
-	wait for clk_period * 6;
-	
 	-- Set write size
 	fi_write_strobe <= '1';
 	fi_addr_strobe <= '1';
-	fi_d <= X"00000008";
+	fi_d <= X"00000020";
 	fi_addr <= X"01";
 	wait for clk_period;
 	fi_write_strobe <= '0';
@@ -188,15 +198,98 @@ begin
 	wait for clk_period * 6;
 	
 	-- Set bits at address 0x01
+	parallel_to_serial_enable <= '1';
+	wait for clk_period;
+	parallel_to_serial_enable <= '0';
+	wait for clk_period;
+
+#define WRITE_FIFO(val) \
+	fi_write_strobe <= '1';	\
+	fi_addr_strobe <= '1';	\
+	fi_d <= val;		\
+	fi_addr <= X"00";	\
+	wait for clk_period;	\
+	fi_write_strobe <= '0';	\
+	fi_addr_strobe <= '0';	\
+	wait for clk_period;
+
+#define WRITE_PREAMBLE()	\
+	WRITE_FIFO(X"AAAA5555")	\
+	WRITE_FIFO(X"55AA5555")	\
+	WRITE_FIFO(X"AAAA5555")	\
+	WRITE_FIFO(X"AA55AA55")	\
+	WRITE_FIFO(X"55AA55AA")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"555555AA")	\
+	WRITE_FIFO(X"AA555555")	\
+	WRITE_FIFO(X"AAAAAAAA")	\
+	WRITE_FIFO(X"AA55AA55")	\
+	WRITE_FIFO(X"AAAAAA55")	\
+	WRITE_FIFO(X"55AA5555")	\
+	WRITE_FIFO(X"AA55AAAA")	\
+	WRITE_FIFO(X"AA5555AA")	\
+	WRITE_FIFO(X"AA555555")	\
+	WRITE_FIFO(X"5555AA55")
+
+	WRITE_PREAMBLE()
+	WRITE_PREAMBLE()
+	WRITE_PREAMBLE()
+	WRITE_PREAMBLE()
+
+	-- Send SFD using RI at sf_64
+
+	WRITE_FIFO(X"55AA55AA")
+	WRITE_FIFO(X"55AAAA55")
+	WRITE_FIFO(X"55AA55AA")
+	WRITE_FIFO(X"AAAA55AA")
+	WRITE_FIFO(X"AAAA55AA")
+	WRITE_FIFO(X"AA55AAAA")
+	WRITE_FIFO(X"AAAA5555")
+	WRITE_FIFO(X"AA55AA55")
+	WRITE_FIFO(X"55AA55AA")
+	WRITE_FIFO(X"AA555555")
+	WRITE_FIFO(X"5555AA55")
+	WRITE_FIFO(X"55AAAA55")
+	WRITE_FIFO(X"55AAAAAA")
+	WRITE_FIFO(X"AA55AA55")
+	WRITE_FIFO(X"AAAA5555")
+	WRITE_FIFO(X"AAAA55AA")
+	--WRITE_FIFO(X"55555555")
+	--WRITE_FIFO(X"55555555")
+	--WRITE_FIFO(X"55555555")
+
+	wait for clk_period * 6;
+
+	-- Set SF
+	io_write_strobe <= '1';
+	io_addr_strobe <= '1';
+	io_d_in <= X"00000000";
+	io_addr <= X"19";
+	wait for clk_period;
+	io_write_strobe <= '0';
+	io_addr_strobe <= '0';
+
+	wait for clk_period * 6;
+	
+	-- Set write size
+	fi_write_strobe <= '1';
+	fi_addr_strobe <= '1';
+	fi_d <= X"00000020";
+	fi_addr <= X"01";
+	wait for clk_period;
+	fi_write_strobe <= '0';
+	fi_addr_strobe <= '0';
+	fi_d <= (others => '0');
+	fi_addr <= (others => '0');
+
+	-- Set bits at address 0x01
 	io_write_strobe <= '1';
 	io_addr_strobe <= '1';
 	io_d_in <= X"12345678";
 	io_addr <= X"18";
-	parallel_to_serial_enable <= '1';
 	wait for clk_period;
 	io_write_strobe <= '0';
 	io_addr_strobe <= '0';
-	parallel_to_serial_enable <= '0';
 	
 	wait;
     end process;

@@ -16,10 +16,10 @@ entity lcd_interface is
 		lcd_rs	: out std_logic);
 end lcd_interface;
 
-architecture Behavioral of lcd_interface is
+architecture lcd_interface_arch of lcd_interface is
 
-	constant LCD_DATA_ADDR	: std_logic_vector := X"03";
-	constant LCD_CMD_ADDR	: std_logic_vector := X"02";
+	constant LCD_DATA_ADDR	: std_logic_vector := HEX(LCD_DATA_ADDR);
+	constant LCD_CMD_ADDR	: std_logic_vector := HEX(LCD_CMD_ADDR);
 
 	type state_type is range 0 to 112;
 	signal state, next_state, resume : state_type := 0;
@@ -155,5 +155,5 @@ begin
 			'1' when LCD_CMD_ADDR,
 			'0' when others;
 		
-end Behavioral;
+end lcd_interface_arch;
 

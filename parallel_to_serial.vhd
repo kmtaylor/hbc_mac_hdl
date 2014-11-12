@@ -15,7 +15,7 @@ entity parallel_to_serial is
 		data_out : out std_logic);
 end parallel_to_serial;
 
-architecture Behavioral of parallel_to_serial is
+architecture parallel_to_serial_arch of parallel_to_serial is
 
     type state_type is (st_reset,
 			st_rd_fifo_1,
@@ -132,5 +132,5 @@ begin
 	end if;
     end process;
 
-end Behavioral;
+end parallel_to_serial_arch;
 

@@ -24,7 +24,7 @@ entity fifo_bus_arbitrator is
         	fifo_io_ready : in std_logic);
 end fifo_bus_arbitrator;
 
-architecture Behavioural of fifo_bus_arbitrator is
+architecture fifo_bus_arbitrator_arch of fifo_bus_arbitrator is
 
 begin
 
@@ -48,5 +48,5 @@ begin
 		end if;
 	end process;
 	
-end Behavioural;
+end fifo_bus_arbitrator_arch;
 

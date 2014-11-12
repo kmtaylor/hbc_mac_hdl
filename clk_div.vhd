@@ -10,7 +10,7 @@ entity clock_divider is
 		clk_div : out std_logic);
 end clock_divider;
 
-architecture Behavioral of clock_divider is
+architecture clock_divider_arch of clock_divider is
 
     signal counter : integer := 0;
     signal clk_div_i : std_logic := '0';
@@ -35,4 +35,4 @@ begin
 
     clk_div <= clk_div_i;
 
-end Behavioral;
+end clock_divider_arch;

@@ -25,13 +25,13 @@ entity mem_interface is
 		rd_data_fifo_out : in std_logic_vector (127 downto 0));
 end mem_interface;
 
-architecture Behavioral of mem_interface is
+architecture mem_interface_arch of mem_interface is
 
 	-- MEM_ADDR must be word aligned
-	constant MEM_RD_WR_ADDR	: std_logic_vector := X"04";
-	constant MEM_FLAGS_ADDR	: std_logic_vector := X"05";
-	constant MEM_RD_P_ADDR	: std_logic_vector := X"08";
-	constant MEM_WR_P_ADDR	: std_logic_vector := X"0C";
+	constant MEM_RD_WR_ADDR	: std_logic_vector := HEX(MEM_RD_RW_ADDR);
+	constant MEM_FLAGS_ADDR	: std_logic_vector := HEX(MEM_FLAGS_ADDR);
+	constant MEM_RD_P_ADDR	: std_logic_vector := HEX(MEM_RD_P_ADDR);
+	constant MEM_WR_P_ADDR	: std_logic_vector := HEX(MEM_WR_P_ADDR);
 
 	signal io_addr_reg : std_logic_vector (7 downto 0);
 	signal io_write_reg : std_logic_vector (31 downto 0);
@@ -242,5 +242,5 @@ begin
 	with io_addr_reg (7 downto 0) select latch_wr_p
 		<=	'1' when MEM_WR_P_ADDR, 
 			'0' when others;
-end Behavioral;
+end mem_interface_arch;
 

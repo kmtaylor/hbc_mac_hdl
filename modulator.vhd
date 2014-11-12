@@ -1,3 +1,4 @@
+#include <preprocessor/constants.vhh>
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -19,11 +20,13 @@ entity modulator is
 	sub_io_ready : in std_logic);
 end modulator;
 
-architecture Behavioural of modulator is
+architecture modulator_arch of modulator is
 
     -- FIFO_ADDR must be word aligned
-    constant MODULATOR_ADDR : std_logic_vector (7 downto 0) := X"18";
-    constant MODULATOR_SF_ADDR : std_logic_vector (7 downto 0) := X"19";
+    constant MODULATOR_ADDR : std_logic_vector (7 downto 0) :=
+							HEX(MODULATOR_ADDR);
+    constant MODULATOR_SF_ADDR : std_logic_vector (7 downto 0) :=
+							HEX(MODULATOR_SF_ADDR);
     constant FIFO_ADDR : std_logic_vector (7 downto 0) := X"00";
 
     constant BIT_MAP_32_1 : std_logic_vector(31 downto 0) := X"AAAAAAAA";
@@ -228,5 +231,5 @@ begin
 	<=  '1' when MODULATOR_SF_ADDR,
             '0' when others;
 	    
-end Behavioural;
+end modulator_arch;
 
