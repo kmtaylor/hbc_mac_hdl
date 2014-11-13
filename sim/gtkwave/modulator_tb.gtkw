@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.45 (w)1999-2012 BSI
-[*] Wed Nov 12 04:02:41 2014
+[*] Thu Nov 13 06:09:39 2014
 [*]
 [dumpfile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/modulator_tb.ghw"
-[dumpfile_mtime] "Wed Nov 12 04:02:25 2014"
-[dumpfile_size] 4812588
+[dumpfile_mtime] "Thu Nov 13 06:08:28 2014"
+[dumpfile_size] 6933449
 [savefile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/gtkwave/modulator_tb.gtkw"
-[timestart] 58655000000
+[timestart] 0
 [size] 1680 1024
 [pos] -1 -1
-*-30.000000 62794000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-36.000000 271000000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] top.
 [treeopen] top.modulator_tb.
 [treeopen] top.modulator_tb.s_to_p.
@@ -93,5 +93,6 @@ top.modulator_tb.s_to_p.state
 #{top.modulator_tb.s_to_p.walsh_count[4:0]} top.modulator_tb.s_to_p.walsh_count[4] top.modulator_tb.s_to_p.walsh_count[3] top.modulator_tb.s_to_p.walsh_count[2] top.modulator_tb.s_to_p.walsh_count[1] top.modulator_tb.s_to_p.walsh_count[0]
 @22
 #{top.modulator_tb.s_to_p.walsh_reg[15:0]} top.modulator_tb.s_to_p.walsh_reg[15] top.modulator_tb.s_to_p.walsh_reg[14] top.modulator_tb.s_to_p.walsh_reg[13] top.modulator_tb.s_to_p.walsh_reg[12] top.modulator_tb.s_to_p.walsh_reg[11] top.modulator_tb.s_to_p.walsh_reg[10] top.modulator_tb.s_to_p.walsh_reg[9] top.modulator_tb.s_to_p.walsh_reg[8] top.modulator_tb.s_to_p.walsh_reg[7] top.modulator_tb.s_to_p.walsh_reg[6] top.modulator_tb.s_to_p.walsh_reg[5] top.modulator_tb.s_to_p.walsh_reg[4] top.modulator_tb.s_to_p.walsh_reg[3] top.modulator_tb.s_to_p.walsh_reg[2] top.modulator_tb.s_to_p.walsh_reg[1] top.modulator_tb.s_to_p.walsh_reg[0]
+#{top.modulator_tb.s_to_p.decoded_sym[3:0]} top.modulator_tb.s_to_p.decoded_sym[3] top.modulator_tb.s_to_p.decoded_sym[2] top.modulator_tb.s_to_p.decoded_sym[1] top.modulator_tb.s_to_p.decoded_sym[0]
 [pattern_trace] 1
 [pattern_trace] 0

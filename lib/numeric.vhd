@@ -12,9 +12,27 @@ package numeric is
     function calc_hamming(slv, target : std_logic_vector) return natural;
     function phase_sum (reg : std_logic_vector; size : unsigned) return natural;
     function walsh_encode (input : walsh_sym_t) return walsh_code_t;
+    function walsh_decode (input : walsh_code_t) return walsh_sym_t;
 end package numeric;
 
 package body numeric is
+
+    constant WALSH_15 : walsh_code_t := X"9669";
+    constant WALSH_14 : walsh_code_t := X"C33C";
+    constant WALSH_13 : walsh_code_t := X"A55A";
+    constant WALSH_12 : walsh_code_t := X"F00F";
+    constant WALSH_11 : walsh_code_t := X"9966";
+    constant WALSH_10 : walsh_code_t := X"CC33";
+    constant WALSH_09 : walsh_code_t := X"AA55";
+    constant WALSH_08 : walsh_code_t := X"FF00";
+    constant WALSH_07 : walsh_code_t := X"9696";
+    constant WALSH_06 : walsh_code_t := X"C3C3";
+    constant WALSH_05 : walsh_code_t := X"A5A5";
+    constant WALSH_04 : walsh_code_t := X"F0F0";
+    constant WALSH_03 : walsh_code_t := X"9999";
+    constant WALSH_02 : walsh_code_t := X"CCCC";
+    constant WALSH_01 : walsh_code_t := X"AAAA";
+    constant WALSH_00 : walsh_code_t := X"FFFF";
 
     function bits_for_val(val : natural) return natural is
 	type u_array is array (0 to 4) of unsigned(31 downto 0);
@@ -77,43 +95,79 @@ package body numeric is
     function walsh_encode (input : walsh_sym_t) return walsh_code_t is
     begin
 	if input =  "1111" then
-	    return X"9669";
+	    return WALSH_15;
 	elsif input =  "1110" then
-	    return X"C33C";
+	    return WALSH_14;
 	elsif input =  "1101" then
-	    return X"A55A";
+	    return WALSH_13;
 	elsif input =  "1100" then
-	    return X"F00F";
+	    return WALSH_12;
 	elsif input =  "1011" then
-	    return X"9966";
+	    return WALSH_11;
 	elsif input =  "1010" then
-	    return X"CC33";
+	    return WALSH_10;
 	elsif input =  "1001" then
-	    return X"AA55";
+	    return WALSH_09;
 	elsif input =  "1000" then
-	    return X"FF00";
+	    return WALSH_08;
 	elsif input =  "0111" then
-	    return X"9696";
+	    return WALSH_07;
 	elsif input =  "0110" then
-	    return X"C3C3";
+	    return WALSH_06;
 	elsif input =  "0101" then
-	    return X"A5A5";
+	    return WALSH_05;
 	elsif input =  "0100" then
-	    return X"F0F0";
+	    return WALSH_04;
 	elsif input =  "0011" then
-	    return X"9999";
+	    return WALSH_03;
 	elsif input =  "0010" then
-	    return X"CCCC";
+	    return WALSH_02;
 	elsif input =  "0001" then
-	    return X"AAAA";
+	    return WALSH_01;
 	elsif input =  "0000" then
-	    return X"FFFF";
+	    return WALSH_00;
 	end if;
 	return X"0000";
     end function walsh_encode;
 
-    --function walsh_decode (input : std_logic_vector) return std_logic_vector) is
-    --begin
-    --end function walsh_decode;
+    -- Whenever the hamming distance from a walsh code is greater than 12, we
+    -- have an unambiguous match. Otherwise, return 0
+    function walsh_decode (input : walsh_code_t) return walsh_sym_t is
+    begin
+	if calc_hamming(input, WALSH_15) > 12 then
+	    return "1111";
+	elsif calc_hamming(input, WALSH_14) > 12 then
+	    return "1110";
+	elsif calc_hamming(input, WALSH_13) > 12 then
+	    return "1101";
+	elsif calc_hamming(input, WALSH_12) > 12 then
+	    return "1100";
+	elsif calc_hamming(input, WALSH_11) > 12 then
+	    return "1011";
+	elsif calc_hamming(input, WALSH_10) > 12 then
+	    return "1010";
+	elsif calc_hamming(input, WALSH_09) > 12 then
+	    return "1001";
+	elsif calc_hamming(input, WALSH_08) > 12 then
+	    return "1000";
+	elsif calc_hamming(input, WALSH_07) > 12 then
+	    return "0111";
+	elsif calc_hamming(input, WALSH_06) > 12 then
+	    return "0110";
+	elsif calc_hamming(input, WALSH_05) > 12 then
+	    return "0101";
+	elsif calc_hamming(input, WALSH_04) > 12 then
+	    return "0100";
+	elsif calc_hamming(input, WALSH_03) > 12 then
+	    return "0011";
+	elsif calc_hamming(input, WALSH_02) > 12 then
+	    return "0010";
+	elsif calc_hamming(input, WALSH_01) > 12 then
+	    return "0001";
+	elsif calc_hamming(input, WALSH_00) > 12 then
+	    return "0000";
+	end if;
+	return "0000";
+    end function walsh_decode;
 
 end package body numeric;

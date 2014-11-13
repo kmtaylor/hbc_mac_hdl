@@ -49,6 +49,7 @@ architecture serial_to_parallel_arch of serial_to_parallel is
     signal walsh_detect_i : std_logic;
     signal walsh_detect : std_logic;
     signal walsh_reg : std_logic_vector (WALSH_SIZE-1 downto 0);
+    signal decoded_sym : walsh_sym_t;
 
     signal phase_change : std_logic;
     signal current_phase : std_logic;
@@ -307,6 +308,8 @@ begin
 	    end if;
 	end if;
     end process store_walsh;
+
+    decoded_sym <= walsh_decode(walsh_reg);
 
 end serial_to_parallel_arch;
 
