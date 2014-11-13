@@ -4,6 +4,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+library transceiver;
+use transceiver.numeric.all;
+
 entity modulator is
     port (
 	clk, reset  : in std_logic;
@@ -34,9 +37,7 @@ architecture modulator_arch of modulator is
     
     constant DOUBLE_WRITE : std_logic_vector (7 downto 0) := X"00";
 
-    constant WALSH_SIZE : integer := 16;
-    constant SYM_SIZE : integer := 4;
-    constant SYM_LIMIT : integer := 32 / SYM_SIZE;
+    constant SYM_LIMIT : integer := 32 / WALSH_SYM_SIZE;
 	    
     signal io_addr_reg : std_logic_vector (7 downto 0);
     signal io_d_in_r : std_logic_vector (31 downto 0);
@@ -55,43 +56,26 @@ architecture modulator_arch of modulator is
 			st_bus_ack);
     signal state, state_i : state_type;
     
-    type bit_counter is range 0 to WALSH_SIZE - 1;
+    type bit_counter is range 0 to WALSH_CODE_SIZE - 1;
     type sym_counter is range 0 to SYM_LIMIT - 1;
     signal symbol_count, symbol_count_i : sym_counter;
     signal bit_count, bit_count_i : bit_counter;
     signal repeat, repeat_i : std_logic;
 
-    signal walsh_data : std_logic_vector (WALSH_SIZE - 1 downto 0);
+    signal walsh_data : std_logic_vector (WALSH_CODE_SIZE - 1 downto 0);
     signal walsh_bit : std_logic;
-    signal symbol : std_logic_vector (SYM_SIZE - 1 downto 0);
+    signal symbol : std_logic_vector (WALSH_SYM_SIZE - 1 downto 0);
 
 begin
     io_ready <= io_ready_s or io_ready_d;
 
-    with symbol select walsh_data
-	<=  X"9669" when "1111",
-	    X"C33C" when "1110",
-	    X"A55A" when "1101",
-	    X"F00F" when "1100",
-	    X"9966" when "1011",
-	    X"CC33" when "1010",
-	    X"AA55" when "1001",
-	    X"FF00" when "1000",
-	    X"9696" when "0111",
-	    X"C3C3" when "0110",
-	    X"A5A5" when "0101",
-	    X"F0F0" when "0100",
-	    X"9999" when "0011",
-	    X"CCCC" when "0010",
-	    X"AAAA" when "0001",
-	    X"FFFF" when "0000",
-	    X"0000" when others;
+    walsh_data <= walsh_encode(symbol);
 
     walsh_bit <= walsh_data(integer(bit_count));
 
     symbol <= std_logic_vector(shift_right( unsigned(io_d_in_r),
 					    natural(symbol_count) * 4)
-				(SYM_SIZE - 1 downto 0));
+				(WALSH_SYM_SIZE - 1 downto 0));
 
     output_decode : process (state, walsh_bit) begin
 	sub_addr_out <= FIFO_ADDR;
@@ -145,7 +129,7 @@ begin
 		    if sf = DOUBLE_WRITE and repeat = '0' then
 			state_i <= st_fifo_write;
 			repeat_i <= '1';
-		    elsif bit_count /= bit_counter(WALSH_SIZE - 1) then
+		    elsif bit_count /= bit_counter(WALSH_CODE_SIZE - 1) then
 			state_i <= st_fifo_write;
 			bit_count_i <= bit_count + 1;
 			repeat_i <= '0';

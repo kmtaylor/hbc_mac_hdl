@@ -20,6 +20,17 @@
 
 #define CONST_INT_COMMA_THRESHOLD	50
 
+#define CONST_INT_SF_8_CHIPS		8
+#define CONST_INT_SF_16_CHIPS		16
+#define CONST_INT_SF_32_CHIPS		32
+#define CONST_INT_SF_64_CHIPS		64
+
+#define CONST_INT_RI_OFFSET_8		6
+#define CONST_INT_RI_OFFSET_16		4
+#define CONST_INT_RI_OFFSET_32		2
+#define CONST_INT_RI_OFFSET_64		0
+#define CONST_INT_RI_OFFSET_MAX		12
+
 /* ----------------------- Module Memory Map ------------------------------ */
 #define CONST_HEX_FIFO_ADDR		00
 #define CONST_HEX_FIFO_MASK_ADDR	01

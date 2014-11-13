@@ -6,6 +6,7 @@ use IEEE.NUMERIC_STD.ALL;
 
 library transceiver;
 use transceiver.numeric.all;
+use transceiver.bits.all;
 
 entity serial_to_parallel is
 	port (
@@ -18,6 +19,9 @@ end serial_to_parallel;
 
 architecture serial_to_parallel_arch of serial_to_parallel is
 
+#define _COUNT_OFFSET(val) COMMA_SIZE-1 + INT(val)
+#define COUNT_OFFSET(val) _COUNT_OFFSET(val)
+
     constant MAX_SYMBOL_SIZE : natural := 64;
     constant SYMBOL_INDEX_BITS : natural := bits_for_val(63);
     constant COMMA_SIZE : natural := 64;
@@ -29,6 +33,8 @@ architecture serial_to_parallel_arch of serial_to_parallel is
     constant WALSH_SIZE : natural := 16;
 
     signal using_ri : std_logic;
+    signal rate_found : std_logic;
+    signal ri_rate : unsigned(SYMBOL_INDEX_BITS-1 downto 0);
     signal r_sf : unsigned(SYMBOL_INDEX_BITS-1 downto 0);
 
     signal sym_reset : std_logic;
@@ -39,7 +45,8 @@ architecture serial_to_parallel_arch of serial_to_parallel is
     signal s2p_align_sym : std_logic_vector (MAX_SYMBOL_SIZE-1 downto 0);
     signal allow_re_align : std_logic;
 
-    signal walsh_count : unsigned (7 downto 0);
+    signal walsh_count : unsigned (bits_for_val(WALSH_SIZE-1) downto 0);
+    signal walsh_detect_i : std_logic;
     signal walsh_detect : std_logic;
     signal walsh_reg : std_logic_vector (WALSH_SIZE-1 downto 0);
 
@@ -51,8 +58,10 @@ architecture serial_to_parallel_arch of serial_to_parallel is
     signal sfd_distance : unsigned (COMMA_TEST_BITS-1 downto 0);
     signal comma_found : std_logic;
     signal sfd_found : std_logic;
-    -- FIXME: Determine the maximum required value for ri_count
-    signal ri_count : unsigned (bits_for_val(64)-1 downto 0);
+    signal sfd_found_i : std_logic;
+    signal sfd_finished : std_logic;
+    signal ri_count : unsigned (
+		    bits_for_val(COUNT_OFFSET(RI_OFFSET_MAX))-1 downto 0);
 
     type state_type is (
 			st_preamble,	-- Load in phase changes until
@@ -62,24 +71,22 @@ architecture serial_to_parallel_arch of serial_to_parallel is
 					-- pushing to FIFO.
     signal state, state_i : state_type;
 
-    signal debug : unsigned (7 downto 0);
-
 begin
 
     fifo_control : process(reset, state) begin
 	using_ri <= '1';
 	allow_re_align <= '0';
-	walsh_detect <= '0';
+	walsh_detect_i <= '0';
 	case(state) is
 	    when st_preamble =>
 		allow_re_align <= '1';
 	    when st_sfd =>
 	    when st_demodulate =>
-		walsh_detect <= '1';
+		walsh_detect_i <= '1';
 	end case;
     end process fifo_control;
 
-    next_state : process(reset, state, comma_found, sfd_found) begin
+    next_state : process(reset, state, comma_found, sfd_finished) begin
 	state_i <= state;
 	case (state) is
 	    when st_preamble =>
@@ -87,7 +94,7 @@ begin
 		    state_i <= st_sfd;
 		end if;
 	    when st_sfd =>
-		if sfd_found = '1' then
+		if sfd_finished = '1' then
 		    state_i <= st_demodulate;
 		end if;
 	    when st_demodulate =>
@@ -133,7 +140,7 @@ begin
     end process detect_phase_shift;
 
     s2p_align : process (serial_clk, reset) begin
-	if sym_reset = '1' then
+	if reset = '1' then
 	    s2p_align_sym <= (others => '0');
 	    s2p_align_index <= (others => '0');
 	elsif serial_clk'event and serial_clk = '1' then
@@ -154,7 +161,6 @@ begin
     -- alignment register is correctly aligned. Reset s2p_index.
     re_align : process (serial_clk, reset) begin
 	if reset = '1' then
-	    debug <= (others => '0');
 	    s2p_index <= (others => '0');
 	elsif serial_clk'event and serial_clk = '1' then
 	    if (s2p_align_index = r_sf-1) and (allow_re_align = '1') then
@@ -162,7 +168,6 @@ begin
 		    (phase_sum(s2p_align_sym, r_sf) = 0) then
 		    s2p_index <= (others => '0');
 		end if;
-		debug <= to_unsigned(phase_sum(s2p_align_sym, r_sf), 8) + 1;
 	    elsif s2p_index = r_sf-1 then
 		s2p_index <= (others => '0');
 	    else
@@ -183,13 +188,15 @@ begin
 	if reset = '1' then
 	    demod_reg <= (others => '0');
 	    walsh_count <= (others => '0');
+	    walsh_detect <= '0';
 	elsif serial_clk'event and serial_clk = '1' then
 	    if s2p_index = r_sf-1 then
 		demod_reg(0) <= current_phase;
 		demod_reg(COMMA_SIZE-1 downto 1) <= 
 				demod_reg(COMMA_SIZE-2 downto 0);
-		if walsh_detect = '1' then
+		if walsh_detect_i = '1' then
 		    if walsh_count = WALSH_SIZE-1 then
+			walsh_detect <= '1';
 			walsh_count <= (others => '0');
 		    else
 			walsh_count <= walsh_count + 1;
@@ -215,39 +222,75 @@ begin
 
     detect_sfd : process(sfd_distance) begin
 	if sfd_distance > COMMA_THRESHOLD then
-	    sfd_found <= '1';
+	    sfd_found_i <= '1';
 	else
-	    sfd_found <= '0';
+	    sfd_found_i <= '0';
 	end if;
     end process detect_sfd;
+
+    latch_sfd : process(reset, serial_clk) begin
+	if reset = '1' then
+	    sfd_found <= '0';
+	elsif serial_clk'event and serial_clk = '1' then
+	    if sfd_found_i = '1' then
+		sfd_found <= '1';
+	    end if;
+	end if;
+    end process latch_sfd;
+
+    consume_ri_chips : process(reset, serial_clk) begin
+	if reset = '1' then
+	    sfd_finished <= '0';
+	elsif serial_clk'event and serial_clk = '1' then
+	    if sfd_found = '1' then
+		if ri_count = COUNT_OFFSET(RI_OFFSET_MAX) then
+		    sfd_finished <= '1';
+		end if;
+	    end if;
+	end if;
+    end process consume_ri_chips;
     
     -- Count the number of chips in between the last COMMA and the SFD.
     -- This determines whether the packet is using RI or DRF mode.
-    count_ri : process(comma_found, serial_clk) begin
-	if comma_found = '1' then
+    count_ri : process(reset, serial_clk) begin
+	if reset = '1' then
 	    ri_count <= (others => '0');
 	elsif serial_clk'event and serial_clk = '1' then
-	    if s2p_index = r_sf-1 then
+	    if comma_found = '1' then
+		ri_count <= (others => '0');
+	    elsif s2p_index(2 downto 0) = INT(SF_8_CHIPS)-1 then
 		ri_count <= ri_count + 1;
 	    end if;
 	end if;
     end process count_ri;
 
+    set_rate : process(reset, serial_clk) begin
+	if reset = '1' then
+	    r_sf <= to_unsigned(8, ri_rate'length);
+	elsif serial_clk'event and serial_clk = '1' then
+	    if rate_found = '1' and sfd_finished = '1' then
+		r_sf <= ri_rate;
+	    end if;
+	end if;
+    end process set_rate;
+
     choose_rate : process(reset, serial_clk) begin
 	if reset = '1' then
-	    r_sf <= to_unsigned(8, r_sf'length);
+	    ri_rate <= to_unsigned(8, ri_rate'length);
+	    rate_found <= '0';
 	elsif serial_clk'event and serial_clk = '1' then
 	    if using_ri = '1' then
-		if sfd_found = '1' then
-		    if ri_count = to_unsigned(66, ri_count'length) then
-			r_sf <= to_unsigned(8, r_sf'length);
-		    elsif ri_count = to_unsigned(65, ri_count'length) then
-			r_sf <= to_unsigned(16, r_sf'length);
-		    elsif ri_count = to_unsigned(64, ri_count'length) then
-			r_sf <= to_unsigned(32, r_sf'length);
-		    elsif ri_count = to_unsigned(63, ri_count'length) then
-			r_sf <= to_unsigned(64, r_sf'length);
+		if sfd_found_i = '1' and rate_found = '0' then
+		    if ri_count = COUNT_OFFSET(RI_OFFSET_8) then
+			ri_rate <= to_unsigned(8, ri_rate'length);
+		    elsif ri_count = COUNT_OFFSET(RI_OFFSET_16) then
+			ri_rate <= to_unsigned(16, ri_rate'length);
+		    elsif ri_count = COUNT_OFFSET(RI_OFFSET_32) then
+			ri_rate <= to_unsigned(32, ri_rate'length);
+		    elsif ri_count = COUNT_OFFSET(RI_OFFSET_64) then
+			ri_rate <= to_unsigned(64, ri_rate'length);
 		    end if;
+		    rate_found <= '1';
 		end if;
 	    end if;
 	end if;
@@ -258,8 +301,8 @@ begin
 	    walsh_reg <= (others => '0');
 	elsif serial_clk'event and serial_clk = '1' then
 	    if walsh_detect = '1' then
-		if walsh_count = to_unsigned(0, walsh_count'length) then
-		    walsh_reg <= demod_reg(WALSH_SIZE-1 downto 0);
+		if walsh_count = 0 then
+		    walsh_reg <= bit_swap(demod_reg(WALSH_SIZE-1 downto 0));
 		end if;
 	    end if;
 	end if;

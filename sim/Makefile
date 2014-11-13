@@ -26,7 +26,7 @@ MODULATOR_TB_FILES += \
 	data_synchroniser.vhd \
 	serial_to_parallel.vhd \
 	modulator_path_tb.vhd
-MODULATOR_SIM_FLAGS += --stop-time=200us
+MODULATOR_SIM_FLAGS += --stop-time=400us
 
 USB_TB_FILES += \
 	usb_fifo_interface.vhd \

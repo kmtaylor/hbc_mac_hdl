@@ -1,3 +1,5 @@
+#include <preprocessor/constants.vhh>
+
 library ieee;
 use ieee.std_logic_1164.all;
 
@@ -174,40 +176,22 @@ begin
 
     serial_clk_90 <= serial_clk after s_clk_period/4;
 
-    -- Stimulus process
-    stim_proc: process begin	
-	-- hold reset state for 20 ns.
-	reset <= '1';
-	parallel_to_serial_enable <= '0';
-	wait for 20 ns;
-	reset <= '0';
-
-	wait for clk_period * 5.5;
-
-	-- Set write size
-	fi_write_strobe <= '1';
-	fi_addr_strobe <= '1';
-	fi_d <= X"00000020";
-	fi_addr <= X"01";
-	wait for clk_period;
-	fi_write_strobe <= '0';
-	fi_addr_strobe <= '0';
-	fi_d <= (others => '0');
+#define FIFO_WRITE_SIZE(val) \
+	fi_write_strobe <= '1';	\
+	fi_addr_strobe <= '1';	\
+	fi_d <= val;		\
+	fi_addr <= HEX(FIFO_MASK_ADDR);	\
+	wait for clk_period;	\
+	fi_write_strobe <= '0';	\
+	fi_addr_strobe <= '0';	\
+	fi_d <= (others => '0');\
 	fi_addr <= (others => '0');
-
-	wait for clk_period * 6;
-	
-	-- Set bits at address 0x01
-	parallel_to_serial_enable <= '1';
-	wait for clk_period;
-	parallel_to_serial_enable <= '0';
-	wait for clk_period;
 
 #define WRITE_FIFO(val) \
 	fi_write_strobe <= '1';	\
 	fi_addr_strobe <= '1';	\
 	fi_d <= val;		\
-	fi_addr <= X"00";	\
+	fi_addr <= HEX(FIFO_ADDR);	\
 	wait for clk_period;	\
 	fi_write_strobe <= '0';	\
 	fi_addr_strobe <= '0';	\
@@ -231,65 +215,105 @@ begin
 	WRITE_FIFO(X"AA555555")	\
 	WRITE_FIFO(X"5555AA55")
 
-	WRITE_PREAMBLE()
-	WRITE_PREAMBLE()
-	WRITE_PREAMBLE()
-	WRITE_PREAMBLE()
-
-	-- Send SFD using RI at sf_64
-
-	WRITE_FIFO(X"55AA55AA")
-	WRITE_FIFO(X"55AAAA55")
-	WRITE_FIFO(X"55AA55AA")
+#define WRITE_SFD() \
+	WRITE_FIFO(X"55AA55AA")	\
+	WRITE_FIFO(X"55AAAA55")	\
+	WRITE_FIFO(X"55AA55AA")	\
+	WRITE_FIFO(X"AAAA55AA")	\
+	WRITE_FIFO(X"AAAA55AA")	\
+	WRITE_FIFO(X"AA55AAAA")	\
+	WRITE_FIFO(X"AAAA5555")	\
+	WRITE_FIFO(X"AA55AA55")	\
+	WRITE_FIFO(X"55AA55AA")	\
+	WRITE_FIFO(X"AA555555")	\
+	WRITE_FIFO(X"5555AA55")	\
+	WRITE_FIFO(X"55AAAA55")	\
+	WRITE_FIFO(X"55AAAAAA")	\
+	WRITE_FIFO(X"AA55AA55")	\
+	WRITE_FIFO(X"AAAA5555")	\
 	WRITE_FIFO(X"AAAA55AA")
-	WRITE_FIFO(X"AAAA55AA")
-	WRITE_FIFO(X"AA55AAAA")
-	WRITE_FIFO(X"AAAA5555")
-	WRITE_FIFO(X"AA55AA55")
-	WRITE_FIFO(X"55AA55AA")
-	WRITE_FIFO(X"AA555555")
-	WRITE_FIFO(X"5555AA55")
-	WRITE_FIFO(X"55AAAA55")
-	WRITE_FIFO(X"55AAAAAA")
-	WRITE_FIFO(X"AA55AA55")
-	WRITE_FIFO(X"AAAA5555")
-	WRITE_FIFO(X"AAAA55AA")
-	--WRITE_FIFO(X"55555555")
-	--WRITE_FIFO(X"55555555")
-	--WRITE_FIFO(X"55555555")
 
-	wait for clk_period * 6;
+#define RI_SF_64() \
+	WRITE_SFD()			\
+	WRITE_FIFO(X"55555555")		\
+	WRITE_FIFO(X"55555555")		\
+	WRITE_FIFO(X"55555555")
 
-	-- Set SF
-	io_write_strobe <= '1';
-	io_addr_strobe <= '1';
-	io_d_in <= X"00000000";
-	io_addr <= X"19";
-	wait for clk_period;
-	io_write_strobe <= '0';
+#define RI_SF_32() \
+	FIFO_WRITE_SIZE(X"00000010")	\
+	WRITE_FIFO(X"55555555")		\
+	FIFO_WRITE_SIZE(X"00000020")	\
+	WRITE_SFD()			\
+	FIFO_WRITE_SIZE(X"00000010")	\
+	WRITE_FIFO(X"55555555")		\
+	FIFO_WRITE_SIZE(X"00000020")	\
+	WRITE_FIFO(X"55555555")		\
+	WRITE_FIFO(X"55555555")
+
+#define RI_SF_16() \
+	WRITE_FIFO(X"55555555")		\
+	WRITE_SFD()			\
+	WRITE_FIFO(X"55555555")		\
+	WRITE_FIFO(X"55555555")
+
+#define RI_SF_8() \
+	FIFO_WRITE_SIZE(X"00000010")	\
+	WRITE_FIFO(X"55555555")		\
+	FIFO_WRITE_SIZE(X"00000020")	\
+	WRITE_FIFO(X"55555555")		\
+	WRITE_SFD()			\
+	FIFO_WRITE_SIZE(X"00000010")	\
+	WRITE_FIFO(X"55555555")		\
+	FIFO_WRITE_SIZE(X"00000020")	\
+	WRITE_FIFO(X"55555555")
+
+#define MODULATE(val) \
+	io_write_strobe <= '1';		\
+	io_addr_strobe <= '1';		\
+	io_d_in <= val;		\
+	io_addr <= HEX(MODULATOR_ADDR);	\
+	wait for clk_period;		\
+	io_write_strobe <= '0';		\
 	io_addr_strobe <= '0';
 
-	wait for clk_period * 6;
-	
-	-- Set write size
-	fi_write_strobe <= '1';
-	fi_addr_strobe <= '1';
-	fi_d <= X"00000020";
-	fi_addr <= X"01";
-	wait for clk_period;
-	fi_write_strobe <= '0';
-	fi_addr_strobe <= '0';
-	fi_d <= (others => '0');
-	fi_addr <= (others => '0');
-
-	-- Set bits at address 0x01
-	io_write_strobe <= '1';
-	io_addr_strobe <= '1';
-	io_d_in <= X"12345678";
-	io_addr <= X"18";
-	wait for clk_period;
-	io_write_strobe <= '0';
+#define SET_SF(val) \
+	io_write_strobe <= '1';		    \
+	io_addr_strobe <= '1';		    \
+	io_d_in <= val;			    \
+	io_addr <= HEX(MODULATOR_SF_ADDR);  \
+	wait for clk_period;		    \
+	io_write_strobe <= '0';		    \
 	io_addr_strobe <= '0';
+
+    -- Stimulus process
+    stim_proc: process begin	
+	-- hold reset state for 20 ns.
+	reset <= '1';
+	parallel_to_serial_enable <= '0';
+	wait for 20 ns;
+	reset <= '0';
+
+	wait for clk_period * 5.5;
+
+	-- Trigger P2S
+	parallel_to_serial_enable <= '1';
+	wait for clk_period;
+	parallel_to_serial_enable <= '0';
+	wait for clk_period;
+
+	FIFO_WRITE_SIZE(X"00000020")
+
+	WRITE_PREAMBLE()
+	WRITE_PREAMBLE()
+	WRITE_PREAMBLE()
+	WRITE_PREAMBLE()
+
+	RI_SF_64()
+
+	SET_SF(X"00000000")
+	FIFO_WRITE_SIZE(X"00000020")
+
+	MODULATE(X"12345678")
 	
 	wait;
     end process;
