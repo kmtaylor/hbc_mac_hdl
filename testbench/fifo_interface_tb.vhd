@@ -1,10 +1,10 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity c_to_vhd_tb is
-end c_to_vhd_tb;
+entity fifo_interface_tb is
+end fifo_interface_tb;
  
-architecture behaviour of c_to_vhd_tb is 
+architecture behaviour of fifo_interface_tb is 
  
     component fifo_tx port (
 	rst : IN STD_LOGIC;

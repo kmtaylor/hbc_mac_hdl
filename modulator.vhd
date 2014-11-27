@@ -140,6 +140,7 @@ begin
 			repeat_i <= '0';
 		    else
 			state_i <= st_bus_ack;
+			repeat_i <= '0';
 		    end if;
 		end if;
 	    when st_bus_ack =>

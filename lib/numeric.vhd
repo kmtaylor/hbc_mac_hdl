@@ -13,6 +13,9 @@ package numeric is
     function phase_sum (reg : std_logic_vector; size : unsigned) return natural;
     function walsh_encode (input : walsh_sym_t) return walsh_code_t;
     function walsh_decode (input : walsh_code_t) return walsh_sym_t;
+
+    function is_equal(input : unsigned; val : natural) return std_logic;
+    function ones(length : natural) return std_logic_vector;
 end package numeric;
 
 package body numeric is
@@ -169,5 +172,23 @@ package body numeric is
 	end if;
 	return "0000";
     end function walsh_decode;
+
+    function is_equal(input : unsigned; val : natural) return std_logic is
+    begin
+	if input = val then
+	    return '1';
+	else
+	    return '0';
+	end if;
+    end function is_equal;
+
+    function ones(length : natural) return std_logic_vector is
+	variable r : std_logic_vector(length-1 downto 0);
+    begin
+	for i in length-1 downto 0 loop
+	    r(i) := '1';
+	end loop;
+	return r;
+    end function ones;
 
 end package body numeric;

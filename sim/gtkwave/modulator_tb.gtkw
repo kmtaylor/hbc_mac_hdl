@@ -1,22 +1,21 @@
 [*]
 [*] GTKWave Analyzer v3.3.45 (w)1999-2012 BSI
-[*] Thu Nov 13 06:09:39 2014
+[*] Thu Nov 27 04:03:46 2014
 [*]
 [dumpfile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/modulator_tb.ghw"
-[dumpfile_mtime] "Thu Nov 13 06:08:28 2014"
-[dumpfile_size] 6933449
+[dumpfile_mtime] "Thu Nov 27 04:02:32 2014"
+[dumpfile_size] 24445233
 [savefile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/gtkwave/modulator_tb.gtkw"
 [timestart] 0
 [size] 1680 1024
 [pos] -1 -1
-*-36.000000 271000000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-37.000000 482028000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] top.
 [treeopen] top.modulator_tb.
-[treeopen] top.modulator_tb.s_to_p.
 [sst_width] 224
 [signals_width] 331
 [sst_expanded] 1
-[sst_vpaned_height] 291
+[sst_vpaned_height] 290
 @28
 top.modulator_tb.uut.clk
 top.modulator_tb.uut.reset
@@ -60,6 +59,13 @@ top.modulator_tb.resp_unit.io_ready
 top.modulator_tb.resp_unit.fifo_wren
 @22
 #{top.modulator_tb.resp_unit.fifo_d_out[31:0]} top.modulator_tb.resp_unit.fifo_d_out[31] top.modulator_tb.resp_unit.fifo_d_out[30] top.modulator_tb.resp_unit.fifo_d_out[29] top.modulator_tb.resp_unit.fifo_d_out[28] top.modulator_tb.resp_unit.fifo_d_out[27] top.modulator_tb.resp_unit.fifo_d_out[26] top.modulator_tb.resp_unit.fifo_d_out[25] top.modulator_tb.resp_unit.fifo_d_out[24] top.modulator_tb.resp_unit.fifo_d_out[23] top.modulator_tb.resp_unit.fifo_d_out[22] top.modulator_tb.resp_unit.fifo_d_out[21] top.modulator_tb.resp_unit.fifo_d_out[20] top.modulator_tb.resp_unit.fifo_d_out[19] top.modulator_tb.resp_unit.fifo_d_out[18] top.modulator_tb.resp_unit.fifo_d_out[17] top.modulator_tb.resp_unit.fifo_d_out[16] top.modulator_tb.resp_unit.fifo_d_out[15] top.modulator_tb.resp_unit.fifo_d_out[14] top.modulator_tb.resp_unit.fifo_d_out[13] top.modulator_tb.resp_unit.fifo_d_out[12] top.modulator_tb.resp_unit.fifo_d_out[11] top.modulator_tb.resp_unit.fifo_d_out[10] top.modulator_tb.resp_unit.fifo_d_out[9] top.modulator_tb.resp_unit.fifo_d_out[8] top.modulator_tb.resp_unit.fifo_d_out[7] top.modulator_tb.resp_unit.fifo_d_out[6] top.modulator_tb.resp_unit.fifo_d_out[5] top.modulator_tb.resp_unit.fifo_d_out[4] top.modulator_tb.resp_unit.fifo_d_out[3] top.modulator_tb.resp_unit.fifo_d_out[2] top.modulator_tb.resp_unit.fifo_d_out[1] top.modulator_tb.resp_unit.fifo_d_out[0]
+@28
+top.modulator_tb.tx_fifo.empty
+top.modulator_tb.tx_fifo.almost_empty
+@29
+top.modulator_tb.tx_fifo.almost_full
+@28
+top.modulator_tb.tx_fifo.full
 @200
 ------------
 @22
@@ -77,10 +83,6 @@ top.modulator_tb.s_to_p.phase_change
 @22
 #{top.modulator_tb.s_to_p.s2p_align_sym[63:0]} top.modulator_tb.s_to_p.s2p_align_sym[63] top.modulator_tb.s_to_p.s2p_align_sym[62] top.modulator_tb.s_to_p.s2p_align_sym[61] top.modulator_tb.s_to_p.s2p_align_sym[60] top.modulator_tb.s_to_p.s2p_align_sym[59] top.modulator_tb.s_to_p.s2p_align_sym[58] top.modulator_tb.s_to_p.s2p_align_sym[57] top.modulator_tb.s_to_p.s2p_align_sym[56] top.modulator_tb.s_to_p.s2p_align_sym[55] top.modulator_tb.s_to_p.s2p_align_sym[54] top.modulator_tb.s_to_p.s2p_align_sym[53] top.modulator_tb.s_to_p.s2p_align_sym[52] top.modulator_tb.s_to_p.s2p_align_sym[51] top.modulator_tb.s_to_p.s2p_align_sym[50] top.modulator_tb.s_to_p.s2p_align_sym[49] top.modulator_tb.s_to_p.s2p_align_sym[48] top.modulator_tb.s_to_p.s2p_align_sym[47] top.modulator_tb.s_to_p.s2p_align_sym[46] top.modulator_tb.s_to_p.s2p_align_sym[45] top.modulator_tb.s_to_p.s2p_align_sym[44] top.modulator_tb.s_to_p.s2p_align_sym[43] top.modulator_tb.s_to_p.s2p_align_sym[42] top.modulator_tb.s_to_p.s2p_align_sym[41] top.modulator_tb.s_to_p.s2p_align_sym[40] top.modulator_tb.s_to_p.s2p_align_sym[39] top.modulator_tb.s_to_p.s2p_align_sym[38] top.modulator_tb.s_to_p.s2p_align_sym[37] top.modulator_tb.s_to_p.s2p_align_sym[36] top.modulator_tb.s_to_p.s2p_align_sym[35] top.modulator_tb.s_to_p.s2p_align_sym[34] top.modulator_tb.s_to_p.s2p_align_sym[33] top.modulator_tb.s_to_p.s2p_align_sym[32] top.modulator_tb.s_to_p.s2p_align_sym[31] top.modulator_tb.s_to_p.s2p_align_sym[30] top.modulator_tb.s_to_p.s2p_align_sym[29] top.modulator_tb.s_to_p.s2p_align_sym[28] top.modulator_tb.s_to_p.s2p_align_sym[27] top.modulator_tb.s_to_p.s2p_align_sym[26] top.modulator_tb.s_to_p.s2p_align_sym[25] top.modulator_tb.s_to_p.s2p_align_sym[24] top.modulator_tb.s_to_p.s2p_align_sym[23] top.modulator_tb.s_to_p.s2p_align_sym[22] top.modulator_tb.s_to_p.s2p_align_sym[21] top.modulator_tb.s_to_p.s2p_align_sym[20] top.modulator_tb.s_to_p.s2p_align_sym[19] top.modulator_tb.s_to_p.s2p_align_sym[18] top.modulator_tb.s_to_p.s2p_align_sym[17] top.modulator_tb.s_to_p.s2p_align_sym[16] top.modulator_tb.s_to_p.s2p_align_sym[15] top.modulator_tb.s_to_p.s2p_align_sym[14] top.modulator_tb.s_to_p.s2p_align_sym[13] top.modulator_tb.s_to_p.s2p_align_sym[12] top.modulator_tb.s_to_p.s2p_align_sym[11] top.modulator_tb.s_to_p.s2p_align_sym[10] top.modulator_tb.s_to_p.s2p_align_sym[9] top.modulator_tb.s_to_p.s2p_align_sym[8] top.modulator_tb.s_to_p.s2p_align_sym[7] top.modulator_tb.s_to_p.s2p_align_sym[6] top.modulator_tb.s_to_p.s2p_align_sym[5] top.modulator_tb.s_to_p.s2p_align_sym[4] top.modulator_tb.s_to_p.s2p_align_sym[3] top.modulator_tb.s_to_p.s2p_align_sym[2] top.modulator_tb.s_to_p.s2p_align_sym[1] top.modulator_tb.s_to_p.s2p_align_sym[0]
 #{top.modulator_tb.s_to_p.s2p_align_index[5:0]} top.modulator_tb.s_to_p.s2p_align_index[5] top.modulator_tb.s_to_p.s2p_align_index[4] top.modulator_tb.s_to_p.s2p_align_index[3] top.modulator_tb.s_to_p.s2p_align_index[2] top.modulator_tb.s_to_p.s2p_align_index[1] top.modulator_tb.s_to_p.s2p_align_index[0]
-@28
-top.modulator_tb.resp_unit.io_ready
-top.modulator_tb.resp_unit.io_write_strobe
-@22
 #{top.modulator_tb.s_to_p.demod_reg[63:0]} top.modulator_tb.s_to_p.demod_reg[63] top.modulator_tb.s_to_p.demod_reg[62] top.modulator_tb.s_to_p.demod_reg[61] top.modulator_tb.s_to_p.demod_reg[60] top.modulator_tb.s_to_p.demod_reg[59] top.modulator_tb.s_to_p.demod_reg[58] top.modulator_tb.s_to_p.demod_reg[57] top.modulator_tb.s_to_p.demod_reg[56] top.modulator_tb.s_to_p.demod_reg[55] top.modulator_tb.s_to_p.demod_reg[54] top.modulator_tb.s_to_p.demod_reg[53] top.modulator_tb.s_to_p.demod_reg[52] top.modulator_tb.s_to_p.demod_reg[51] top.modulator_tb.s_to_p.demod_reg[50] top.modulator_tb.s_to_p.demod_reg[49] top.modulator_tb.s_to_p.demod_reg[48] top.modulator_tb.s_to_p.demod_reg[47] top.modulator_tb.s_to_p.demod_reg[46] top.modulator_tb.s_to_p.demod_reg[45] top.modulator_tb.s_to_p.demod_reg[44] top.modulator_tb.s_to_p.demod_reg[43] top.modulator_tb.s_to_p.demod_reg[42] top.modulator_tb.s_to_p.demod_reg[41] top.modulator_tb.s_to_p.demod_reg[40] top.modulator_tb.s_to_p.demod_reg[39] top.modulator_tb.s_to_p.demod_reg[38] top.modulator_tb.s_to_p.demod_reg[37] top.modulator_tb.s_to_p.demod_reg[36] top.modulator_tb.s_to_p.demod_reg[35] top.modulator_tb.s_to_p.demod_reg[34] top.modulator_tb.s_to_p.demod_reg[33] top.modulator_tb.s_to_p.demod_reg[32] top.modulator_tb.s_to_p.demod_reg[31] top.modulator_tb.s_to_p.demod_reg[30] top.modulator_tb.s_to_p.demod_reg[29] top.modulator_tb.s_to_p.demod_reg[28] top.modulator_tb.s_to_p.demod_reg[27] top.modulator_tb.s_to_p.demod_reg[26] top.modulator_tb.s_to_p.demod_reg[25] top.modulator_tb.s_to_p.demod_reg[24] top.modulator_tb.s_to_p.demod_reg[23] top.modulator_tb.s_to_p.demod_reg[22] top.modulator_tb.s_to_p.demod_reg[21] top.modulator_tb.s_to_p.demod_reg[20] top.modulator_tb.s_to_p.demod_reg[19] top.modulator_tb.s_to_p.demod_reg[18] top.modulator_tb.s_to_p.demod_reg[17] top.modulator_tb.s_to_p.demod_reg[16] top.modulator_tb.s_to_p.demod_reg[15] top.modulator_tb.s_to_p.demod_reg[14] top.modulator_tb.s_to_p.demod_reg[13] top.modulator_tb.s_to_p.demod_reg[12] top.modulator_tb.s_to_p.demod_reg[11] top.modulator_tb.s_to_p.demod_reg[10] top.modulator_tb.s_to_p.demod_reg[9] top.modulator_tb.s_to_p.demod_reg[8] top.modulator_tb.s_to_p.demod_reg[7] top.modulator_tb.s_to_p.demod_reg[6] top.modulator_tb.s_to_p.demod_reg[5] top.modulator_tb.s_to_p.demod_reg[4] top.modulator_tb.s_to_p.demod_reg[3] top.modulator_tb.s_to_p.demod_reg[2] top.modulator_tb.s_to_p.demod_reg[1] top.modulator_tb.s_to_p.demod_reg[0]
 #{top.modulator_tb.s_to_p.comma_distance[6:0]} top.modulator_tb.s_to_p.comma_distance[5] top.modulator_tb.s_to_p.comma_distance[4] top.modulator_tb.s_to_p.comma_distance[3] top.modulator_tb.s_to_p.comma_distance[2] top.modulator_tb.s_to_p.comma_distance[1] top.modulator_tb.s_to_p.comma_distance[0]
 @28
@@ -89,10 +91,18 @@ top.modulator_tb.s_to_p.sfd_found
 top.modulator_tb.s_to_p.state
 @22
 #{top.modulator_tb.s_to_p.ri_count[6:0]} top.modulator_tb.s_to_p.ri_count[6] top.modulator_tb.s_to_p.ri_count[5] top.modulator_tb.s_to_p.ri_count[4] top.modulator_tb.s_to_p.ri_count[3] top.modulator_tb.s_to_p.ri_count[2] top.modulator_tb.s_to_p.ri_count[1] top.modulator_tb.s_to_p.ri_count[0]
-@23
-#{top.modulator_tb.s_to_p.walsh_count[4:0]} top.modulator_tb.s_to_p.walsh_count[4] top.modulator_tb.s_to_p.walsh_count[3] top.modulator_tb.s_to_p.walsh_count[2] top.modulator_tb.s_to_p.walsh_count[1] top.modulator_tb.s_to_p.walsh_count[0]
-@22
 #{top.modulator_tb.s_to_p.walsh_reg[15:0]} top.modulator_tb.s_to_p.walsh_reg[15] top.modulator_tb.s_to_p.walsh_reg[14] top.modulator_tb.s_to_p.walsh_reg[13] top.modulator_tb.s_to_p.walsh_reg[12] top.modulator_tb.s_to_p.walsh_reg[11] top.modulator_tb.s_to_p.walsh_reg[10] top.modulator_tb.s_to_p.walsh_reg[9] top.modulator_tb.s_to_p.walsh_reg[8] top.modulator_tb.s_to_p.walsh_reg[7] top.modulator_tb.s_to_p.walsh_reg[6] top.modulator_tb.s_to_p.walsh_reg[5] top.modulator_tb.s_to_p.walsh_reg[4] top.modulator_tb.s_to_p.walsh_reg[3] top.modulator_tb.s_to_p.walsh_reg[2] top.modulator_tb.s_to_p.walsh_reg[1] top.modulator_tb.s_to_p.walsh_reg[0]
+@28
+top.modulator_tb.s_to_p.walsh_detect
+@22
+#{top.modulator_tb.s_to_p.walsh_count[3:0]} top.modulator_tb.s_to_p.walsh_count[3] top.modulator_tb.s_to_p.walsh_count[2] top.modulator_tb.s_to_p.walsh_count[1] top.modulator_tb.s_to_p.walsh_count[0]
 #{top.modulator_tb.s_to_p.decoded_sym[3:0]} top.modulator_tb.s_to_p.decoded_sym[3] top.modulator_tb.s_to_p.decoded_sym[2] top.modulator_tb.s_to_p.decoded_sym[1] top.modulator_tb.s_to_p.decoded_sym[0]
+@28
+#{top.modulator_tb.s_to_p.nibble_count[2:0]} top.modulator_tb.s_to_p.nibble_count[2] top.modulator_tb.s_to_p.nibble_count[1] top.modulator_tb.s_to_p.nibble_count[0]
+top.modulator_tb.s_to_p.walsh_clk
+top.modulator_tb.s_to_p.nibble_ready
+top.modulator_tb.s_to_p.fifo_wren
+@22
+#{top.modulator_tb.s_to_p.decoded_word[31:0]} top.modulator_tb.s_to_p.decoded_word[31] top.modulator_tb.s_to_p.decoded_word[30] top.modulator_tb.s_to_p.decoded_word[29] top.modulator_tb.s_to_p.decoded_word[28] top.modulator_tb.s_to_p.decoded_word[27] top.modulator_tb.s_to_p.decoded_word[26] top.modulator_tb.s_to_p.decoded_word[25] top.modulator_tb.s_to_p.decoded_word[24] top.modulator_tb.s_to_p.decoded_word[23] top.modulator_tb.s_to_p.decoded_word[22] top.modulator_tb.s_to_p.decoded_word[21] top.modulator_tb.s_to_p.decoded_word[20] top.modulator_tb.s_to_p.decoded_word[19] top.modulator_tb.s_to_p.decoded_word[18] top.modulator_tb.s_to_p.decoded_word[17] top.modulator_tb.s_to_p.decoded_word[16] top.modulator_tb.s_to_p.decoded_word[15] top.modulator_tb.s_to_p.decoded_word[14] top.modulator_tb.s_to_p.decoded_word[13] top.modulator_tb.s_to_p.decoded_word[12] top.modulator_tb.s_to_p.decoded_word[11] top.modulator_tb.s_to_p.decoded_word[10] top.modulator_tb.s_to_p.decoded_word[9] top.modulator_tb.s_to_p.decoded_word[8] top.modulator_tb.s_to_p.decoded_word[7] top.modulator_tb.s_to_p.decoded_word[6] top.modulator_tb.s_to_p.decoded_word[5] top.modulator_tb.s_to_p.decoded_word[4] top.modulator_tb.s_to_p.decoded_word[3] top.modulator_tb.s_to_p.decoded_word[2] top.modulator_tb.s_to_p.decoded_word[1] top.modulator_tb.s_to_p.decoded_word[0]
 [pattern_trace] 1
 [pattern_trace] 0

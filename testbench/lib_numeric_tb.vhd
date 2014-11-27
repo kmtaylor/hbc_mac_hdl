@@ -14,6 +14,7 @@ architecture test of numeric_tb is
  
 begin
 
+#if 0
     process
 	variable l : line;
 	variable w_code_1 : walsh_code_t;
@@ -40,5 +41,15 @@ begin
 
 	wait;
     end process;
- 
+#endif
+
+    process
+	variable l : line;
+    begin
+	write(l, string'("bits_for_val(15) = "));
+	write(l, bits_for_val(16));
+	writeline(output, l);
+	wait;
+    end process;
+
 end;

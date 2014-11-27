@@ -274,7 +274,8 @@ begin
 	io_addr <= HEX(MODULATOR_ADDR);	\
 	wait for clk_period;		\
 	io_write_strobe <= '0';		\
-	io_addr_strobe <= '0';
+	io_addr_strobe <= '0';		\
+	wait for clk_period * 12800;
 
 #define SET_SF(val) \
 	io_write_strobe <= '1';		    \
@@ -296,24 +297,37 @@ begin
 	wait for clk_period * 5.5;
 
 	-- Trigger P2S
-	parallel_to_serial_enable <= '1';
+#define TRIGGER()			    \
+	parallel_to_serial_enable <= '1';   \
+	wait for clk_period;		    \
+	parallel_to_serial_enable <= '0';   \
 	wait for clk_period;
-	parallel_to_serial_enable <= '0';
-	wait for clk_period;
 
-	FIFO_WRITE_SIZE(X"00000020")
+#define SEND_PACKET()			    \
+	FIFO_WRITE_SIZE(X"00000020")	    \
+					    \
+	WRITE_PREAMBLE()		    \
+	WRITE_PREAMBLE()		    \
+	WRITE_PREAMBLE()		    \
+	WRITE_PREAMBLE()		    \
+					    \
+	RI_SF_64()			    \
+					    \
+	SET_SF(X"00000000")		    \
+	FIFO_WRITE_SIZE(X"00000020")	    \
+					    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"95748334")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"42334321")
 
-	WRITE_PREAMBLE()
-	WRITE_PREAMBLE()
-	WRITE_PREAMBLE()
-	WRITE_PREAMBLE()
+	TRIGGER()
+	SEND_PACKET()
 
-	RI_SF_64()
+	wait for clk_period * 60000;
 
-	SET_SF(X"00000000")
-	FIFO_WRITE_SIZE(X"00000020")
-
-	MODULATE(X"12345678")
+	TRIGGER()
+	SEND_PACKET()
 	
 	wait;
     end process;
