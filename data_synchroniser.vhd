@@ -17,6 +17,8 @@ architecture data_synchroniser_arch of data_synchroniser is
     signal serial_clk_180 : std_logic;
     signal serial_clk_270 : std_logic;
 
+    -- It may be necessary to increase the array size here to allow for greater
+    -- clock drift.
     signal d_0	    : std_logic_vector (7 downto 0);
     signal d_90	    : std_logic_vector (7 downto 0);
     signal d_180    : std_logic_vector (7 downto 0);
@@ -170,6 +172,7 @@ begin
 
     wrap_detect : process(serial_clk, reset) begin
 	if reset = '1' then
+	    -- On packet reset, initialise the delay to the centre of the array.
 	    delay_time <= to_unsigned(2, 3);
 	elsif serial_clk'event and serial_clk = '1' then
 	    if (use_270_hold and use_0) = '1' then

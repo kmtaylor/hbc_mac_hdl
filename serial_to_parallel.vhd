@@ -14,7 +14,8 @@ entity serial_to_parallel is
 		fifo_d_out : out std_logic_vector (31 downto 0);
 		fifo_wren : out std_logic;
 		fifo_full : in std_logic;
-		data_in : in std_logic);
+		data_in : in std_logic;
+		pkt_reset : out std_logic);
 end serial_to_parallel;
 
 architecture serial_to_parallel_arch of serial_to_parallel is
@@ -147,6 +148,7 @@ begin
     -- over as the tracking register.
 
     sym_reset <= reset or sym_reset_i;
+    pkt_reset <= sym_reset;
 
     s2p_reg : process (serial_clk, sym_reset) begin
 	if sym_reset = '1' then

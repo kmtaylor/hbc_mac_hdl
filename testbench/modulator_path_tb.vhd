@@ -25,6 +25,7 @@ architecture behaviour of modulator_tb is
    --Inputs
     signal clk : std_logic := '0';
     signal reset : std_logic := '0';
+    signal pkt_reset : std_logic;
     signal io_addr : std_logic_vector(7 downto 0) := (others => '0');
     signal io_d_in : std_logic_vector(31 downto 0) := (others => '0');
     signal io_addr_strobe : std_logic := '0';
@@ -53,15 +54,17 @@ architecture behaviour of modulator_tb is
     -- FIFO
     signal fifo_d_out : std_logic_vector (31 downto 0);
     signal fifo_wren, fifo_rden : std_logic;
-    signal full, overflow, empty, underflow, prog_full : std_logic;
+    signal full, overflow, empty, underflow : std_logic;
     signal from_fifo : std_logic_vector (31 downto 0);
 
     -- P2S
     signal serial_clk, parallel_to_serial_enable : std_logic;
     signal s_data_out : std_logic;
+    signal s2p_full, s2p_overflow, s2p_empty, s2p_underflow : std_logic;
 
     -- S2P
-    signal serial_clk_90 : std_logic;
+    signal serial_clk_dly : std_logic;
+    signal serial_clk_dly_90 : std_logic;
     signal s_data_sync : std_logic;
     signal s2p_fifo_wren : std_logic;
     signal s2p_fifo_data : std_logic_vector (31 downto 0);
@@ -70,6 +73,7 @@ architecture behaviour of modulator_tb is
     -- Clock period definitions
     constant clk_period : time := 10 ns;
     constant s_clk_period : time := 24 ns;
+    constant s_clk_dly_period : time := 23995 ps;
     
 begin
  
@@ -144,16 +148,30 @@ begin
         empty => empty,
         underflow => underflow);
 
+    rx_fifo : component fifo_tx port map (
+        rst => reset,
+        wr_clk => serial_clk_dly,
+        rd_clk => clk,
+        din => s2p_fifo_data,
+        wr_en => s2p_fifo_wren,
+        rd_en => '0',
+        dout => open,
+        full => s2p_full,
+        overflow => s2p_overflow,
+        empty => s2p_empty,
+        underflow => s2p_underflow);
+
     sync : entity work.data_synchroniser port map (
-	reset => reset,
-	serial_clk => serial_clk,
-	serial_clk_90 => serial_clk_90,
+	reset => pkt_reset,
+	serial_clk => serial_clk_dly,
+	serial_clk_90 => serial_clk_dly_90,
 	data_in => s_data_out,
 	data_out => s_data_sync);
 
     s_to_p : entity work.serial_to_parallel port map (
 	reset => reset,
-	serial_clk => serial_clk,
+	pkt_reset => pkt_reset,
+	serial_clk => serial_clk_dly,
 	fifo_d_out => s2p_fifo_data,
 	fifo_wren => s2p_fifo_wren,
 	fifo_full => s2p_fifo_full,
@@ -174,7 +192,18 @@ begin
 	wait for s_clk_period/2;
     end process;
 
-    serial_clk_90 <= serial_clk after s_clk_period/4;
+#if 0
+    serial_clk_dly <= serial_clk after 0 ns;
+#else
+    s_clk_dly_process : process begin
+	serial_clk_dly <= '0';
+	wait for s_clk_dly_period/2;
+	serial_clk_dly <= '1';
+	wait for s_clk_dly_period/2;
+    end process;
+#endif
+
+    serial_clk_dly_90 <= serial_clk_dly after s_clk_period/4;
 
 #define FIFO_WRITE_SIZE(val) \
 	fi_write_strobe <= '1';	\
@@ -275,7 +304,7 @@ begin
 	wait for clk_period;		\
 	io_write_strobe <= '0';		\
 	io_addr_strobe <= '0';		\
-	wait for clk_period * 12800;
+	wait for clk_period * 300;
 
 #define SET_SF(val) \
 	io_write_strobe <= '1';		    \
@@ -311,10 +340,10 @@ begin
 	WRITE_PREAMBLE()		    \
 	WRITE_PREAMBLE()		    \
 					    \
-	RI_SF_64()			    \
+	RI_SF_8()			    \
 					    \
-	SET_SF(X"00000000")		    \
-	FIFO_WRITE_SIZE(X"00000020")	    \
+	SET_SF(X"00000001")		    \
+	FIFO_WRITE_SIZE(X"00000008")	    \
 					    \
 	MODULATE(X"12345678")		    \
 	MODULATE(X"95748334")		    \

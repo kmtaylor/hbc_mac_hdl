@@ -1,17 +1,18 @@
 [*]
 [*] GTKWave Analyzer v3.3.45 (w)1999-2012 BSI
-[*] Thu Nov 27 04:03:46 2014
+[*] Mon Dec  1 00:49:07 2014
 [*]
 [dumpfile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/modulator_tb.ghw"
-[dumpfile_mtime] "Thu Nov 27 04:02:32 2014"
-[dumpfile_size] 24445233
+[dumpfile_mtime] "Mon Dec  1 00:48:10 2014"
+[dumpfile_size] 20274637
 [savefile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/gtkwave/modulator_tb.gtkw"
 [timestart] 0
 [size] 1680 1024
 [pos] -1 -1
-*-37.000000 482028000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-36.000000 779597550000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] top.
 [treeopen] top.modulator_tb.
+[treeopen] top.modulator_tb.sync.
 [sst_width] 224
 [signals_width] 331
 [sst_expanded] 1
@@ -62,16 +63,21 @@ top.modulator_tb.resp_unit.fifo_wren
 @28
 top.modulator_tb.tx_fifo.empty
 top.modulator_tb.tx_fifo.almost_empty
-@29
 top.modulator_tb.tx_fifo.almost_full
-@28
 top.modulator_tb.tx_fifo.full
 @200
 ------------
 @22
 #{top.modulator_tb.s_to_p.r_sf[5:0]} top.modulator_tb.s_to_p.r_sf[5] top.modulator_tb.s_to_p.r_sf[4] top.modulator_tb.s_to_p.r_sf[3] top.modulator_tb.s_to_p.r_sf[2] top.modulator_tb.s_to_p.r_sf[1] top.modulator_tb.s_to_p.r_sf[0]
 @28
-top.modulator_tb.s_to_p.serial_clk
+top.modulator_tb.serial_clk
+top.modulator_tb.serial_clk_dly
+top.modulator_tb.serial_clk_dly_90
+top.modulator_tb.sync.use_0_hold
+top.modulator_tb.sync.use_90_hold
+top.modulator_tb.sync.use_180_hold
+top.modulator_tb.sync.use_270_hold
+#{top.modulator_tb.sync.delay_time[2:0]} top.modulator_tb.sync.delay_time[2] top.modulator_tb.sync.delay_time[1] top.modulator_tb.sync.delay_time[0]
 top.modulator_tb.p_to_s.data_out
 top.modulator_tb.s_to_p.data_in
 @22
@@ -104,5 +110,9 @@ top.modulator_tb.s_to_p.nibble_ready
 top.modulator_tb.s_to_p.fifo_wren
 @22
 #{top.modulator_tb.s_to_p.decoded_word[31:0]} top.modulator_tb.s_to_p.decoded_word[31] top.modulator_tb.s_to_p.decoded_word[30] top.modulator_tb.s_to_p.decoded_word[29] top.modulator_tb.s_to_p.decoded_word[28] top.modulator_tb.s_to_p.decoded_word[27] top.modulator_tb.s_to_p.decoded_word[26] top.modulator_tb.s_to_p.decoded_word[25] top.modulator_tb.s_to_p.decoded_word[24] top.modulator_tb.s_to_p.decoded_word[23] top.modulator_tb.s_to_p.decoded_word[22] top.modulator_tb.s_to_p.decoded_word[21] top.modulator_tb.s_to_p.decoded_word[20] top.modulator_tb.s_to_p.decoded_word[19] top.modulator_tb.s_to_p.decoded_word[18] top.modulator_tb.s_to_p.decoded_word[17] top.modulator_tb.s_to_p.decoded_word[16] top.modulator_tb.s_to_p.decoded_word[15] top.modulator_tb.s_to_p.decoded_word[14] top.modulator_tb.s_to_p.decoded_word[13] top.modulator_tb.s_to_p.decoded_word[12] top.modulator_tb.s_to_p.decoded_word[11] top.modulator_tb.s_to_p.decoded_word[10] top.modulator_tb.s_to_p.decoded_word[9] top.modulator_tb.s_to_p.decoded_word[8] top.modulator_tb.s_to_p.decoded_word[7] top.modulator_tb.s_to_p.decoded_word[6] top.modulator_tb.s_to_p.decoded_word[5] top.modulator_tb.s_to_p.decoded_word[4] top.modulator_tb.s_to_p.decoded_word[3] top.modulator_tb.s_to_p.decoded_word[2] top.modulator_tb.s_to_p.decoded_word[1] top.modulator_tb.s_to_p.decoded_word[0]
+@29
+top.modulator_tb.rx_fifo.empty
+@28
+top.modulator_tb.rx_fifo.almost_empty
 [pattern_trace] 1
 [pattern_trace] 0
