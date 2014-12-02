@@ -1,3 +1,4 @@
+#include <preprocessor/constants.vhh>
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -28,7 +29,7 @@ end mem_interface;
 architecture mem_interface_arch of mem_interface is
 
 	-- MEM_ADDR must be word aligned
-	constant MEM_RD_WR_ADDR	: std_logic_vector := HEX(MEM_RD_RW_ADDR);
+	constant MEM_RD_WR_ADDR	: std_logic_vector := HEX(MEM_RD_WR_ADDR);
 	constant MEM_FLAGS_ADDR	: std_logic_vector := HEX(MEM_FLAGS_ADDR);
 	constant MEM_RD_P_ADDR	: std_logic_vector := HEX(MEM_RD_P_ADDR);
 	constant MEM_WR_P_ADDR	: std_logic_vector := HEX(MEM_WR_P_ADDR);

@@ -32,6 +32,7 @@ entity dcm_serial is
           RST_IN     : in    std_logic; 
           CLKFX_OUT  : out   std_logic; 
           CLK0_OUT   : out   std_logic; 
+          CLK90_OUT   : out   std_logic; 
           LOCKED_OUT : out   std_logic);
 end dcm_serial;
 
@@ -39,6 +40,7 @@ architecture BEHAVIORAL of dcm_serial is
    signal CLKFB_IN   : std_logic;
    signal CLKFX_BUF  : std_logic;
    signal CLK0_BUF   : std_logic;
+   signal CLK90_BUF   : std_logic;
    signal GND_BIT    : std_logic;
    signal GND_BUS_7  : std_logic_vector (6 downto 0);
    signal GND_BUS_16 : std_logic_vector (15 downto 0);
@@ -55,13 +57,17 @@ begin
       port map (I=>CLK0_BUF,
                 O=>CLKFB_IN);
    
+   CLK90_BUFG_INST : BUFG
+      port map (I=>CLK90_BUF,
+                O=>CLK90_OUT);
+   
    DCM_ADV_INST : DCM_ADV
    generic map( CLK_FEEDBACK => "1X",
             CLKDV_DIVIDE => 2.0,
             CLKFX_DIVIDE => 15,
             CLKFX_MULTIPLY => 7,
             CLKIN_DIVIDE_BY_2 => FALSE,
-            CLKIN_PERIOD => 11.111,
+            CLKIN_PERIOD => 23.810,
             CLKOUT_PHASE_SHIFT => "NONE",
             DCM_AUTOCALIBRATION => TRUE,
             DCM_PERFORMANCE_MODE => "MAX_SPEED",
@@ -90,7 +96,7 @@ begin
                 CLK0=>CLK0_BUF,
                 CLK2X=>open,
                 CLK2X180=>open,
-                CLK90=>open,
+                CLK90=>CLK90_BUF,
                 CLK180=>open,
                 CLK270=>open,
                 DO=>open,

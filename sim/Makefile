@@ -39,6 +39,12 @@ FIFO_TB_FILES += \
 	fifo_tx_sim.vhd
 FIFO_SIM_FLAGS += --stop-time=1000ns
 
+RX_FIFO_TB_FILES += \
+	rx_fifo_interface.vhd \
+	rx_fifo_interface_tb.vhd \
+	fifo_tx_sim.vhd
+RX_FIFO_SIM_FLAGS += --stop-time=1000ns
+
 CLK_DIV_TB_FILES += \
 	clk_div.vhd \
 	clk_div_tb.vhd
@@ -75,6 +81,11 @@ fifo_interface_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(FIFO_TB_FILES:.vhd=_pp.o)
 	ghdl -m $(XILINX_FLAGS) "$@"
 	./"$@" $(FIFO_SIM_FLAGS) --wave="$@".ghw
 
+rx_fifo_interface_tb: $(XILINX_OBJS) $(LOCAL_OBJS) \
+			$(RX_FIFO_TB_FILES:.vhd=_pp.o)
+	ghdl -m $(XILINX_FLAGS) "$@"
+	./"$@" $(FIFO_SIM_FLAGS) --wave="$@".ghw
+
 clk_div_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(CLK_DIV_TB_FILES:.vhd=_pp.o)
 	ghdl -m $(XILINX_FLAGS) "$@"
 	./"$@" $(CLK_DIV_SIM_FLAGS) --wave="$@".ghw
@@ -102,7 +113,7 @@ transceiver-obj93.cf:
 
 # Preprocessing
 %_pp.vhd: ../%.vhd
-	cpp -DVHDL -x assembler-with-cpp -P -I ../ "$<" -o "$@"
+	cpp -DVHDL -D_QUOTE=\" -x assembler-with-cpp -P -I ../ "$<" -o "$@"
 
 # Analysis
 %_pp.o: ../processed/%_pp.vhd

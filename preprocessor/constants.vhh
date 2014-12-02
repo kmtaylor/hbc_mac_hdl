@@ -1,4 +1,6 @@
-#define _QUOTE "
+/* To prevent CPP unterminated string warnings, call with -DVHDL and
+ * -D_QUOTE=\" */
+/* #define _QUOTE " */
 #define PRINT(x) x
 
 #define V_VAL(val) PRINT(X)PRINT(_QUOTE)PRINT(val)PRINT(_QUOTE)
@@ -49,3 +51,21 @@
 
 #define CONST_HEX_MODULATOR_ADDR	18
 #define CONST_HEX_MODULATOR_SF_ADDR	19
+
+#define CONST_HEX_RX_FIFO_ADDR		20
+
+/* ----------------------- Module IRQ Map --------------------------------- */
+#define CONST_INT_IRQ_BUTTON		0
+#define CONST_INT_IRQ_FIFO_FULL		1
+#define CONST_INT_IRQ_FIFO_ALMOST_FULL	2
+#define CONST_INT_IRQ_FIFO_OVERFLOW	3
+#define CONST_INT_IRQ_FIFO_EMPTY	4
+#define CONST_INT_IRQ_FIFO_UNDERFLOW	5
+#define CONST_INT_IRQ_RX_DATA_READY	6
+#define CONST_INT_IRQ_CLOCK_LOSS	7
+#define CONST_INT_IRQ_RAM_INIT		8
+#define CONST_INT_IRQ_RAM_FIFO_FULL	9
+#define CONST_INT_IRQ_USB_INT		10
+#define CONST_INT_IRQ_USB_FULL		11
+#define CONST_INT_IRQ_USB_EN		12
+#define CONST_INT_IRQ_USB_EMPTY         13

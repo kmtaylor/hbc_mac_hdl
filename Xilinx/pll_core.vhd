@@ -64,8 +64,8 @@ begin
             CLKOUT0_PHASE => 0.000,
             CLKOUT0_DUTY_CYCLE => 0.500,
             COMPENSATION => "SYSTEM_SYNCHRONOUS",
-            DIVCLK_DIVIDE => 1,
-            CLKFBOUT_MULT => 9,
+            DIVCLK_DIVIDE => 5,
+            CLKFBOUT_MULT => 21,
             CLKFBOUT_PHASE => 0.0,
             REF_JITTER => 0.000000)
       port map (CLKFBIN=>CLKFBOUT_CLKFBIN,

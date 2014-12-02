@@ -15,7 +15,8 @@ entity serial_to_parallel is
 		fifo_wren : out std_logic;
 		fifo_full : in std_logic;
 		data_in : in std_logic;
-		pkt_reset : out std_logic);
+		pkt_reset : out std_logic;
+		dbg : out std_logic_vector (7 downto 0));
 end serial_to_parallel;
 
 architecture serial_to_parallel_arch of serial_to_parallel is
@@ -49,6 +50,7 @@ architecture serial_to_parallel_arch of serial_to_parallel is
     signal s2p_sym : std_logic_vector (MAX_SYMBOL_SIZE-1 downto 0);
     signal s2p_align_sym : std_logic_vector (MAX_SYMBOL_SIZE-1 downto 0);
     signal allow_re_align : std_logic;
+    signal latch_sfd : std_logic;
 
     signal walsh_count : unsigned (bits_for_val(WALSH_SIZE-1)-1 downto 0);
     signal walsh_clk : std_logic;
@@ -91,16 +93,21 @@ architecture serial_to_parallel_arch of serial_to_parallel is
 
 begin
 
+    dbg(7 downto 1) <= (others => '0');
+    dbg(0) <= sfd_found;
+
     fifo_control : process(reset, state) begin
 	using_ri <= '1';
 	allow_re_align <= '0';
 	walsh_detect_i <= '0';
 	chk_pkt_end <= '0';
 	sym_reset_i <= '0';
+	latch_sfd <= '0';
 	case(state) is
 	    when st_preamble =>
 		allow_re_align <= '1';
 	    when st_sfd =>
+		latch_sfd <= '1';
 	    when st_demodulate =>
 		walsh_detect_i <= '1';
 		chk_pkt_end <= '1';
@@ -205,7 +212,7 @@ begin
 	end if;
     end process re_align;
 
-    detect_phase : process (s2p_sym) begin
+    detect_phase : process (s2p_sym, r_sf) begin
 	if phase_sum(s2p_sym, r_sf) > r_sf/2 then
 	    current_phase <= '1';
 	else
@@ -257,15 +264,15 @@ begin
 	end if;
     end process detect_sfd;
 
-    latch_sfd : process(sym_reset, serial_clk) begin
+    latch_sfd_proc : process(sym_reset, serial_clk) begin
 	if sym_reset = '1' then
 	    sfd_found <= '0';
 	elsif serial_clk'event and serial_clk = '1' then
-	    if sfd_found_i = '1' then
+	    if sfd_found_i = '1' and latch_sfd = '1' then
 		sfd_found <= '1';
 	    end if;
 	end if;
-    end process latch_sfd;
+    end process latch_sfd_proc;
 
     consume_ri_chips : process(sym_reset, serial_clk) begin
 	if sym_reset = '1' then
