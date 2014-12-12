@@ -37,6 +37,8 @@
 
 # onBoard PUSH BUTTONS 
  NET "btn1" LOC = "G7";  # Bank = 12, Pin name = IO_L17N_12,        Sch name = BTN1
+ NET "btn2" LOC = "G6";  # Bank = 12, Pin name = IO_L17P_12,	    Sch name = BTN0
+
  
 # Pmod Connectors
  NET "s_data_out"  LOC = "AD11";   # BANK = 22,  Pin name = IO_L10N_CC_22,   Sch name = JA1

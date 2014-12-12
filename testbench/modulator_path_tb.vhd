@@ -69,11 +69,15 @@ architecture behaviour of modulator_tb is
     signal s2p_fifo_wren : std_logic;
     signal s2p_fifo_data : std_logic_vector (31 downto 0);
     signal s2p_fifo_full : std_logic;
+    signal s2p_fifo_rden : std_logic;
+    signal s2p_from_fifo : std_logic_vector (31 downto 0);
+    signal rx_fifo_data : std_logic_vector (31 downto 0);
+    signal rx_fifo_io_ready : std_logic;
  
     -- Clock period definitions
     constant clk_period : time := 10 ns;
     constant s_clk_period : time := 24 ns;
-    constant s_clk_dly_period : time := 23995 ps;
+    constant s_clk_dly_period : time := 23999 ps;
     
 begin
  
@@ -154,8 +158,8 @@ begin
         rd_clk => clk,
         din => s2p_fifo_data,
         wr_en => s2p_fifo_wren,
-        rd_en => '0',
-        dout => open,
+        rd_en => s2p_fifo_rden,
+        dout => s2p_from_fifo,
         full => s2p_full,
         overflow => s2p_overflow,
         empty => s2p_empty,
@@ -169,13 +173,24 @@ begin
 	data_out => s_data_sync);
 
     s_to_p : entity work.serial_to_parallel port map (
-	reset => reset,
+	reset_i => reset,
 	pkt_reset => pkt_reset,
 	serial_clk => serial_clk_dly,
 	fifo_d_out => s2p_fifo_data,
 	fifo_wren => s2p_fifo_wren,
 	fifo_full => s2p_fifo_full,
 	data_in => s_data_sync);
+
+    rx_fifo_int : entity work.rx_fifo_interface port map (
+            clk => clk,
+            reset => reset,
+            io_addr => io_addr,
+            io_d_out => rx_fifo_data,
+            io_addr_strobe => io_addr_strobe,
+            io_read_strobe => io_read_strobe,
+            io_ready => rx_fifo_io_ready,
+            fifo_d_in => s2p_from_fifo,
+            fifo_rden => s2p_fifo_rden); 
 
     -- Clock process definitions
     clk_process : process begin
@@ -226,6 +241,7 @@ begin
 	fi_addr_strobe <= '0';	\
 	wait for clk_period;
 
+#if 1
 #define WRITE_PREAMBLE()	\
 	WRITE_FIFO(X"AAAA5555")	\
 	WRITE_FIFO(X"55AA5555")	\
@@ -243,6 +259,25 @@ begin
 	WRITE_FIFO(X"AA5555AA")	\
 	WRITE_FIFO(X"AA555555")	\
 	WRITE_FIFO(X"5555AA55")
+#else
+#define WRITE_PREAMBLE()	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")
+#endif
 
 #define WRITE_SFD() \
 	WRITE_FIFO(X"55AA55AA")	\
@@ -317,10 +352,10 @@ begin
 
     -- Stimulus process
     stim_proc: process begin	
-	-- hold reset state for 20 ns.
+	-- hold reset state for 60 ns.
 	reset <= '1';
 	parallel_to_serial_enable <= '0';
-	wait for 20 ns;
+	wait for 60 ns;
 	reset <= '0';
 
 	wait for clk_period * 5.5;
@@ -340,10 +375,10 @@ begin
 	WRITE_PREAMBLE()		    \
 	WRITE_PREAMBLE()		    \
 					    \
-	RI_SF_8()			    \
+	RI_SF_32()			    \
 					    \
 	SET_SF(X"00000001")		    \
-	FIFO_WRITE_SIZE(X"00000008")	    \
+	FIFO_WRITE_SIZE(X"00000020")	    \
 					    \
 	MODULATE(X"12345678")		    \
 	MODULATE(X"95748334")		    \
@@ -354,6 +389,22 @@ begin
 	SEND_PACKET()
 
 	wait for clk_period * 60000;
+
+#define READ_RX_FIFO()			    \
+	io_read_strobe <= '1';		    \
+	io_addr_strobe <= '1';		    \
+	io_addr <= HEX(RX_FIFO_ADDR);	    \
+	wait for clk_period;		    \
+	io_read_strobe <= '0';		    \
+	io_addr_strobe <= '0';		    \
+	wait for clk_period * 3;
+
+	READ_RX_FIFO()
+	READ_RX_FIFO()
+	READ_RX_FIFO()
+	READ_RX_FIFO()
+	READ_RX_FIFO()
+	READ_RX_FIFO()
 
 	TRIGGER()
 	SEND_PACKET()

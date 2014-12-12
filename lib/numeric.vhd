@@ -14,7 +14,7 @@ package numeric is
     function walsh_encode (input : walsh_sym_t) return walsh_code_t;
     function walsh_decode (input : walsh_code_t) return walsh_sym_t;
 
-    function is_equal(input : unsigned; val : natural) return std_logic;
+    function bool_to_bit(input : boolean) return std_logic;
     function ones(length : natural) return std_logic_vector;
 end package numeric;
 
@@ -58,39 +58,29 @@ package body numeric is
     end function bits_for_val;
 
     function calc_hamming(slv, target : std_logic_vector) return natural is
-	variable n_ones : natural := 0;
+	variable sum : natural := 0;
     begin
 	for i in slv'range loop
 	    if slv(i) = target(i) then
-		n_ones := n_ones + 1;
+		sum := sum + 1;
 	    end if;
 	end loop;
-	return n_ones;
+	return sum;
     end function calc_hamming;
  
     function phase_sum (reg : std_logic_vector; size : unsigned)
     return natural is
 	variable acc : natural := 0;
-	variable i : integer;
-	variable required : std_logic;
+	variable required : std_logic := '0';
     begin
-	-- Count correct phase samples in odd positions
-	i := to_integer(size - 1);
-	required := '1';
-	while i >= 0 loop
+	for i in 0 to reg'length-1 loop
+	    if i = size then
+		exit;
+	    end if;
 	    if reg(i) = required then
 		acc := acc + 1;
 	    end if;
-	    i := i - 2;
-	end loop;
-	-- Count correct phase samples in even positions
-	i := to_integer(size - 2);
-	required := '0';
-	while i >= 0 loop
-	    if reg(i) = required then
-		acc := acc + 1;
-	    end if;
-	    i := i - 2;
+	    required := not required;
 	end loop;
 	return acc;
     end function phase_sum;
@@ -173,14 +163,14 @@ package body numeric is
 	return "0000";
     end function walsh_decode;
 
-    function is_equal(input : unsigned; val : natural) return std_logic is
+    function bool_to_bit(input : boolean) return std_logic is
     begin
-	if input = val then
+	if input then
 	    return '1';
 	else
 	    return '0';
 	end if;
-    end function is_equal;
+    end function bool_to_bit;
 
     function ones(length : natural) return std_logic_vector is
 	variable r : std_logic_vector(length-1 downto 0);

@@ -1,8 +1,11 @@
 XILINX_FLAGS += --ieee=none -fexplicit --warn-no-binding
+GHDL_DIR := $(shell dirname `ghdl --dispconfig | grep "default prefix" | \
+		sed 's/.*: //'`)
 
 XILINX_OBJS += \
 	ieee-obj93.cf \
-	xilinxcorelib-obj93.cf
+	xilinxcorelib-obj93.cf \
+	unisim-obj93.cf
 
 LOCAL_OBJS += \
 	transceiver-obj93.cf
@@ -25,8 +28,20 @@ MODULATOR_TB_FILES += \
 	fifo_tx_sim.vhd \
 	data_synchroniser.vhd \
 	serial_to_parallel.vhd \
+	rx_fifo_interface.vhd \
 	modulator_path_tb.vhd
-MODULATOR_SIM_FLAGS += --stop-time=2000us
+MODULATOR_SIM_FLAGS += --stop-time=1000us --ieee-asserts=disable-at-0
+
+MODULATOR_SYNTH_TB_FILES += \
+	modulator.vhd \
+	parallel_to_serial.vhd \
+	fifo_interface.vhd \
+	fifo_tx_sim.vhd \
+	data_synchroniser.vhd \
+	serial_to_parallel_synthesis.vhd \
+	rx_fifo_interface.vhd \
+	modulator_path_tb.vhd
+MODULATOR_SYNTH_SIM_FLAGS += --stop-time=1000us --ieee-asserts=disable-at-0
 
 USB_TB_FILES += \
 	usb_fifo_interface.vhd \
@@ -94,6 +109,11 @@ modulator_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(MODULATOR_TB_FILES:.vhd=_pp.o)
 	ghdl -m $(XILINX_FLAGS) "$@"
 	./"$@" $(MODULATOR_SIM_FLAGS) --wave="$@".ghw
 
+modulator_synth_tb: $(XILINX_OBJS) $(LOCAL_OBJS) \
+		$(MODULATOR_SYNTH_TB_FILES:.vhd=_pp.o)
+	ghdl -m $(XILINX_FLAGS) modulator_tb
+	./modulator_tb $(MODULATOR_SYNTH_SIM_FLAGS) --wave="$@".ghw
+
 parallel_to_serial_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(P2S_TB_FILES:.vhd=_pp.o)
 	ghdl -m $(XILINX_FLAGS) "$@"
 	./"$@" $(P2S_SIM_FLAGS) --wave="$@".ghw
@@ -104,9 +124,14 @@ numeric_tb: $(LOCAL_OBJS) $(NUMERIC_TB_FILES:.vhd=_pp.o)
 
 # Xilinx libraries
 xilinxcorelib-obj93.cf:
-	ghdl -i --ieee=none --work=XilinxCoreLib ../Xilinx/sim/XilinxCoreLib/*.vhd
+	ghdl -i --ieee=none --work=XilinxCoreLib \
+		../Xilinx/sim/XilinxCoreLib/*.vhd
+unisim-obj93.cf:
+	ghdl -i --ieee=none --work=unisim ../Xilinx/sim/unisims/*.vhd \
+		../Xilinx/sim/unisims/primitive/*.vhd
 ieee-obj93.cf:
-	ghdl -i --ieee=none --work=ieee ../Xilinx/sim/ieee/*.vhd
+	ghdl -i --ieee=none --work=ieee ../Xilinx/sim/ieee/*.vhd \
+		$(GHDL_DIR)/src/vital95/*.vhdl
 
 transceiver-obj93.cf:
 	ghdl -i --ieee=none --work=transceiver ../lib/*.vhd
@@ -121,6 +146,8 @@ transceiver-obj93.cf:
 %_tb_pp.o: ../testbench/processed/%_tb_pp.vhd
 	ghdl -a $(XILINX_FLAGS) "$<"
 %_sim_pp.o: ../Xilinx/sim/processed/%_sim_pp.vhd
+	ghdl -a $(XILINX_FLAGS) "$<"
+%_synthesis_pp.o: netgen/synthesis/processed/%_synthesis_pp.vhd
 	ghdl -a $(XILINX_FLAGS) "$<"
 
 # Other Targets

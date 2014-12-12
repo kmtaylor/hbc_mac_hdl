@@ -9,7 +9,7 @@ entity toplevel is
 	Led : out std_logic_vector (7 downto 0);
 	LCDD : inout std_logic_vector (7 downto 0);
 	LCDEN, LCDRW, LCDRS : out std_logic;
-	clkin, rstbtn, btn1 : in std_logic;
+	clkin, rstbtn, btn1, btn2 : in std_logic;
 	serial_clk_out : out std_logic;
 	s_data_out : out std_logic;
 	-- Physical memory interface
@@ -190,6 +190,7 @@ architecture toplevel_arch of toplevel is
     signal cpu_dcm_locked : std_logic;
 
     signal btn1_d : std_logic;
+    signal btn2_d : std_logic;
 
 begin
     
@@ -242,7 +243,7 @@ begin
     --	LOCKED_OUT => cpu_dcm_locked);
     cpu_dcm_locked <= '1';
 
-    -- 90MHz PLL to 42MHz serial clock for TX
+    -- 42MHz PLL to 42MHz serial clock for TX
     serial_clk_dcm : entity work.dcm_serial
 	port map (
 	    CLKIN_IN => pll_clk,
@@ -290,7 +291,8 @@ begin
 	    INTC_Interrupt (INT(IRQ_USB_FULL)) => UsbFull,
 	    INTC_Interrupt (INT(IRQ_USB_EN)) => UsbEN,
 	    INTC_Interrupt (INT(IRQ_USB_EMPTY)) => UsbEmpty,
-	    INTC_Interrupt (15 downto 14) => "00",
+	    INTC_Interrupt (INT(IRQ_BUTTON_2)) => btn2_d,
+	    INTC_Interrupt (15) => '0',
 	    GPI1 (INT(IRQ_BUTTON)) => btn1_d,
 	    GPI1 (INT(IRQ_FIFO_FULL)) => tx_fifo_full,
 	    GPI1 (INT(IRQ_FIFO_ALMOST_FULL)) => tx_fifo_almost_full,
@@ -305,7 +307,8 @@ begin
 	    GPI1 (INT(IRQ_USB_FULL)) => UsbFull,
 	    GPI1 (INT(IRQ_USB_EN)) => UsbEN,
 	    GPI1 (INT(IRQ_USB_EMPTY)) => UsbEmpty,
-	    GPI1 (15 downto 14) => "00");
+	    GPI1 (INT(IRQ_BUTTON_2)) => btn2_d,
+	    GPI1 (15) => '0');
     
     ba_0 : entity work.io_bus_arbitrator
 	port map (
@@ -536,12 +539,23 @@ begin
 	    empty => rx_fifo_empty,
 	    underflow => rx_fifo_underflow);
 
-    Led(1) <= rx_fifo_empty;
-    Led(2) <= rx_fifo_full;
-    Led(3) <= rx_fifo_underflow;
-    Led(4) <= rx_fifo_overflow;
-    Led(5) <= rx_fifo_almost_full;
-    Led(7 downto 6) <= (others => '0');
+#if 1
+    Led(5) <= rx_fifo_empty;
+
+    dbg_latch : process(reset, cpu_clk) begin
+	if reset = '1' then
+	    Led(6) <= '0';
+	    Led(7) <= '0';
+	elsif cpu_clk'event and cpu_clk = '1' then
+	    if rx_fifo_underflow = '1' then
+		Led(6) <= '1';
+	    end if;
+	    if rx_fifo_overflow = '1' then
+		Led(7) <= '1';
+	    end if;
+	end if;
+    end process dbg_latch;
+#endif
 
     cdr0 : entity work.data_synchroniser
 	port map (
@@ -553,15 +567,15 @@ begin
 
     s_to_p : entity work.serial_to_parallel
 	port map (
-	    reset => reset,
+	    reset_i => reset,
 	    pkt_reset => pkt_reset,
 	    serial_clk => serial_clk,
 	    fifo_d_out => s2p_fifo_data,
 	    fifo_wren => rx_fifo_wren,
 	    fifo_full => '0',
-	    data_in => s_data_in_sync,
-	    dbg(7 downto 1) => open,
-	    dbg(0) => Led(0));
+	    data_in => s_data_out_tmp, --s_data_in_sync,
+	    dbg(7 downto 5) => open,
+	    dbg(4 downto 0) => Led(4 downto 0));
 
     fifo_int_1 : entity rx_fifo_interface
 	port map (
@@ -580,6 +594,12 @@ begin
 	    clk => clk_debounce,
 	    d_in => btn1,
 	    q_out => btn1_d);
+
+    db_btn2 : entity work.debounce
+	port map (
+	    clk => clk_debounce,
+	    d_in => btn2,
+	    q_out => btn2_d);
 
 end toplevel_arch;
 
