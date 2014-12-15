@@ -5,7 +5,8 @@ GHDL_DIR := $(shell dirname `ghdl --dispconfig | grep "default prefix" | \
 XILINX_OBJS += \
 	ieee-obj93.cf \
 	xilinxcorelib-obj93.cf \
-	unisim-obj93.cf
+	unisim-obj93.cf \
+	simprim-obj93.cf
 
 LOCAL_OBJS += \
 	transceiver-obj93.cf
@@ -38,7 +39,7 @@ MODULATOR_SYNTH_TB_FILES += \
 	fifo_interface.vhd \
 	fifo_tx_sim.vhd \
 	data_synchroniser.vhd \
-	serial_to_parallel_synthesis.vhd \
+	serial_to_parallel_timesim.vhd \
 	rx_fifo_interface.vhd \
 	modulator_path_tb.vhd
 MODULATOR_SYNTH_SIM_FLAGS += --stop-time=1000us --ieee-asserts=disable-at-0
@@ -129,6 +130,9 @@ xilinxcorelib-obj93.cf:
 unisim-obj93.cf:
 	ghdl -i --ieee=none --work=unisim ../Xilinx/sim/unisims/*.vhd \
 		../Xilinx/sim/unisims/primitive/*.vhd
+simprim-obj93.cf:
+	ghdl -i --ieee=none --work=simprim ../Xilinx/sim/simprims/*.vhd \
+		../Xilinx/sim/simprims/primitive/*.vhd
 ieee-obj93.cf:
 	ghdl -i --ieee=none --work=ieee ../Xilinx/sim/ieee/*.vhd \
 		$(GHDL_DIR)/src/vital95/*.vhdl
@@ -142,13 +146,15 @@ transceiver-obj93.cf:
 
 # Analysis
 %_pp.o: ../processed/%_pp.vhd
-	ghdl -a $(XILINX_FLAGS) "$<"
+	ghdl -i $(XILINX_FLAGS) "$<"
 %_tb_pp.o: ../testbench/processed/%_tb_pp.vhd
-	ghdl -a $(XILINX_FLAGS) "$<"
+	ghdl -i $(XILINX_FLAGS) "$<"
 %_sim_pp.o: ../Xilinx/sim/processed/%_sim_pp.vhd
-	ghdl -a $(XILINX_FLAGS) "$<"
+	ghdl -i $(XILINX_FLAGS) "$<"
 %_synthesis_pp.o: netgen/synthesis/processed/%_synthesis_pp.vhd
-	ghdl -a $(XILINX_FLAGS) "$<"
+	ghdl -i $(XILINX_FLAGS) "$<"
+%_timesim_pp.o: netgen/par/processed/%_timesim_pp.vhd
+	ghdl -i $(XILINX_FLAGS) "$<"
 
 # Other Targets
 clean:
