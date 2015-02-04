@@ -1,0 +1,50 @@
+[*]
+[*] GTKWave Analyzer v3.3.64 (w)1999-2014 BSI
+[*] Thu Jan 22 00:36:50 2015
+[*]
+[dumpfile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/modulator_synth_tb.fst_100"
+[dumpfile_mtime] "Wed Jan 21 15:04:32 2015"
+[dumpfile_size] 168919778
+[savefile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/gtkwave/modulator_synth_tb.gtkw"
+[timestart] 0
+[size] 1920 1027
+[pos] -1 -1
+*-31.000000 823300000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] rx_fifo.u0.
+[sst_width] 358
+[signals_width] 291
+[sst_expanded] 1
+[sst_vpaned_height] 292
+@28
+sync.serial_cl
+s_to_p.data_i
+@24
+s_to_p.s2p_sym[63:0]
+@22
+s_to_p.s2p_index[5:0]
+s_to_p.s2p_align_index[5:0]
+@28
+s_to_p.current_phas
+s_to_p.phase_chang
+@22
+s_to_p.demod_reg[63:0]
+@28
+s_to_p.comma_foun
+s_to_p.sfd_found_5129
+s_to_p.sfd_finished_5113
+@22
+s_to_p.ri_count[6:0]
+s_to_p.walsh_reg[15:0]
+@28
+s_to_p.walsh_detect_5107
+@22
+s_to_p.decoded_sym[3:0]
+@28
+s_to_p.nibble_count[2:0]
+s_to_p.walsh_clk_5108
+s_to_p.nibble_read
+s_to_p.fifo_wren_mux000
+@22
+s_to_p.decoded_word[31:0]
+[pattern_trace] 1
+[pattern_trace] 0
