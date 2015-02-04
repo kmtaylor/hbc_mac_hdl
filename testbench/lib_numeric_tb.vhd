@@ -3,14 +3,36 @@ use std.textio.all;
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use ieee.vital_primitives.all;
+use ieee.vital_timing.all;
 
 library transceiver;
 use transceiver.numeric.all;
 
 entity numeric_tb is
+    generic (
+	tperiod_CLK_posedge : VitalDelayType := 0.000 ns);
+    port (
+	CLK : in std_ulogic);
+    attribute VITAL_LEVEL0 of numeric_tb : entity is true;
 end numeric_tb;
- 
+
 architecture test of numeric_tb is 
+
+    type val_ft is file of std_logic;
+    type time_ft is file of time;
+    file val_file : val_ft open WRITE_MODE is "modulator_tb_stim.value";
+    file time_file : time_ft open WRITE_MODE is "modulator_tb_stim.time";
+
+    procedure write_val(val : std_logic) is 
+    begin
+	write(val_file, val);
+	write(time_file, now);
+    end procedure write_val;
+
+    signal val : unsigned (63 downto 0) := X"FFFFFFFFFFFFFFFF";
+    signal weight : std_logic_vector (6 downto 0);
+    constant clk_period : time := 10 ns;
  
 begin
 
@@ -49,7 +71,27 @@ begin
 	write(l, string'("bits_for_val(15) = "));
 	write(l, bits_for_val(16));
 	writeline(output, l);
+	write(l, string'("tperiod_CLK_posedge = "));
+	write(l, tperiod_CLK_posedge);
+	writeline(output, l);
+
+	write_val('1');
+	wait for 10 ns;
+	write_val('0');
+	wait for 10 ns;
+	write_val('1');
+
 	wait;
     end process;
+
+    test_hamming : entity work.hamming_lut
+	port map (
+	    val => std_logic_vector(val),
+	    weight => weight);
+
+    inc_val : process begin
+	wait for clk_period;
+	val <= val + 1;
+    end process inc_val;
 
 end;

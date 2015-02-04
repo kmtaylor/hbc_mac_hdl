@@ -10,9 +10,10 @@ package numeric is
 
     function bits_for_val(val: natural) return natural;
     function calc_hamming(slv, target : std_logic_vector) return natural;
-    function phase_sum (reg : std_logic_vector; size : unsigned) return natural;
+    function sym_in_phase(sym : std_logic_vector) return boolean;
     function walsh_encode (input : walsh_sym_t) return walsh_code_t;
     function walsh_decode (input : walsh_code_t) return walsh_sym_t;
+    function weight_threshold (weight : std_logic_vector) return std_logic;
 
     function bool_to_bit(input : boolean) return std_logic;
     function ones(length : natural) return std_logic_vector;
@@ -67,23 +68,27 @@ package body numeric is
 	end loop;
 	return sum;
     end function calc_hamming;
- 
-    function phase_sum (reg : std_logic_vector; size : unsigned)
-    return natural is
-	variable acc : natural := 0;
-	variable required : std_logic := '0';
+
+    function weight_threshold (weight : std_logic_vector) return std_logic is
     begin
-	for i in 0 to reg'length-1 loop
-	    if i = size then
-		exit;
-	    end if;
-	    if reg(i) = required then
-		acc := acc + 1;
-	    end if;
-	    required := not required;
-	end loop;
-	return acc;
-    end function phase_sum;
+    	-- Do a 4 bit comparison to check for values greater than 55 
+        if weight(6 downto 3) = X"8" then
+            return '1';
+        elsif weight(6 downto 3) = X"7" then
+            return '1';
+        else
+            return '0';
+        end if;
+    end function weight_threshold;
+ 
+    function sym_in_phase (sym : std_logic_vector) return boolean is
+    begin
+	if (sym(7 downto 0) = X"AA") or (sym(7 downto 0) = X"55") then
+	    return true;
+	else
+	    return false;
+	end if;
+    end function sym_in_phase;
 
     function walsh_encode (input : walsh_sym_t) return walsh_code_t is
     begin

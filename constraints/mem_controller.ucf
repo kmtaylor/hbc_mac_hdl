@@ -23,11 +23,17 @@
 # Clock constraints                                                        #
 ############################################################################
 
-#NET "u_ddr2_infrastructure/sys_clk_ibufg" TNM_NET =  "SYS_CLK";
-#TIMESPEC "TS_SYS_CLK" = PERIOD "SYS_CLK" 8 ns HIGH 50 %;
+#NET "mem_clk0" TNM_NET = "SYS_clk0";
+#TIMESPEC "TS_SYS_clk0" = PERIOD "SYS_clk0" 8 ns HIGH 50 %;
 
-#NET "u_ddr2_infrastructure/clk200_ibufg" TNM_NET = "SYS_CLK_200";
-#TIMESPEC "TS_SYS_CLK_200" = PERIOD "SYS_CLK_200" 5 ns HIGH 50 %;
+#NET "mem_clk90" TNM_NET = "SYS_clk90";
+#TIMESPEC "TS_SYS_clk90" = PERIOD "SYS_clk90" "TS_SYS_clk0" PHASE 2 ns HIGH 50 %;
+
+#NET "mem_clkdiv0" TNM_NET = "SYS_clkdiv0";
+#TIMESPEC "TS_SYS_clkdiv0" = PERIOD "SYS_clkdiv0" "TS_SYS_clk0" * 2 HIGH 50 %;
+
+#NET "mem_clk200" TNM_NET = "SYS_clk200";
+#TIMESPEC "TS_SYS_clk200" = PERIOD "SYS_clk200" 5 ns HIGH 50 %;
 
 ############################################################################
 ########################################################################
@@ -189,16 +195,16 @@ NET  "ddr2_ck_n[1]"                              LOC = "F28" ;          #Bank 19
 # MUX Select for either rising/falling CLK0 for 2nd stage read capture
 #INST "*/u_phy_calib/gen_rd_data_sel*.u_ff_rd_data_sel" TNM = "TNM_RD_DATA_SEL";
 #TIMESPEC "TS_MC_RD_DATA_SEL" = FROM "TNM_RD_DATA_SEL" TO FFS
-#"TS_SYS_CLK" * 4;
+#"TS_SYS_clk0" * 4;
 # MUX select for read data - optional delay on data to account for byte skews
 #INST "*/u_usr_rd/gen_rden_sel_mux*.u_ff_rden_sel_mux" TNM = "TNM_RDEN_SEL_MUX";
 #TIMESPEC "TS_MC_RDEN_SEL_MUX" = FROM "TNM_RDEN_SEL_MUX" TO FFS
-#"TS_SYS_CLK" * 4;
+#"TS_SYS_clk0" * 4;
 # Calibration/Initialization complete status flag (for PHY logic only) - can
 # be used to drive both flip-flops and BRAMs
 #INST "*/u_phy_init/u_ff_phy_init_data_sel" TNM = "TNM_PHY_INIT_DATA_SEL";
 #TIMESPEC "TS_MC_PHY_INIT_DATA_SEL_0" = FROM "TNM_PHY_INIT_DATA_SEL" TO FFS
-#"TS_SYS_CLK" * 4;
+#"TS_SYS_clk0" * 4;
 # The RAM path is only used in cases where Write Latency (Additive Latency + 
 # (CAS Latency - 1) + (1 in case of RDIMM)) is 2 or below. So these constraints are 
 # valid for CAS Latency = 3, Additive Latency = 0 and selected part is not RDIMM. 
@@ -206,19 +212,19 @@ NET  "ddr2_ck_n[1]"                              LOC = "F28" ;          #Bank 19
 # and the constraint can be ignored as this path does not exist. RAM constraint 
 # can be safely removed if the warning is not to be displayed.
 #TIMESPEC "TS_MC_PHY_INIT_DATA_SEL_90" = FROM "TNM_PHY_INIT_DATA_SEL" TO RAMS
-#"TS_SYS_CLK" * 4;
+#"TS_SYS_clk0" * 4;
 # Select (address) bits for SRL32 shift registers used in stage3/stage4
 # calibration
 #INST "*/u_phy_calib/gen_gate_dly*.u_ff_gate_dly" TNM = "TNM_GATE_DLY";
-#TIMESPEC "TS_MC_GATE_DLY" = FROM "TNM_GATE_DLY" TO FFS "TS_SYS_CLK" * 4;
+#TIMESPEC "TS_MC_GATE_DLY" = FROM "TNM_GATE_DLY" TO FFS "TS_SYS_clk0" * 4;
 
 #INST "*/u_phy_calib/gen_rden_dly*.u_ff_rden_dly" TNM = "TNM_RDEN_DLY";
-#TIMESPEC "TS_MC_RDEN_DLY" = FROM "TNM_RDEN_DLY" TO FFS "TS_SYS_CLK" * 4;
+#TIMESPEC "TS_MC_RDEN_DLY" = FROM "TNM_RDEN_DLY" TO FFS "TS_SYS_clk0" * 4;
 
 #INST "*/u_phy_calib/gen_cal_rden_dly*.u_ff_cal_rden_dly"
 #  TNM = "TNM_CAL_RDEN_DLY";
 #TIMESPEC "TS_MC_CAL_RDEN_DLY" = FROM "TNM_CAL_RDEN_DLY" TO FFS
-#"TS_SYS_CLK" * 4;
+#"TS_SYS_clk0" * 4;
 ############################################################################### 
 #The following constraint is added to prevent (false) hold time violations on
 #the data path from stage1 to stage2 capture flops.  Stage1 flops are clocked by 

@@ -31,11 +31,9 @@ architecture serial_to_parallel_arch of serial_to_parallel is
     constant COMMA_SIZE : natural := 64;
     constant SYMBOL_INDEX_BITS : natural := bits_for_val(MAX_SYMBOL_SIZE-1);
     constant RATE_SELECT_BITS : natural := bits_for_val(MAX_SYMBOL_SIZE);
-    constant COMMA_TEST_BITS : natural := bits_for_val(COMMA_SIZE);
+    constant COMMA_WEIGHT_BITS : natural := bits_for_val(COMMA_SIZE);
     constant COMMA : std_logic_vector (COMMA_SIZE-1 downto 0) := HEX(PREAMBLE);
     constant SFD : std_logic_vector (COMMA_SIZE-1 downto 0) := HEX(SFD);
-    constant COMMA_THRESHOLD : unsigned(COMMA_TEST_BITS-1 downto 0) := 
-			    to_unsigned(INT(COMMA_THRESHOLD), COMMA_TEST_BITS);
     constant WALSH_SIZE : natural := 16;
     constant NIBBLE_SIZE : natural := 8;
     constant WORD_SIZE : natural := 32;
@@ -78,13 +76,17 @@ architecture serial_to_parallel_arch of serial_to_parallel is
 
     signal phase_change : std_logic;
     signal phase_changes : std_logic_vector(PKT_END_THRESH-1 downto 0);
+    signal expected_phase : std_logic;
     signal current_phase : std_logic;
+    signal phase_sum : unsigned (SYMBOL_INDEX_BITS-1 downto 0);
     signal chk_pkt_end : std_logic;
     signal pkt_end : std_logic;
 
+    signal comma_weight : std_logic_vector (COMMA_WEIGHT_BITS-1 downto 0);
+    signal sfd_weight : std_logic_vector (COMMA_WEIGHT_BITS-1 downto 0);
+    signal comma_xnor : std_logic_vector (COMMA_SIZE-1 downto 0);
+    signal sfd_xnor : std_logic_vector (COMMA_SIZE-1 downto 0);
     signal demod_reg : std_logic_vector (COMMA_SIZE-1 downto 0);
-    signal comma_distance : unsigned (COMMA_TEST_BITS-1 downto 0);
-    signal sfd_distance : unsigned (COMMA_TEST_BITS-1 downto 0);
     signal comma_found : std_logic;
     signal sfd_found : std_logic;
     signal sfd_found_i : std_logic;
@@ -216,23 +218,33 @@ begin
 	if serial_clk'event and serial_clk = '1' then
 	    if sym_reset = '1' then
 		s2p_index <= (others => '0');
+		phase_sum <= (others => '0');
+		expected_phase <= '1';
 	    else
-		if (s2p_align_index = r_sf-1) and (allow_re_align = '1') then
-		    if (phase_sum(s2p_sym, r_sf) = INT(SF_8)) or
-			(phase_sum(s2p_sym, r_sf) = 0) then
+		if (s2p_align_index = INT(SF_8)-1) and 
+			    (allow_re_align = '1') then
+		    if sym_in_phase(s2p_sym) then 
 			s2p_index <= (others => '0');
+			phase_sum <= (others => '0');
+			expected_phase <= '1';
 		    end if;
 		elsif s2p_index = r_sf-1 then
 		    s2p_index <= (others => '0');
+		    phase_sum <= (others => '0');
+		    expected_phase <= '1';
 		else
 		    s2p_index <= s2p_index + 1;
+		    if (s2p_sym(0) = expected_phase) then
+			phase_sum <= phase_sum + 1;
+		    end if;
+		    expected_phase <= not expected_phase;
 		end if;
 	    end if;
 	end if;
     end process re_align;
 
-    detect_phase : process (s2p_sym, r_sf) begin
-	if phase_sum(s2p_sym, r_sf) = r_sf then
+    detect_phase : process (phase_sum, r_sf) begin
+	if phase_sum >= r_sf/2 then
 	    current_phase <= '1';
 	else
 	    current_phase <= '0';
@@ -262,27 +274,18 @@ begin
 	end if;
     end process demodulate;
 
-    comma_distance <= to_unsigned(
-		    calc_hamming(demod_reg, COMMA), comma_distance'length);
+    comma_xnor <= demod_reg xnor COMMA;
+    sfd_xnor <= demod_reg xnor SFD;
 
-    detect_comma : process(comma_distance) begin
-	if comma_distance > COMMA_THRESHOLD then
-	    comma_found <= '1';
-	else
-	    comma_found <= '0';
-	end if;
-    end process detect_comma;
+    comma_distance_lut : entity work.hamming_lut
+	port map (val => comma_xnor, weight => comma_weight);
 
-    sfd_distance <= to_unsigned(
-		    calc_hamming(demod_reg, SFD), sfd_distance'length);
+    sfd_distance_lut : entity work.hamming_lut
+	port map (val => sfd_xnor, weight => sfd_weight);
 
-    detect_sfd : process(sfd_distance) begin
-	if sfd_distance > COMMA_THRESHOLD then
-	    sfd_found_i <= '1';
-	else
-	    sfd_found_i <= '0';
-	end if;
-    end process detect_sfd;
+    comma_found <= weight_threshold(comma_weight);
+
+    sfd_found_i <= weight_threshold(sfd_weight);
 
     latch_sfd_proc : process(serial_clk) begin
 	if serial_clk'event and serial_clk = '1' then
@@ -297,7 +300,6 @@ begin
     end process latch_sfd_proc;
 
 #if DEBUG
-#if 1
     dbg_latch : process(serial_clk) begin
 	if serial_clk'event and serial_clk = '1' then
 	    if reset = '1' then
@@ -328,20 +330,6 @@ begin
 	    end if;
 	end if;
     end process dbg_latch;
-#else
-    dbg_latch : process(serial_clk) begin
-	if serial_clk'event and serial_clk = '1' then
-	    if reset = '1' then
-		dbg <= (others => '0');
-	    else
-		if sfd_found = '1' and rate_found = '0' then
-		    -- Check with XST what happens if we change dbg'range
-		    dbg(6 downto 0) <= std_logic_vector(ri_count);
-		end if;
-	    end if;
-	end if;
-    end process dbg_latch;
-#endif
 #endif
 
     consume_ri_chips : process(serial_clk) begin
@@ -456,10 +444,8 @@ begin
 		    else
 			nibble_count <= nibble_count + 1;
 		    end if;
-		    decoded_word(WORD_SIZE-WALSH_SYM_SIZE-1 downto 0) <= 
+		    decoded_word <= decoded_sym & 
 				decoded_word(WORD_SIZE-1 downto WALSH_SYM_SIZE);
-		    decoded_word(WORD_SIZE-1 downto WORD_SIZE-WALSH_SYM_SIZE) <=
-				decoded_sym;
 		end if;
 	    end if;
 	end if;

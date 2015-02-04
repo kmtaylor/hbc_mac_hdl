@@ -99,7 +99,6 @@ architecture syn of ddr2_infrastructure is
   signal rst90_sync_r   : std_logic_vector(RST_SYNC_NUM-1 downto 0);
   signal rstdiv0_sync_r : std_logic_vector((RST_SYNC_NUM/2)-1 downto 0);
   signal rst_tmp        : std_logic;
-  signal sys_clk_ibufg  : std_logic;
   signal sys_rst        : std_logic;
 
   attribute max_fanout : string;

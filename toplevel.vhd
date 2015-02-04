@@ -276,7 +276,7 @@ begin
 	    GPO1 (4) => seed_clk,
 	    GPO1 (5) => tx_fifo_flush,
 	    GPO1 (7 downto 6) => open,
-	    GPO2 => open, --Led, FIXME
+	    GPO2 => Led,
 	    INTC_Interrupt (INT(IRQ_BUTTON)) => btn1_d,
 	    INTC_Interrupt (INT(IRQ_FIFO_FULL)) => tx_fifo_full,
 	    INTC_Interrupt (INT(IRQ_FIFO_ALMOST_FULL)) => tx_fifo_almost_full,
@@ -352,52 +352,52 @@ begin
     ram : entity work.mem_controller
 	port map (
 	    -- Physical RAM interface
-	    ddr2_dq	    => ddr2_dq,
-	    ddr2_a	    => ddr2_a,
-	    ddr2_ba	    => ddr2_ba,
-	    ddr2_ras_n	=> ddr2_ras_n,
-	    ddr2_cas_n	=> ddr2_cas_n,
-	    ddr2_we_n	=> ddr2_we_n,
-	    ddr2_cs_n	=> ddr2_cs_n,
-	    ddr2_odt	=> ddr2_odt,
-	    ddr2_cke	=> ddr2_cke,
-	    ddr2_dm	    => ddr2_dm,
-	    ddr2_dqs	=> ddr2_dqs,
-	    ddr2_dqs_n	=> ddr2_dqs_n,
-	    ddr2_ck	    => ddr2_ck,
-	    ddr2_ck_n	=> ddr2_ck_n,
+	    ddr2_dq		=> ddr2_dq,
+	    ddr2_a		=> ddr2_a,
+	    ddr2_ba		=> ddr2_ba,
+	    ddr2_ras_n		=> ddr2_ras_n,
+	    ddr2_cas_n		=> ddr2_cas_n,
+	    ddr2_we_n		=> ddr2_we_n,
+	    ddr2_cs_n		=> ddr2_cs_n,
+	    ddr2_odt		=> ddr2_odt,
+	    ddr2_cke		=> ddr2_cke,
+	    ddr2_dm		=> ddr2_dm,
+	    ddr2_dqs		=> ddr2_dqs,
+	    ddr2_dqs_n		=> ddr2_dqs_n,
+	    ddr2_ck		=> ddr2_ck,
+	    ddr2_ck_n		=> ddr2_ck_n,
 	    -- Infrastructure
-	    clk0	    => mem_clk0,
-	    clk90	    => mem_clk90,
-	    clkdiv0	    => mem_clkdiv0,
-	    clk200	    => mem_clk200,
-	    locked	    => mem_pll_locked,
-	    sys_rst_n	=> rstbtn,
+	    clk0		=> mem_clk0,
+	    clk90		=> mem_clk90,
+	    clkdiv0		=> mem_clkdiv0,
+	    clk200		=> mem_clk200,
+	    locked		=> mem_pll_locked,
+	    sys_rst_n		=> rstbtn,
 	    phy_init_done	=> phy_init_done,
-	    rst0_tb	    => rst0_tb,
-	    clk0_tb	    => clk0_tb,
+	    rst0_tb		=> rst0_tb,
+	    clk0_tb		=> clk0_tb,
 	    -- Address FIFO
-	    app_af_cmd	=> app_af_cmd,
-	    app_af_addr	=> app_af_addr,
-	    app_af_wren	=> app_af_wren,
+	    app_af_cmd		=> app_af_cmd,
+	    app_af_addr		=> app_af_addr,
+	    app_af_wren		=> app_af_wren,
 	    app_af_afull	=> app_af_afull,
 	    -- Write FIFO
 	    app_wdf_data	=> app_wdf_data,
 	    app_wdf_wren	=> app_wdf_wren,
 	    app_wdf_afull	=> app_wdf_afull,
-	    app_wdf_mask_data    => app_wdf_mask_data,
+	    app_wdf_mask_data	=> app_wdf_mask_data,
 	    --Read FIFO
 	    rd_data_valid	=> rd_data_valid,
-	    rd_data_fifo_out    => rd_data_fifo_out);
+	    rd_data_fifo_out	=> rd_data_fifo_out);
 
     fifo_int_0 : entity work.fifo_interface
 	port map (
 	    clk => cpu_clk,
 	    reset => reset,
 	    trigger => tx_fifo_flush,
-	    io_addr    => fifo_bus_addr,
-	    io_d_in    => fifo_d_out,
-	    io_d_out    => bus1_data,
+	    io_addr => fifo_bus_addr,
+	    io_d_in => fifo_d_out,
+	    io_d_out => bus1_data,
 	    io_addr_strobe => fifo_addr_strobe,
 	    io_read_strobe => io_read_strobe,
 	    io_write_strobe => fifo_write_strobe,
@@ -457,7 +457,7 @@ begin
 	    UsbEmpty => UsbEmpty,
 	    UsbFull => UsbFull,
 	    UsbEN => UsbEN,
-	    UsbDBG => open); --Led);
+	    UsbDBG => open);
 
     lcd_0 : entity work.lcd_interface
 	port map (
@@ -539,24 +539,6 @@ begin
 	    empty => rx_fifo_empty,
 	    underflow => rx_fifo_underflow);
 
-#if 1
-    Led(5) <= rx_fifo_empty;
-
-    dbg_latch : process(reset, cpu_clk) begin
-	if reset = '1' then
-	    Led(6) <= '0';
-	    Led(7) <= '0';
-	elsif cpu_clk'event and cpu_clk = '1' then
-	    if rx_fifo_underflow = '1' then
-		Led(6) <= '1';
-	    end if;
-	    if rx_fifo_overflow = '1' then
-		Led(7) <= '1';
-	    end if;
-	end if;
-    end process dbg_latch;
-#endif
-
     cdr0 : entity work.data_synchroniser
 	port map (
 	    reset => pkt_reset,
@@ -574,8 +556,7 @@ begin
 	    fifo_wren => rx_fifo_wren,
 	    fifo_full => '0',
 	    data_in => s_data_out_tmp, --s_data_in_sync,
-	    dbg(7 downto 5) => open,
-	    dbg(4 downto 0) => Led(4 downto 0));
+	    dbg => open);
 
     fifo_int_1 : entity rx_fifo_interface
 	port map (

@@ -1,6 +1,10 @@
-XILINX_FLAGS += --ieee=none -fexplicit --warn-no-binding
+XILINX_FLAGS += --ieee=none -fexplicit --warn-no-binding --warn-no-vital-generic
 GHDL_DIR := $(shell dirname `ghdl --dispconfig | grep "default prefix" | \
 		sed 's/.*: //'`)
+GHDL_MCODE_DIR := $(shell ghdl_mcode --dispconfig | grep "library directory" | \
+		sed 's/.*: //')
+GHDL := ghdl
+GHDL_MCODE := ghdl_mcode
 
 XILINX_OBJS += \
 	ieee-obj93.cf \
@@ -28,6 +32,7 @@ MODULATOR_TB_FILES += \
 	fifo_interface.vhd \
 	fifo_tx_sim.vhd \
 	data_synchroniser.vhd \
+	hamming_lut.vhd \
 	serial_to_parallel.vhd \
 	rx_fifo_interface.vhd \
 	modulator_path_tb.vhd
@@ -42,7 +47,8 @@ MODULATOR_SYNTH_TB_FILES += \
 	serial_to_parallel_timesim.vhd \
 	rx_fifo_interface.vhd \
 	modulator_path_tb.vhd
-MODULATOR_SYNTH_SIM_FLAGS += --stop-time=1000us --ieee-asserts=disable-at-0
+MODULATOR_SYNTH_SIM_FLAGS += --stop-time=500us --ieee-asserts=disable-at-0 \
+			     --disp-time
 
 USB_TB_FILES += \
 	usb_fifo_interface.vhd \
@@ -74,7 +80,7 @@ P2S_SIM_FLAGS += --stop-time=5000ns
 
 NUMERIC_TB_FILES += \
 	lib_numeric_tb.vhd
-NUMERIC_SIM_FLAGS += --stop-time=10ns
+NUMERIC_SIM_FLAGS += --stop-time=100ns
 
 all:
 	@make -qp | awk -F ':' '/^[a-zA-Z0-9][^$$#\/\t=]*:([^=]|$$)/ \
@@ -82,63 +88,65 @@ all:
 
 # Test Benches (Elaboration)
 c_to_vhd_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(C_TO_VHD_FILES:.vhd=_pp.o)
-	ghdl -m $(XILINX_FLAGS) "$@"
+	$(GHDL) -m $(XILINX_FLAGS) "$@"
 	./"$@" $(C_TO_VHD_SIM_FLAGS) --wave="$@".ghw
 
 scrambler_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(SCRAMBLER_TB_FILES:.vhd=_pp.o)
-	ghdl -m $(XILINX_FLAGS) "$@"
+	$(GHDL) -m $(XILINX_FLAGS) "$@"
 	./"$@" $(SCRAMBLER_SIM_FLAGS) --wave="$@".ghw
 
 usb_fifo_interface_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(USB_TB_FILES:.vhd=_pp.o)
-	ghdl -m $(XILINX_FLAGS) "$@"
+	$(GHDL) -m $(XILINX_FLAGS) "$@"
 	./"$@" $(USB_SIM_FLAGS) --wave="$@".ghw
 
 fifo_interface_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(FIFO_TB_FILES:.vhd=_pp.o)
-	ghdl -m $(XILINX_FLAGS) "$@"
+	$(GHDL) -m $(XILINX_FLAGS) "$@"
 	./"$@" $(FIFO_SIM_FLAGS) --wave="$@".ghw
 
 rx_fifo_interface_tb: $(XILINX_OBJS) $(LOCAL_OBJS) \
 			$(RX_FIFO_TB_FILES:.vhd=_pp.o)
-	ghdl -m $(XILINX_FLAGS) "$@"
+	$(GHDL) -m $(XILINX_FLAGS) "$@"
 	./"$@" $(FIFO_SIM_FLAGS) --wave="$@".ghw
 
 clk_div_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(CLK_DIV_TB_FILES:.vhd=_pp.o)
-	ghdl -m $(XILINX_FLAGS) "$@"
+	$(GHDL) -m $(XILINX_FLAGS) "$@"
 	./"$@" $(CLK_DIV_SIM_FLAGS) --wave="$@".ghw
 
 modulator_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(MODULATOR_TB_FILES:.vhd=_pp.o)
-	ghdl -m $(XILINX_FLAGS) "$@"
+	$(GHDL) -m $(XILINX_FLAGS) "$@"
 	./"$@" $(MODULATOR_SIM_FLAGS) --wave="$@".ghw
 
 modulator_synth_tb: $(XILINX_OBJS) $(LOCAL_OBJS) \
 		$(MODULATOR_SYNTH_TB_FILES:.vhd=_pp.o)
-	ghdl -m $(XILINX_FLAGS) modulator_tb
-	./modulator_tb $(MODULATOR_SYNTH_SIM_FLAGS) --wave="$@".ghw
+	$(GHDL_MCODE) -c $(XILINX_FLAGS) -r modulator_tb \
+	$(MODULATOR_SYNTH_SIM_FLAGS) --fst="$@".fst_none #\
+#	--sdf=s_to_p=netgen/par/processed/serial_to_parallel_timesim_pp.sdf \
 
 parallel_to_serial_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(P2S_TB_FILES:.vhd=_pp.o)
-	ghdl -m $(XILINX_FLAGS) "$@"
+	$(GHDL) -m $(XILINX_FLAGS) "$@"
 	./"$@" $(P2S_SIM_FLAGS) --wave="$@".ghw
 
-numeric_tb: $(LOCAL_OBJS) $(NUMERIC_TB_FILES:.vhd=_pp.o)
-	ghdl -m $(XILINX_FLAGS) "$@"
-	./"$@" $(NUMERIC_SIM_FLAGS) --wave="$@".ghw
+numeric_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(NUMERIC_TB_FILES:.vhd=_pp.o)
+	$(GHDL) -m $(XILINX_FLAGS) "$@"
+	$(GHDL) -r "$@" $(NUMERIC_SIM_FLAGS) --wave="$@".ghw #\
+#		--sdf=typ==../testbench/lib_numeric_tb.sdf
 
 # Xilinx libraries
 xilinxcorelib-obj93.cf:
-	ghdl -i --ieee=none --work=XilinxCoreLib \
+	$(GHDL) -i --ieee=none --work=XilinxCoreLib \
 		../Xilinx/sim/XilinxCoreLib/*.vhd
 unisim-obj93.cf:
-	ghdl -i --ieee=none --work=unisim ../Xilinx/sim/unisims/*.vhd \
+	$(GHDL) -i --ieee=none --work=unisim ../Xilinx/sim/unisims/*.vhd \
 		../Xilinx/sim/unisims/primitive/*.vhd
 simprim-obj93.cf:
-	ghdl -i --ieee=none --work=simprim ../Xilinx/sim/simprims/*.vhd \
+	$(GHDL) -i --ieee=none --work=simprim ../Xilinx/sim/simprims/*.vhd \
 		../Xilinx/sim/simprims/primitive/*.vhd
 ieee-obj93.cf:
-	ghdl -i --ieee=none --work=ieee ../Xilinx/sim/ieee/*.vhd \
-		$(GHDL_DIR)/src/vital95/*.vhdl
+	$(GHDL) -i --ieee=none --work=ieee ../Xilinx/sim/ieee/*.vhd \
+		$(GHDL_DIR)/src/vital2000/*.vhdl
 
 transceiver-obj93.cf:
-	ghdl -i --ieee=none --work=transceiver ../lib/*.vhd
+	$(GHDL) -i --ieee=none --work=transceiver ../lib/*.vhd
 
 # Preprocessing
 %_pp.vhd: ../%.vhd
@@ -146,21 +154,21 @@ transceiver-obj93.cf:
 
 # Analysis
 %_pp.o: ../processed/%_pp.vhd
-	ghdl -i $(XILINX_FLAGS) "$<"
+	$(GHDL) -i $(XILINX_FLAGS) "$<"
 %_tb_pp.o: ../testbench/processed/%_tb_pp.vhd
-	ghdl -i $(XILINX_FLAGS) "$<"
+	$(GHDL) -i $(XILINX_FLAGS) "$<"
 %_sim_pp.o: ../Xilinx/sim/processed/%_sim_pp.vhd
-	ghdl -i $(XILINX_FLAGS) "$<"
+	$(GHDL) -i $(XILINX_FLAGS) "$<"
 %_synthesis_pp.o: netgen/synthesis/processed/%_synthesis_pp.vhd
-	ghdl -i $(XILINX_FLAGS) "$<"
+	$(GHDL) -i $(XILINX_FLAGS) "$<"
 %_timesim_pp.o: netgen/par/processed/%_timesim_pp.vhd
-	ghdl -i $(XILINX_FLAGS) "$<"
+	$(GHDL) -i $(XILINX_FLAGS) "$<"
 
 # Other Targets
 clean:
-	ghdl --remove
+	$(GHDL) --remove
 cleanall:
-	ghdl --remove
+	$(GHDL) --remove
 	rm -f *.ghw
 	rm -f *.cf
 	rm -f *.o

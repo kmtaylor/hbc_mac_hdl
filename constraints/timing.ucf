@@ -1,0 +1,4 @@
+# All downstream clock domains inherit their timing constraints from this
+
+NET "clkin" TNM_NET = "TNM_NET_clkin";
+TIMESPEC "TS_clkin" = PERIOD "TNM_NET_clkin" 10ns HIGH 50%;

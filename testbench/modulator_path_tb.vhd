@@ -79,6 +79,14 @@ architecture behaviour of modulator_tb is
     constant s_clk_period : time := 24 ns;
     constant s_clk_dly_period : time := 23999 ps;
     
+    type val_ft is file of std_logic;
+    type time_ft is file of time;
+    file val_file : val_ft open WRITE_MODE is "modulator_none_tb_stim.value";
+    file time_file : time_ft open WRITE_MODE is "modulator_none_tb_stim.time";
+    procedure write_val(val : std_logic) is begin
+        write(val_file, val);
+        write(time_file, now);
+    end procedure write_val;
 begin
  
     -- Instantiate the Unit Under Test (UUT)
@@ -204,6 +212,7 @@ begin
 	serial_clk <= '0';
 	wait for s_clk_period/2;
 	serial_clk <= '1';
+	write_val(s_data_sync);
 	wait for s_clk_period/2;
     end process;
 
