@@ -555,7 +555,7 @@ begin
 	    fifo_d_out => s2p_fifo_data,
 	    fifo_wren => rx_fifo_wren,
 	    fifo_full => '0',
-	    data_in => s_data_out_tmp, --s_data_in_sync,
+	    data_in => s_data_in_sync,
 	    dbg => open);
 
     fifo_int_1 : entity rx_fifo_interface

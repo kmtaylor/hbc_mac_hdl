@@ -1,6 +1,6 @@
 #include <preprocessor/constants.vhh>
 
-#define DEBUG 1
+#define DEBUG 0
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -38,6 +38,8 @@ architecture serial_to_parallel_arch of serial_to_parallel is
     constant NIBBLE_SIZE : natural := 8;
     constant WORD_SIZE : natural := 32;
     constant PKT_END_THRESH : natural := 8;
+
+    signal data_in_r : std_logic;
 
     signal using_ri : std_logic;
     signal rate_found : std_logic;
@@ -178,21 +180,29 @@ begin
     sym_reset <= reset or sym_reset_i;
     pkt_reset <= sym_reset;
 
+    data_sync : process (serial_clk) begin
+	if serial_clk'event and serial_clk = '1' then
+	    data_in_r <= data_in;
+	end if;
+    end process data_sync;
+
     s2p_reg : process (serial_clk) begin
 	if serial_clk'event and serial_clk = '1' then
 	    if sym_reset = '1' then
 		s2p_sym <= (others => '0');
 	    else
-		s2p_sym <= s2p_sym(MAX_SYMBOL_SIZE-2 downto 0) & data_in;
+		s2p_sym <= s2p_sym(MAX_SYMBOL_SIZE-2 downto 0) & data_in_r;
 	    end if;
 	end if;
     end process s2p_reg;
     
-    detect_phase_shift : process(s2p_sym, data_in) begin
-	if s2p_sym(0) = data_in then
-	    phase_change <= '1';
-	else
-	    phase_change <= '0';
+    detect_phase_shift : process(serial_clk) begin
+	if serial_clk'event and serial_clk = '1' then
+	    if s2p_sym(0) = data_in_r then
+		phase_change <= '1';
+	    else
+		phase_change <= '0';
+	    end if;
 	end if;
     end process detect_phase_shift;
 
@@ -201,9 +211,11 @@ begin
 	    if sym_reset = '1' then
 		s2p_align_index <= (others => '0');
 	    else
-		if (phase_change = '1') or (s2p_align_index = r_sf-1) then
+		if (phase_change = '1') then
 		    -- We received the same two values in a row, this may be a
 		    -- phase change. 
+		    s2p_align_index <= to_unsigned(1, s2p_align_index'length);
+		elsif s2p_align_index = r_sf-1 then
 		    s2p_align_index <= (others => '0');
 		else
 		    s2p_align_index <= s2p_align_index + 1;

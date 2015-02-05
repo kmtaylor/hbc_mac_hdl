@@ -81,8 +81,8 @@ architecture behaviour of modulator_tb is
     
     type val_ft is file of std_logic;
     type time_ft is file of time;
-    file val_file : val_ft open WRITE_MODE is "modulator_none_tb_stim.value";
-    file time_file : time_ft open WRITE_MODE is "modulator_none_tb_stim.time";
+    file val_file : val_ft open WRITE_MODE is "modulator_tb_stim.value";
+    file time_file : time_ft open WRITE_MODE is "modulator_tb_stim.time";
     procedure write_val(val : std_logic) is begin
         write(val_file, val);
         write(time_file, now);

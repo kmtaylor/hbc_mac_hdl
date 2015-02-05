@@ -47,8 +47,8 @@ MODULATOR_SYNTH_TB_FILES += \
 	serial_to_parallel_timesim.vhd \
 	rx_fifo_interface.vhd \
 	modulator_path_tb.vhd
-MODULATOR_SYNTH_SIM_FLAGS += --stop-time=500us --ieee-asserts=disable-at-0 \
-			     --disp-time
+MODULATOR_SYNTH_SIM_FLAGS += --stop-time=500us --ieee-asserts=disable-at-0 #\
+#			     --disp-time
 
 USB_TB_FILES += \
 	usb_fifo_interface.vhd \
@@ -119,8 +119,8 @@ modulator_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(MODULATOR_TB_FILES:.vhd=_pp.o)
 modulator_synth_tb: $(XILINX_OBJS) $(LOCAL_OBJS) \
 		$(MODULATOR_SYNTH_TB_FILES:.vhd=_pp.o)
 	$(GHDL_MCODE) -c $(XILINX_FLAGS) -r modulator_tb \
-	$(MODULATOR_SYNTH_SIM_FLAGS) --fst="$@".fst_none #\
-#	--sdf=s_to_p=netgen/par/processed/serial_to_parallel_timesim_pp.sdf \
+	$(MODULATOR_SYNTH_SIM_FLAGS) --fst="$@".fst \
+	--sdf=s_to_p=netgen/par/processed/serial_to_parallel_timesim_pp.sdf
 
 parallel_to_serial_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(P2S_TB_FILES:.vhd=_pp.o)
 	$(GHDL) -m $(XILINX_FLAGS) "$@"
