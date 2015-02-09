@@ -18,6 +18,8 @@ entity serial_to_parallel is
 		fifo_full : in std_logic;
 		data_in : in std_logic;
 		pkt_reset : out std_logic;
+		pkt_ready : out std_logic;
+		pkt_ack : in std_logic;
 		dbg : out std_logic_vector (7 downto 0));
 end serial_to_parallel;
 
@@ -179,6 +181,16 @@ begin
 
     sym_reset <= reset or sym_reset_i;
     pkt_reset <= sym_reset;
+
+    packet_ack : process (reset, pkt_ack, serial_clk) begin
+	if pkt_ack = '1' or reset = '1'then
+	    pkt_ready <= '0';
+	elsif serial_clk'event and serial_clk = '1' then
+	    if sym_reset_i = '1' then
+		pkt_ready <= '1';
+	    end if;
+	end if;
+    end process packet_ack;
 
     data_sync : process (serial_clk) begin
 	if serial_clk'event and serial_clk = '1' then

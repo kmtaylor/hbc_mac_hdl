@@ -26,6 +26,7 @@ architecture behaviour of modulator_tb is
     signal clk : std_logic := '0';
     signal reset : std_logic := '0';
     signal pkt_reset : std_logic;
+    signal pkt_ack : std_logic := '0';
     signal io_addr : std_logic_vector(7 downto 0) := (others => '0');
     signal io_d_in : std_logic_vector(31 downto 0) := (others => '0');
     signal io_addr_strobe : std_logic := '0';
@@ -187,7 +188,8 @@ begin
 	fifo_d_out => s2p_fifo_data,
 	fifo_wren => s2p_fifo_wren,
 	fifo_full => s2p_fifo_full,
-	data_in => s_data_sync);
+	data_in => s_data_sync,
+	pkt_ack => pkt_ack);
 
     rx_fifo_int : entity work.rx_fifo_interface port map (
             clk => clk,

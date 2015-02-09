@@ -42,8 +42,8 @@
  
 # Pmod Connectors
  NET "s_data_out"  LOC = "AD11";   # BANK = 22,  Pin name = IO_L10N_CC_22,   Sch name = JA1
-# NET "clk1_dbg"  LOC = "AD9";    # BANK = 22,  Pin name = IO_L9N_CC_22,    Sch name = JA2
-# NET "clk2_dbg"  LOC = "AM13";   # BANK = 22,  Pin name = IO_L2N_22,       Sch name = JA3
+# NET "s_data_in"  LOC = "AD9";    # BANK = 22,  Pin name = IO_L9N_CC_22,    Sch name = JA2
+ NET "s_data_in"  LOC = "AM13";   # BANK = 22,  Pin name = IO_L2N_22,       Sch name = JA3
  NET "serial_clk_out"  LOC = "AM12";   # BANK = 22,  Pin name = IO_L6P_22,       Sch name = JA4
 
 # onBoard USB controller

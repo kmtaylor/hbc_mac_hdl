@@ -12,6 +12,7 @@ entity toplevel is
 	clkin, rstbtn, btn1, btn2 : in std_logic;
 	serial_clk_out : out std_logic;
 	s_data_out : out std_logic;
+	s_data_in : in std_logic;
 	-- Physical memory interface
 	ddr2_dq	    : inout std_logic_vector (63 downto 0);
 	ddr2_a	    : out std_logic_vector (12 downto 0);
@@ -158,6 +159,8 @@ architecture toplevel_arch of toplevel is
     signal rx_fifo_flush : std_logic;
 
     signal s2p_fifo_data : std_logic_vector (31 downto 0);
+    signal s2p_pkt_ready : std_logic;
+    signal s2p_pkt_ack : std_logic;
 
     signal mod_bus_master : std_logic;
     signal fifo_bus_addr : std_logic_vector (7 downto 0);
@@ -177,7 +180,6 @@ architecture toplevel_arch of toplevel is
     
     signal reseed, seed_val, seed_clk : std_logic;
 
-    signal s_data_out_tmp : std_logic;
     signal s_data_in_sync : std_logic;
 
     signal reset : std_logic;
@@ -194,8 +196,6 @@ architecture toplevel_arch of toplevel is
 
 begin
     
-    s_data_out <= s_data_out_tmp;
-
     serial_clk_out <= serial_clk;
 
     cpu_clk <= mem_clk0;
@@ -275,14 +275,15 @@ begin
 	    GPO1 (3) => seed_val,
 	    GPO1 (4) => seed_clk,
 	    GPO1 (5) => tx_fifo_flush,
-	    GPO1 (7 downto 6) => open,
+	    GPO1 (6) => s2p_pkt_ack,
+	    GPO1 (7) => open,
 	    GPO2 => Led,
 	    INTC_Interrupt (INT(IRQ_BUTTON)) => btn1_d,
 	    INTC_Interrupt (INT(IRQ_FIFO_FULL)) => tx_fifo_full,
 	    INTC_Interrupt (INT(IRQ_FIFO_ALMOST_FULL)) => tx_fifo_almost_full,
 	    INTC_Interrupt (INT(IRQ_FIFO_OVERFLOW)) => tx_fifo_overflow,
 	    INTC_Interrupt (INT(IRQ_FIFO_EMPTY)) => tx_fifo_empty,
-	    INTC_Interrupt (INT(IRQ_FIFO_UNDERFLOW)) => tx_fifo_underflow,
+	    INTC_Interrupt (INT(IRQ_RX_PKT_READY)) => s2p_pkt_ready,
 	    INTC_Interrupt (INT(IRQ_RX_DATA_READY)) => not(rx_fifo_empty),
 	    INTC_Interrupt (INT(IRQ_CLOCK_LOSS)) => clk_lock_int,
 	    INTC_Interrupt (INT(IRQ_RAM_INIT)) => not(phy_init_done),
@@ -298,7 +299,7 @@ begin
 	    GPI1 (INT(IRQ_FIFO_ALMOST_FULL)) => tx_fifo_almost_full,
 	    GPI1 (INT(IRQ_FIFO_OVERFLOW)) => tx_fifo_overflow,
 	    GPI1 (INT(IRQ_FIFO_EMPTY)) => tx_fifo_empty,
-	    GPI1 (INT(IRQ_FIFO_UNDERFLOW)) => tx_fifo_underflow,
+	    GPI1 (INT(IRQ_RX_PKT_READY)) => s2p_pkt_ready,
 	    GPI1 (INT(IRQ_RX_DATA_READY)) => not(rx_fifo_empty),
 	    GPI1 (INT(IRQ_CLOCK_LOSS)) => clk_lock_int,
 	    GPI1 (INT(IRQ_RAM_INIT)) => not(phy_init_done),
@@ -432,7 +433,7 @@ begin
 	    fifo_d_in => from_tx_fifo,
 	    fifo_rden => tx_fifo_rden,
 	    fifo_empty => tx_fifo_empty,
-	    data_out => s_data_out_tmp);
+	    data_out => s_data_out);
 
     usb_0 : entity work.usb_fifo
 	port map (
@@ -544,7 +545,7 @@ begin
 	    reset => pkt_reset,
 	    serial_clk => serial_clk,
 	    serial_clk_90 => serial_clk_90,
-	    data_in => s_data_out_tmp,
+	    data_in => s_data_in,
 	    data_out => s_data_in_sync);
 
     s_to_p : entity work.serial_to_parallel
@@ -556,6 +557,8 @@ begin
 	    fifo_wren => rx_fifo_wren,
 	    fifo_full => '0',
 	    data_in => s_data_in_sync,
+	    pkt_ack => s2p_pkt_ack,
+	    pkt_ready => s2p_pkt_ready,
 	    dbg => open);
 
     fifo_int_1 : entity rx_fifo_interface
