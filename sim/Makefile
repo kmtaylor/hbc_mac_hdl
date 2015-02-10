@@ -47,7 +47,7 @@ MODULATOR_SYNTH_TB_FILES += \
 	serial_to_parallel_timesim.vhd \
 	rx_fifo_interface.vhd \
 	modulator_path_tb.vhd
-MODULATOR_SYNTH_SIM_FLAGS += --stop-time=500us --ieee-asserts=disable-at-0 #\
+MODULATOR_SYNTH_SIM_FLAGS += --stop-time=1000us --ieee-asserts=disable-at-0 #\
 #			     --disp-time
 
 USB_TB_FILES += \

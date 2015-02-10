@@ -1,8 +1,10 @@
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.ALL;
+use ieee.numeric_std.ALL;
 
-use IEEE.NUMERIC_STD.ALL;
+library transceiver;
+use transceiver.bits.all;
 
 entity data_synchroniser is
 	port (
@@ -14,15 +16,22 @@ end data_synchroniser;
 
 architecture data_synchroniser_arch of data_synchroniser is
 
+    constant WRAP_REG_SIZE : natural := 8;
+
     signal serial_clk_180 : std_logic;
     signal serial_clk_270 : std_logic;
 
     -- It may be necessary to increase the array size here to allow for greater
     -- clock drift.
-    signal d_0	    : std_logic_vector (7 downto 0);
-    signal d_90	    : std_logic_vector (7 downto 0);
-    signal d_180    : std_logic_vector (7 downto 0);
-    signal d_270    : std_logic_vector (7 downto 0);
+    signal d_0	    : std_logic_vector (2 downto 0);
+    signal d_90	    : std_logic_vector (2 downto 0);
+    signal d_180    : std_logic_vector (2 downto 0);
+    signal d_270    : std_logic_vector (2 downto 0);
+
+    signal d_0_wrap	: std_logic_vector (WRAP_REG_SIZE-1 downto 0);
+    signal d_90_wrap	: std_logic_vector (WRAP_REG_SIZE-1 downto 0);
+    signal d_180_wrap	: std_logic_vector (WRAP_REG_SIZE-1 downto 0);
+    signal d_270_wrap	: std_logic_vector (WRAP_REG_SIZE-1 downto 0);
 
     signal d_0_n, d_0_p : std_logic;
     signal d_90_n, d_90_p : std_logic;
@@ -34,7 +43,7 @@ architecture data_synchroniser_arch of data_synchroniser is
     signal use_180, use_180_hold : std_logic;
     signal use_270, use_270_hold : std_logic;
 
-    signal delay_time : unsigned (2 downto 0);
+    signal delay_time : unsigned (bits_for_val(WRAP_REG_SIZE-1)-1 downto 0);
 
     signal delay_d_0 : std_logic;
     signal delay_d_90 : std_logic;
@@ -158,22 +167,22 @@ begin
     -- shorter or longer delay whenever we wrap from 0 to 270 or vice versa.
     wrap_delay : process (serial_clk, reset) begin
 	if reset = '1' then
-	    d_0(7 downto 3) <= (others => '0');
-	    d_90(7 downto 3) <= (others => '0');
-	    d_180(7 downto 3) <= (others => '0');
-	    d_270(7 downto 3) <= (others => '0');
+	    d_0_wrap <= (others => '0');
+	    d_90_wrap <= (others => '0');
+	    d_180_wrap <= (others => '0');
+	    d_270_wrap <= (others => '0');
 	elsif serial_clk'event and serial_clk = '1' then
-	    d_0(7 downto 3) <= d_0(6 downto 2);
-	    d_90(7 downto 3) <= d_90(6 downto 2);
-	    d_180(7 downto 3) <= d_180(6 downto 2);
-	    d_270(7 downto 3) <= d_270(6 downto 2);
+	    d_0_wrap <= d_0_wrap(WRAP_REG_SIZE-2 downto 0) & d_0(2);
+	    d_90_wrap <= d_90_wrap(WRAP_REG_SIZE-2 downto 0) & d_90(2);
+	    d_180_wrap <= d_180_wrap(WRAP_REG_SIZE-2 downto 0) & d_180(2);
+	    d_270_wrap <= d_270_wrap(WRAP_REG_SIZE-2 downto 0) & d_270(2);
 	end if;
     end process wrap_delay;
 
     wrap_detect : process(serial_clk, reset) begin
 	if reset = '1' then
 	    -- On packet reset, initialise the delay to the centre of the array.
-	    delay_time <= to_unsigned(2, 3);
+	    delay_time <= to_unsigned(WRAP_REG_SIZE/2, delay_time'length);
 	elsif serial_clk'event and serial_clk = '1' then
 	    if (use_270_hold and use_0) = '1' then
 		delay_time <= delay_time - 1;
@@ -183,6 +192,12 @@ begin
 	end if;
     end process wrap_detect;
 
+    delay_d_0 <=d_0_wrap(to_integer(delay_time));
+    delay_d_90 <=d_90_wrap(to_integer(delay_time));
+    delay_d_180 <=d_180_wrap(to_integer(delay_time));
+    delay_d_270 <=d_270_wrap(to_integer(delay_time));
+
+#if 0
     with (delay_time) select delay_d_0
 	<=  d_0(3) when "000",
 	    d_0(4) when "001",
@@ -210,6 +225,7 @@ begin
 	    d_270(5) when "010",
 	    d_270(6) when "011",
 	    d_270(7) when others;
+#endif
  
     sync_d_0     <= delay_d_0   and use_0_hold;
     sync_d_90    <= delay_d_90  and use_90_hold;

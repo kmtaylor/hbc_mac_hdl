@@ -78,7 +78,7 @@ architecture behaviour of modulator_tb is
     -- Clock period definitions
     constant clk_period : time := 10 ns;
     constant s_clk_period : time := 24 ns;
-    constant s_clk_dly_period : time := 23999 ps;
+    constant s_clk_dly_period : time := 23997 ps;
     
     type val_ft is file of std_logic;
     type time_ft is file of time;
@@ -350,7 +350,7 @@ begin
 	wait for clk_period;		\
 	io_write_strobe <= '0';		\
 	io_addr_strobe <= '0';		\
-	wait for clk_period * 300;
+	wait for clk_period * 2000;
 
 #define SET_SF(val) \
 	io_write_strobe <= '1';		    \
@@ -386,20 +386,20 @@ begin
 	WRITE_PREAMBLE()		    \
 	WRITE_PREAMBLE()		    \
 					    \
-	RI_SF_32()			    \
+	RI_SF_64()			    \
 					    \
-	SET_SF(X"00000001")		    \
+	SET_SF(X"00000000")		    \
 	FIFO_WRITE_SIZE(X"00000020")	    \
 					    \
 	MODULATE(X"12345678")		    \
-	MODULATE(X"95748334")		    \
+	MODULATE(X"87654321")		    \
 	MODULATE(X"12345678")		    \
-	MODULATE(X"42334321")
+	MODULATE(X"87654321")
 
 	TRIGGER()
 	SEND_PACKET()
 
-	wait for clk_period * 60000;
+	wait for clk_period * 120000;
 
 #define READ_RX_FIFO()			    \
 	io_read_strobe <= '1';		    \
