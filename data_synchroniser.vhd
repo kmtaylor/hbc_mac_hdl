@@ -16,7 +16,7 @@ end data_synchroniser;
 
 architecture data_synchroniser_arch of data_synchroniser is
 
-    constant WRAP_REG_SIZE : natural := 8;
+    constant WRAP_REG_SIZE : natural := 16;
 
     signal serial_clk_180 : std_logic;
     signal serial_clk_270 : std_logic;

@@ -28,7 +28,7 @@ architecture serial_to_parallel_arch of serial_to_parallel is
 #define _COUNT_OFFSET(val) COMMA_SIZE-1 + INT(val)
 #define COUNT_OFFSET(val) _COUNT_OFFSET(val)
 
-    constant RESET_DELAY : natural := 25;
+    constant RESET_DELAY : natural := 16;
     constant MAX_SYMBOL_SIZE : natural := 64;
     constant COMMA_SIZE : natural := 64;
     constant SYMBOL_INDEX_BITS : natural := bits_for_val(MAX_SYMBOL_SIZE-1);

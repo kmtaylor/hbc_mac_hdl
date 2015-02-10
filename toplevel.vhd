@@ -97,6 +97,8 @@ architecture toplevel_arch of toplevel is
 	);
     END COMPONENT;
 
+    constant RESET_DELAY : natural := 16;
+
     signal io_read_strobe, io_write_strobe : std_logic;
     signal io_ready, io_addr_strobe : std_logic;
     signal io_address : std_logic_vector (31 downto 0);
@@ -182,7 +184,21 @@ architecture toplevel_arch of toplevel is
 
     signal s_data_in_sync : std_logic;
 
-    signal reset : std_logic;
+    signal serial_reset : std_logic;
+    signal cpu_reset : std_logic;
+    signal c_reset_shift_r : std_logic_vector(RESET_DELAY-1 downto 0);
+    signal s_reset_shift_r : std_logic_vector(RESET_DELAY-1 downto 0);
+
+    attribute equivalent_register_removal : string;
+    attribute max_fanout : string;
+    attribute shreg_extract : string;
+    attribute equivalent_register_removal of cpu_reset : signal is "no";
+    attribute max_fanout of cpu_reset : signal is "10";
+    attribute shreg_extract of cpu_reset : signal is "no";
+    attribute equivalent_register_removal of serial_reset : signal is "no";
+    attribute max_fanout of serial_reset : signal is "10";
+    attribute shreg_extract of serial_reset : signal is "no";
+
     signal pkt_reset : std_logic;
     signal clk_debounce, clkin_ibufg : std_logic;
     signal pll_clk, cpu_clk, serial_clk, serial_clk_90, usb_clk : std_logic;
@@ -196,11 +212,29 @@ architecture toplevel_arch of toplevel is
 
 begin
     
+    cpu_reset_sync_proc : process (cpu_clk, rstbtn) begin
+        if rstbtn = '0' then
+            c_reset_shift_r <= (others => '1');
+        elsif cpu_clk'event and cpu_clk = '1' then
+            c_reset_shift_r <= c_reset_shift_r(RESET_DELAY-2 downto 0) & '0';
+        end if;
+    end process cpu_reset_sync_proc;
+
+    cpu_reset <= c_reset_shift_r(RESET_DELAY-1);
+
+    serial_reset_sync_proc : process (serial_clk, rstbtn) begin
+        if rstbtn = '0' then
+            s_reset_shift_r <= (others => '1');
+        elsif serial_clk'event and serial_clk = '1' then
+            s_reset_shift_r <= s_reset_shift_r(RESET_DELAY-2 downto 0) & '0';
+        end if;
+    end process serial_reset_sync_proc;
+
+    serial_reset <= s_reset_shift_r(RESET_DELAY-1);
+
     serial_clk_out <= serial_clk;
 
     cpu_clk <= mem_clk0;
-
-    reset <= not rstbtn;
 
     clk_lock_int <= not(pll_locked and serial_dcm_locked and 
 		cpu_dcm_locked and mem_pll_locked);
@@ -260,7 +294,7 @@ begin
     cpu_0 : component mcs_0
 	port map (
 	    Clk => cpu_clk,
-	    Reset => reset,
+	    Reset => cpu_reset,
 	    IO_Addr_Strobe => io_addr_strobe,
 	    IO_Read_Strobe => io_read_strobe,
 	    IO_Write_Strobe => io_write_strobe,
@@ -333,7 +367,7 @@ begin
     mem_if : entity work.mem_interface
 	port map (
 	    cpu_clk => cpu_clk,
-	    reset => reset,
+	    reset => cpu_reset,
 	    io_addr => io_address (7 downto 0),
 	    io_d_in => io_write_data,
 	    io_d_out => bus3_data,
@@ -394,7 +428,7 @@ begin
     fifo_int_0 : entity work.fifo_interface
 	port map (
 	    clk => cpu_clk,
-	    reset => reset,
+	    reset => cpu_reset,
 	    trigger => tx_fifo_flush,
 	    io_addr => fifo_bus_addr,
 	    io_d_in => fifo_d_out,
@@ -411,7 +445,7 @@ begin
 	    
     tx_fifo : component fifo_tx
 	port map (
-	    rst => reset,
+	    rst => cpu_reset,
 	    wr_clk => cpu_clk,
 	    rd_clk => serial_clk,
 	    din => to_tx_fifo,
@@ -427,7 +461,7 @@ begin
     p_to_s : entity work.parallel_to_serial
 	port map (
 	    clk => serial_clk,
-	    reset => reset,
+	    reset => serial_reset,
 	    trigger => parallel_to_serial_enable,
 	    trig_clk => cpu_clk,
 	    fifo_d_in => from_tx_fifo,
@@ -439,7 +473,7 @@ begin
 	port map (
 	    usb_clk => usb_clk,
 	    cpu_clk => cpu_clk,
-	    reset => reset,
+	    reset => cpu_reset,
 	    io_addr => io_address (7 downto 0),
 	    io_d_in => io_write_data,
 	    io_d_out => bus4_data,
@@ -463,7 +497,7 @@ begin
     lcd_0 : entity work.lcd_interface
 	port map (
 	    clk => cpu_clk,
-	    reset => reset,
+	    reset => cpu_reset,
 	    io_addr => io_address (7 downto 0),
 	    io_d_in => io_write_data (7 downto 0),
 	    -- offset of 2 if MEM_FLAGS_ADDR := X"02"
@@ -480,7 +514,7 @@ begin
     scrambler : entity work.scrambler
 	port map (
 	    cpu_clk => cpu_clk,
-	    reset => reset,
+	    reset => cpu_reset,
 	    reseed => reseed,
 	    seed_val => seed_val,
 	    seed_clk => seed_clk,
@@ -512,7 +546,7 @@ begin
     modulator : entity work.modulator
 	port map (
 	    clk => cpu_clk,
-	    reset => reset,
+	    reset => cpu_reset,
 	    io_addr => io_address (7 downto 0),
 	    io_d_in => io_write_data,
 	    io_addr_strobe => io_addr_strobe,
@@ -527,7 +561,7 @@ begin
     
     rx_fifo : component fifo_rx
 	port map (
-	    rst => reset,
+	    rst => cpu_reset,
 	    wr_clk => serial_clk,
 	    rd_clk => cpu_clk,
 	    din => s2p_fifo_data,
@@ -550,7 +584,7 @@ begin
 
     s_to_p : entity work.serial_to_parallel
 	port map (
-	    reset_i => reset,
+	    reset_i => serial_reset,
 	    pkt_reset => pkt_reset,
 	    serial_clk => serial_clk,
 	    fifo_d_out => s2p_fifo_data,
@@ -564,7 +598,7 @@ begin
     fifo_int_1 : entity rx_fifo_interface
 	port map (
 	    clk => cpu_clk,
-	    reset => reset,
+	    reset => cpu_reset,
 	    io_addr => io_address (7 downto 0),
 	    io_d_out => bus7_data,
 	    io_addr_strobe => io_addr_strobe,
