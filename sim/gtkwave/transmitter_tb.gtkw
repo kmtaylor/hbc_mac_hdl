@@ -1,0 +1,48 @@
+[*]
+[*] GTKWave Analyzer v3.3.45 (w)1999-2012 BSI
+[*] Wed Mar 25 02:49:21 2015
+[*]
+[dumpfile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/transmitter_tb.ghw"
+[dumpfile_mtime] "Wed Mar 25 02:41:29 2015"
+[dumpfile_size] 667637
+[savefile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/transmitter_tb.gtkw"
+[timestart] 0
+[size] 1920 1027
+[pos] -1 26
+*-29.000000 115000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.transmitter_tb.
+[sst_width] 224
+[signals_width] 230
+[sst_expanded] 1
+[sst_vpaned_height] 292
+@28
+top.transmitter_tb.clk
+top.transmitter_tb.reset
+@200
+-
+@22
+#{top.transmitter_tb.io_addr[7:0]} top.transmitter_tb.io_addr[7] top.transmitter_tb.io_addr[6] top.transmitter_tb.io_addr[5] top.transmitter_tb.io_addr[4] top.transmitter_tb.io_addr[3] top.transmitter_tb.io_addr[2] top.transmitter_tb.io_addr[1] top.transmitter_tb.io_addr[0]
+#{top.transmitter_tb.io_d_in[31:0]} top.transmitter_tb.io_d_in[31] top.transmitter_tb.io_d_in[30] top.transmitter_tb.io_d_in[29] top.transmitter_tb.io_d_in[28] top.transmitter_tb.io_d_in[27] top.transmitter_tb.io_d_in[26] top.transmitter_tb.io_d_in[25] top.transmitter_tb.io_d_in[24] top.transmitter_tb.io_d_in[23] top.transmitter_tb.io_d_in[22] top.transmitter_tb.io_d_in[21] top.transmitter_tb.io_d_in[20] top.transmitter_tb.io_d_in[19] top.transmitter_tb.io_d_in[18] top.transmitter_tb.io_d_in[17] top.transmitter_tb.io_d_in[16] top.transmitter_tb.io_d_in[15] top.transmitter_tb.io_d_in[14] top.transmitter_tb.io_d_in[13] top.transmitter_tb.io_d_in[12] top.transmitter_tb.io_d_in[11] top.transmitter_tb.io_d_in[10] top.transmitter_tb.io_d_in[9] top.transmitter_tb.io_d_in[8] top.transmitter_tb.io_d_in[7] top.transmitter_tb.io_d_in[6] top.transmitter_tb.io_d_in[5] top.transmitter_tb.io_d_in[4] top.transmitter_tb.io_d_in[3] top.transmitter_tb.io_d_in[2] top.transmitter_tb.io_d_in[1] top.transmitter_tb.io_d_in[0]
+@28
+top.transmitter_tb.io_ready
+top.transmitter_tb.io_write_strobe
+top.transmitter_tb.io_read_strobe
+top.transmitter_tb.io_addr_strobe
+@200
+-
+@22
+#{top.transmitter_tb.fi_d[31:0]} top.transmitter_tb.fi_d[31] top.transmitter_tb.fi_d[30] top.transmitter_tb.fi_d[29] top.transmitter_tb.fi_d[28] top.transmitter_tb.fi_d[27] top.transmitter_tb.fi_d[26] top.transmitter_tb.fi_d[25] top.transmitter_tb.fi_d[24] top.transmitter_tb.fi_d[23] top.transmitter_tb.fi_d[22] top.transmitter_tb.fi_d[21] top.transmitter_tb.fi_d[20] top.transmitter_tb.fi_d[19] top.transmitter_tb.fi_d[18] top.transmitter_tb.fi_d[17] top.transmitter_tb.fi_d[16] top.transmitter_tb.fi_d[15] top.transmitter_tb.fi_d[14] top.transmitter_tb.fi_d[13] top.transmitter_tb.fi_d[12] top.transmitter_tb.fi_d[11] top.transmitter_tb.fi_d[10] top.transmitter_tb.fi_d[9] top.transmitter_tb.fi_d[8] top.transmitter_tb.fi_d[7] top.transmitter_tb.fi_d[6] top.transmitter_tb.fi_d[5] top.transmitter_tb.fi_d[4] top.transmitter_tb.fi_d[3] top.transmitter_tb.fi_d[2] top.transmitter_tb.fi_d[1] top.transmitter_tb.fi_d[0]
+#{top.transmitter_tb.fi_addr[7:0]} top.transmitter_tb.fi_addr[7] top.transmitter_tb.fi_addr[6] top.transmitter_tb.fi_addr[5] top.transmitter_tb.fi_addr[4] top.transmitter_tb.fi_addr[3] top.transmitter_tb.fi_addr[2] top.transmitter_tb.fi_addr[1] top.transmitter_tb.fi_addr[0]
+@28
+top.transmitter_tb.fi_write_strobe
+top.transmitter_tb.fi_addr_strobe
+@200
+-
+@28
+top.transmitter_tb.p_to_s.state
+top.transmitter_tb.parallel_to_serial_enable
+@29
+top.transmitter_tb.s_data_out
+[pattern_trace] 1
+[pattern_trace] 0

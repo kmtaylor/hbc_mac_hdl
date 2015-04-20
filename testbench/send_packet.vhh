@@ -1,0 +1,236 @@
+#ifndef PACKET_RATE
+#define PACKET_RATE RI_SF_8
+#endif
+
+#define FIFO_WRITE_SIZE(val) \
+	fi_write_strobe <= '1';	\
+	fi_addr_strobe <= '1';	\
+	fi_d <= val;		\
+	fi_addr <= HEX(FIFO_MASK_ADDR);	\
+	wait for clk_period;	\
+	fi_write_strobe <= '0';	\
+	fi_addr_strobe <= '0';	\
+	fi_d <= (others => '0');\
+	fi_addr <= (others => '0');
+
+#define WRITE_FIFO(val) \
+	fi_write_strobe <= '1';	\
+	fi_addr_strobe <= '1';	\
+	fi_d <= val;		\
+	fi_addr <= HEX(FIFO_ADDR);	\
+	wait for clk_period;	\
+	fi_write_strobe <= '0';	\
+	fi_addr_strobe <= '0';	\
+	wait for clk_period;
+
+#if 1
+#define WRITE_PREAMBLE()	\
+	WRITE_FIFO(X"AAAA5555")	\
+	WRITE_FIFO(X"55AA5555")	\
+	WRITE_FIFO(X"AAAA5555")	\
+	WRITE_FIFO(X"AA55AA55")	\
+	WRITE_FIFO(X"55AA55AA")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"555555AA")	\
+	WRITE_FIFO(X"AA555555")	\
+	WRITE_FIFO(X"AAAAAAAA")	\
+	WRITE_FIFO(X"AA55AA55")	\
+	WRITE_FIFO(X"AAAAAA55")	\
+	WRITE_FIFO(X"55AA5555")	\
+	WRITE_FIFO(X"AA55AAAA")	\
+	WRITE_FIFO(X"AA5555AA")	\
+	WRITE_FIFO(X"AA555555")	\
+	WRITE_FIFO(X"5555AA55")
+#else
+#define WRITE_PREAMBLE()	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")	\
+	WRITE_FIFO(X"55555555")
+#endif
+
+#define WRITE_SFD() \
+	WRITE_FIFO(X"55AA55AA")	\
+	WRITE_FIFO(X"55AAAA55")	\
+	WRITE_FIFO(X"55AA55AA")	\
+	WRITE_FIFO(X"AAAA55AA")	\
+	WRITE_FIFO(X"AAAA55AA")	\
+	WRITE_FIFO(X"AA55AAAA")	\
+	WRITE_FIFO(X"AAAA5555")	\
+	WRITE_FIFO(X"AA55AA55")	\
+	WRITE_FIFO(X"55AA55AA")	\
+	WRITE_FIFO(X"AA555555")	\
+	WRITE_FIFO(X"5555AA55")	\
+	WRITE_FIFO(X"55AAAA55")	\
+	WRITE_FIFO(X"55AAAAAA")	\
+	WRITE_FIFO(X"AA55AA55")	\
+	WRITE_FIFO(X"AAAA5555")	\
+	WRITE_FIFO(X"AAAA55AA")
+
+#define RI_SF_64() \
+	WRITE_SFD()			\
+	WRITE_FIFO(X"55555555")		\
+	WRITE_FIFO(X"55555555")		\
+	WRITE_FIFO(X"55555555")		\
+	SET_SF(X"00000000")		\
+	FIFO_WRITE_SIZE(X"00000020")
+
+#define RI_SF_32() \
+	FIFO_WRITE_SIZE(X"00000010")	\
+	WRITE_FIFO(X"55555555")		\
+	FIFO_WRITE_SIZE(X"00000020")	\
+	WRITE_SFD()			\
+	FIFO_WRITE_SIZE(X"00000010")	\
+	WRITE_FIFO(X"55555555")		\
+	FIFO_WRITE_SIZE(X"00000020")	\
+	WRITE_FIFO(X"55555555")		\
+	WRITE_FIFO(X"55555555")		\
+	SET_SF(X"00000001")		\
+	FIFO_WRITE_SIZE(X"00000020")
+
+#define RI_SF_16() \
+	WRITE_FIFO(X"55555555")		\
+	WRITE_SFD()			\
+	WRITE_FIFO(X"55555555")		\
+	WRITE_FIFO(X"55555555")		\
+	SET_SF(X"00000001")		\
+	FIFO_WRITE_SIZE(X"00000010")
+
+#define RI_SF_8() \
+	FIFO_WRITE_SIZE(X"00000010")	\
+	WRITE_FIFO(X"55555555")		\
+	FIFO_WRITE_SIZE(X"00000020")	\
+	WRITE_FIFO(X"55555555")		\
+	WRITE_SFD()			\
+	FIFO_WRITE_SIZE(X"00000010")	\
+	WRITE_FIFO(X"55555555")		\
+	FIFO_WRITE_SIZE(X"00000020")	\
+	WRITE_FIFO(X"55555555")		\
+	SET_SF(X"00000001")		\
+	FIFO_WRITE_SIZE(X"00000008")
+
+#define MODULATE(val) \
+	io_write_strobe <= '1';		    \
+	io_addr_strobe <= '1';		    \
+	io_d_in <= val;			    \
+	io_addr <= HEX(MODULATOR_ADDR);	    \
+	wait for clk_period;		    \
+	io_write_strobe <= '0';		    \
+	io_addr_strobe <= '0';		    \
+	wait until (io_ready = '1');	    \
+	wait until (io_ready = '0');	    \
+	if prog_full = '1' then		    \
+	    wait until (prog_full = '0');   \
+	end if;				    \
+	wait until (clk = '1');
+
+#define SET_SF(val) \
+	io_write_strobe <= '1';		    \
+	io_addr_strobe <= '1';		    \
+	io_d_in <= val;			    \
+	io_addr <= HEX(MODULATOR_SF_ADDR);  \
+	wait for clk_period;		    \
+	io_write_strobe <= '0';		    \
+	io_addr_strobe <= '0';
+
+#define TRIGGER()			    \
+	parallel_to_serial_enable <= '1';   \
+	wait for clk_period;		    \
+	parallel_to_serial_enable <= '0';   \
+	wait for clk_period;
+
+#define SEND_PACKET()			    \
+	FIFO_WRITE_SIZE(X"00000020")	    \
+					    \
+	WRITE_PREAMBLE()		    \
+	WRITE_PREAMBLE()		    \
+	WRITE_PREAMBLE()		    \
+	WRITE_PREAMBLE()		    \
+					    \
+	PACKET_RATE()			    \
+					    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")		    \
+	MODULATE(X"12345678")		    \
+	MODULATE(X"87654321")
+
+#define READ_RX_FIFO()			    \
+	io_read_strobe <= '1';		    \
+	io_addr_strobe <= '1';		    \
+	io_addr <= HEX(RX_FIFO_ADDR);	    \
+	wait for clk_period;		    \
+	io_read_strobe <= '0';		    \
+	io_addr_strobe <= '0';		    \
+	wait for clk_period * 3;

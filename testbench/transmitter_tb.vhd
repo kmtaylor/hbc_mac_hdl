@@ -1,13 +1,34 @@
 #include <preprocessor/constants.vhh>
 #include "send_packet.vhh"
 
+#ifndef STIMULUS
+#define STIMULUS 0
+#endif
+
+#ifndef SERIAL_CLK_NS
+#define SERIAL_CLK_NS 24
+#endif
+
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity modulator_tb is
-end modulator_tb;
+entity transmitter_tb is
+#if !STIMULUS
+    port (
+	clk, serial_clk, reset, parallel_to_serial_enable : in std_logic;
+	fi_write_strobe, fi_addr_strobe : in std_logic;
+	fi_d : in std_logic_vector (31 downto 0);
+	fi_addr : in std_logic_vector (7 downto 0);
+	io_write_strobe, io_addr_strobe : in std_logic;
+	io_d_in : in std_logic_vector (31 downto 0);
+	io_addr : in std_logic_vector (7 downto 0);
+	io_ready : out std_logic;
+	prog_full : out std_logic;
+	s_data_out : out std_logic);
+#endif
+end transmitter_tb;
  
-architecture behaviour of modulator_tb is 
+architecture behaviour of transmitter_tb is 
  
     component fifo_tx port (
         rst : IN STD_LOGIC;
@@ -25,16 +46,16 @@ architecture behaviour of modulator_tb is
     end component fifo_tx;
 
    --Inputs
+#if STIMULUS
     signal clk : std_logic := '0';
     signal reset : std_logic := '0';
-    signal pkt_reset : std_logic;
-    signal pkt_ack : std_logic := '0';
     signal io_addr : std_logic_vector(7 downto 0) := (others => '0');
     signal io_d_in : std_logic_vector(31 downto 0) := (others => '0');
     signal io_addr_strobe : std_logic := '0';
-    signal io_read_strobe : std_logic := '0';
     signal io_write_strobe : std_logic := '0';
     signal io_ready : std_logic;
+#endif
+    signal io_read_strobe : std_logic := '0';
     signal sub_io_ready : std_logic;
 
     signal tmp_addr : std_logic_vector (7 downto 0);
@@ -42,10 +63,12 @@ architecture behaviour of modulator_tb is
     signal tmp_addr_strobe : std_logic;
     signal tmp_write_strobe : std_logic;
 
+#if STIMULUS
     signal fi_addr : std_logic_vector (7 downto 0) := (others => '0');
     signal fi_d : std_logic_vector (31 downto 0) := (others => '0');
     signal fi_addr_strobe : std_logic := '0';
     signal fi_write_strobe : std_logic := '0';
+#endif
 
     --Outputs
     signal sub_addr_out: std_logic_vector (7 downto 0);
@@ -57,40 +80,32 @@ architecture behaviour of modulator_tb is
     -- FIFO
     signal fifo_d_out : std_logic_vector (31 downto 0);
     signal fifo_wren, fifo_rden : std_logic;
-    signal full, prog_full, overflow, empty, underflow : std_logic;
+    signal full, overflow, empty, underflow : std_logic;
     signal from_fifo : std_logic_vector (31 downto 0);
+#if STIMULUS
+    signal prog_full : std_logic;
+#endif
 
     -- P2S
+#if STIMULUS
     signal serial_clk, parallel_to_serial_enable : std_logic;
     signal s_data_out : std_logic;
-    signal s2p_full, s2p_prog_full, s2p_overflow : std_logic;
-    signal s2p_empty, s2p_underflow : std_logic;
+#endif
 
-    -- S2P
-    signal serial_clk_dly : std_logic;
-    signal serial_clk_dly_90 : std_logic;
-    signal s_data_sync : std_logic;
-    signal s2p_fifo_wren : std_logic;
-    signal s2p_fifo_data : std_logic_vector (31 downto 0);
-    signal s2p_fifo_full : std_logic;
-    signal s2p_fifo_rden : std_logic;
-    signal s2p_from_fifo : std_logic_vector (31 downto 0);
-    signal rx_fifo_data : std_logic_vector (31 downto 0);
-    signal rx_fifo_io_ready : std_logic;
- 
     -- Clock period definitions
     constant clk_period : time := 10 ns;
-    constant s_clk_period : time := 1667 ns; --24 ns;
-    constant s_clk_dly_period : time := 23997 ps;
+    constant s_clk_period : time := SERIAL_CLK_NS ns;
     
+#if 0
     type val_ft is file of std_logic;
     type time_ft is file of time;
-    file val_file : val_ft open WRITE_MODE is "modulator_tb_stim.value";
-    file time_file : time_ft open WRITE_MODE is "modulator_tb_stim.time";
+    file val_file : val_ft open WRITE_MODE is "transmitter_tb_stim.value";
+    file time_file : time_ft open WRITE_MODE is "transmitter_tb_stim.time";
     procedure write_val(val : std_logic) is begin
         write(val_file, val);
         write(time_file, now);
     end procedure write_val;
+#endif
 begin
  
     -- Instantiate the Unit Under Test (UUT)
@@ -165,48 +180,7 @@ begin
         empty => empty,
         underflow => underflow);
 
-    rx_fifo : component fifo_tx port map (
-        rst => reset,
-        wr_clk => serial_clk_dly,
-        rd_clk => clk,
-        din => s2p_fifo_data,
-        wr_en => s2p_fifo_wren,
-        rd_en => s2p_fifo_rden,
-        dout => s2p_from_fifo,
-        full => s2p_full,
-	prog_full => s2p_prog_full,
-        overflow => s2p_overflow,
-        empty => s2p_empty,
-        underflow => s2p_underflow);
-
-    sync : entity work.data_synchroniser port map (
-	reset => pkt_reset,
-	serial_clk => serial_clk_dly,
-	serial_clk_90 => serial_clk_dly_90,
-	data_in => s_data_out,
-	data_out => s_data_sync);
-
-    s_to_p : entity work.serial_to_parallel port map (
-	reset_i => reset,
-	pkt_reset => pkt_reset,
-	serial_clk => serial_clk_dly,
-	fifo_d_out => s2p_fifo_data,
-	fifo_wren => s2p_fifo_wren,
-	fifo_full => s2p_fifo_full,
-	data_in => s_data_sync,
-	pkt_ack => pkt_ack);
-
-    rx_fifo_int : entity work.rx_fifo_interface port map (
-            clk => clk,
-            reset => reset,
-            io_addr => io_addr,
-            io_d_out => rx_fifo_data,
-            io_addr_strobe => io_addr_strobe,
-            io_read_strobe => io_read_strobe,
-            io_ready => rx_fifo_io_ready,
-            fifo_d_in => s2p_from_fifo,
-            fifo_rden => s2p_fifo_rden); 
-
+#if STIMULUS
     -- Clock process definitions
     clk_process : process begin
 	clk <= '0';
@@ -221,21 +195,9 @@ begin
 	serial_clk <= '1';
 	wait for s_clk_period/2;
     end process;
-
-#if 1
-    serial_clk_dly <= serial_clk after 0 ns;
-#else
-    s_clk_dly_process : process begin
-	serial_clk_dly <= '0';
-	wait for s_clk_dly_period/2;
-	serial_clk_dly <= '1';
-	write_val(s_data_sync);
-	wait for s_clk_dly_period/2;
-    end process;
 #endif
 
-    serial_clk_dly_90 <= serial_clk_dly after s_clk_period/4;
-
+#if STIMULUS
     -- Stimulus process
     stim_proc: process begin	
 	-- hold reset state for 60 ns.
@@ -250,21 +212,8 @@ begin
 	TRIGGER()
 	SEND_PACKET()
 
-#if 0
-	wait for clk_period * 120000;
-
-	READ_RX_FIFO()
-	READ_RX_FIFO()
-	READ_RX_FIFO()
-	READ_RX_FIFO()
-	READ_RX_FIFO()
-	READ_RX_FIFO()
-
-	TRIGGER()
-	SEND_PACKET()
-#endif
-	
 	wait;
     end process;
+#endif
 
 end;

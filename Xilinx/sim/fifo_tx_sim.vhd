@@ -50,11 +50,10 @@ ENTITY fifo_tx IS
     rd_en : IN STD_LOGIC;
     dout : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
     full : OUT STD_LOGIC;
-    almost_full : OUT STD_LOGIC;
     overflow : OUT STD_LOGIC;
     empty : OUT STD_LOGIC;
-    almost_empty : OUT STD_LOGIC;
-    underflow : OUT STD_LOGIC
+    underflow : OUT STD_LOGIC;
+    prog_full : OUT STD_LOGIC
   );
 END fifo_tx;
 
@@ -70,11 +69,10 @@ COMPONENT wrapped_fifo_tx
     rd_en : IN STD_LOGIC;
     dout : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
     full : OUT STD_LOGIC;
-    almost_full : OUT STD_LOGIC;
     overflow : OUT STD_LOGIC;
     empty : OUT STD_LOGIC;
-    almost_empty : OUT STD_LOGIC;
-    underflow : OUT STD_LOGIC
+    underflow : OUT STD_LOGIC;
+    prog_full : OUT STD_LOGIC
   );
 END COMPONENT;
 
@@ -128,8 +126,8 @@ END COMPONENT;
       c_error_injection_type_wrch => 0,
       c_family => "virtex5",
       c_full_flags_rst_val => 1,
-      c_has_almost_empty => 1,
-      c_has_almost_full => 1,
+      c_has_almost_empty => 0,
+      c_has_almost_full => 0,
       c_has_axi_aruser => 0,
       c_has_axi_awuser => 0,
       c_has_axi_buser => 0,
@@ -205,15 +203,15 @@ END COMPONENT;
       c_prog_empty_type_wach => 0,
       c_prog_empty_type_wdch => 0,
       c_prog_empty_type_wrch => 0,
-      c_prog_full_thresh_assert_val => 1021,
+      c_prog_full_thresh_assert_val => 750,
       c_prog_full_thresh_assert_val_axis => 1023,
       c_prog_full_thresh_assert_val_rach => 1023,
       c_prog_full_thresh_assert_val_rdch => 1023,
       c_prog_full_thresh_assert_val_wach => 1023,
       c_prog_full_thresh_assert_val_wdch => 1023,
       c_prog_full_thresh_assert_val_wrch => 1023,
-      c_prog_full_thresh_negate_val => 1020,
-      c_prog_full_type => 0,
+      c_prog_full_thresh_negate_val => 749,
+      c_prog_full_type => 1,
       c_prog_full_type_axis => 0,
       c_prog_full_type_rach => 0,
       c_prog_full_type_rdch => 0,
@@ -237,7 +235,7 @@ END COMPONENT;
       c_use_common_overflow => 0,
       c_use_common_underflow => 0,
       c_use_default_settings => 0,
-      c_use_dout_rst => 0,
+      c_use_dout_rst => 1,
       c_use_ecc => 0,
       c_use_ecc_axis => 0,
       c_use_ecc_rach => 0,
@@ -284,11 +282,10 @@ U0 : wrapped_fifo_tx
     rd_en => rd_en,
     dout => dout,
     full => full,
-    almost_full => almost_full,
     overflow => overflow,
     empty => empty,
-    almost_empty => almost_empty,
-    underflow => underflow
+    underflow => underflow,
+    prog_full => prog_full
   );
 -- synthesis translate_on
 

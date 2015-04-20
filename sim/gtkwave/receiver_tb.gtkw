@@ -1,0 +1,53 @@
+[*]
+[*] GTKWave Analyzer v3.3.45 (w)1999-2012 BSI
+[*] Tue Mar 17 03:14:19 2015
+[*]
+[dumpfile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/receiver_tb.ghw"
+[dumpfile_mtime] "Tue Mar 17 03:08:51 2015"
+[dumpfile_size] 5735333
+[savefile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/gtkwave/receiver_tb.gtkw"
+[timestart] 0
+[size] 1680 1024
+[pos] -1 -1
+*-30.000000 1090606406 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.receiver_tb.
+[sst_width] 224
+[signals_width] 255
+[sst_expanded] 1
+[sst_vpaned_height] 290
+@28
+top.receiver_tb.clk
+top.receiver_tb.serial_clk
+top.receiver_tb.reset
+top.receiver_tb.s_data_in
+top.receiver_tb.s_data_in_2
+@200
+-
+@29
+top.receiver_tb.s_data_sync
+@28
+top.receiver_tb.s_data_sync_2
+@200
+-
+@28
+top.receiver_tb.s2p_fifo_wren
+top.receiver_tb.s2p_fifo_wren_2
+@22
+#{top.receiver_tb.s2p_fifo_data[31:0]} top.receiver_tb.s2p_fifo_data[31] top.receiver_tb.s2p_fifo_data[30] top.receiver_tb.s2p_fifo_data[29] top.receiver_tb.s2p_fifo_data[28] top.receiver_tb.s2p_fifo_data[27] top.receiver_tb.s2p_fifo_data[26] top.receiver_tb.s2p_fifo_data[25] top.receiver_tb.s2p_fifo_data[24] top.receiver_tb.s2p_fifo_data[23] top.receiver_tb.s2p_fifo_data[22] top.receiver_tb.s2p_fifo_data[21] top.receiver_tb.s2p_fifo_data[20] top.receiver_tb.s2p_fifo_data[19] top.receiver_tb.s2p_fifo_data[18] top.receiver_tb.s2p_fifo_data[17] top.receiver_tb.s2p_fifo_data[16] top.receiver_tb.s2p_fifo_data[15] top.receiver_tb.s2p_fifo_data[14] top.receiver_tb.s2p_fifo_data[13] top.receiver_tb.s2p_fifo_data[12] top.receiver_tb.s2p_fifo_data[11] top.receiver_tb.s2p_fifo_data[10] top.receiver_tb.s2p_fifo_data[9] top.receiver_tb.s2p_fifo_data[8] top.receiver_tb.s2p_fifo_data[7] top.receiver_tb.s2p_fifo_data[6] top.receiver_tb.s2p_fifo_data[5] top.receiver_tb.s2p_fifo_data[4] top.receiver_tb.s2p_fifo_data[3] top.receiver_tb.s2p_fifo_data[2] top.receiver_tb.s2p_fifo_data[1] top.receiver_tb.s2p_fifo_data[0]
+#{top.receiver_tb.s2p_fifo_data_2[31:0]} top.receiver_tb.s2p_fifo_data_2[31] top.receiver_tb.s2p_fifo_data_2[30] top.receiver_tb.s2p_fifo_data_2[29] top.receiver_tb.s2p_fifo_data_2[28] top.receiver_tb.s2p_fifo_data_2[27] top.receiver_tb.s2p_fifo_data_2[26] top.receiver_tb.s2p_fifo_data_2[25] top.receiver_tb.s2p_fifo_data_2[24] top.receiver_tb.s2p_fifo_data_2[23] top.receiver_tb.s2p_fifo_data_2[22] top.receiver_tb.s2p_fifo_data_2[21] top.receiver_tb.s2p_fifo_data_2[20] top.receiver_tb.s2p_fifo_data_2[19] top.receiver_tb.s2p_fifo_data_2[18] top.receiver_tb.s2p_fifo_data_2[17] top.receiver_tb.s2p_fifo_data_2[16] top.receiver_tb.s2p_fifo_data_2[15] top.receiver_tb.s2p_fifo_data_2[14] top.receiver_tb.s2p_fifo_data_2[13] top.receiver_tb.s2p_fifo_data_2[12] top.receiver_tb.s2p_fifo_data_2[11] top.receiver_tb.s2p_fifo_data_2[10] top.receiver_tb.s2p_fifo_data_2[9] top.receiver_tb.s2p_fifo_data_2[8] top.receiver_tb.s2p_fifo_data_2[7] top.receiver_tb.s2p_fifo_data_2[6] top.receiver_tb.s2p_fifo_data_2[5] top.receiver_tb.s2p_fifo_data_2[4] top.receiver_tb.s2p_fifo_data_2[3] top.receiver_tb.s2p_fifo_data_2[2] top.receiver_tb.s2p_fifo_data_2[1] top.receiver_tb.s2p_fifo_data_2[0]
+@200
+-
+-
+@28
+top.receiver_tb.s_to_p.state
+@22
+#{top.receiver_tb.s_to_p.comma_weight[6:0]} top.receiver_tb.s_to_p.comma_weight[6] top.receiver_tb.s_to_p.comma_weight[5] top.receiver_tb.s_to_p.comma_weight[4] top.receiver_tb.s_to_p.comma_weight[3] top.receiver_tb.s_to_p.comma_weight[2] top.receiver_tb.s_to_p.comma_weight[1] top.receiver_tb.s_to_p.comma_weight[0]
+@200
+-
+@28
+top.receiver_tb.s_to_p_2.state
+@22
+#{top.receiver_tb.s_to_p_2.comma_weight[6:0]} top.receiver_tb.s_to_p_2.comma_weight[6] top.receiver_tb.s_to_p_2.comma_weight[5] top.receiver_tb.s_to_p_2.comma_weight[4] top.receiver_tb.s_to_p_2.comma_weight[3] top.receiver_tb.s_to_p_2.comma_weight[2] top.receiver_tb.s_to_p_2.comma_weight[1] top.receiver_tb.s_to_p_2.comma_weight[0]
+[pattern_trace] 1
+[pattern_trace] 0

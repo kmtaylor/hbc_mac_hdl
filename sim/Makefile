@@ -13,7 +13,24 @@ XILINX_OBJS += \
 	simprim-obj93.cf
 
 LOCAL_OBJS += \
-	transceiver-obj93.cf
+	transceiver-obj93.cf \
+	work-obj93.cf
+
+RECEIVER_TB_FILES += \
+	data_synchroniser.vhd \
+	serial_to_parallel.vhd \
+	rx_fifo_interface.vhd \
+	hamming_lut.vhd \
+	receiver_tb.vhd
+RECEIVER_SIM_FLAGS += --stop-time=200us
+
+TRANSMITTER_TB_FILES += \
+	modulator.vhd \
+	parallel_to_serial.vhd \
+	fifo_interface.vhd \
+	fifo_tx_sim.vhd \
+	transmitter_tb.vhd
+TRANSMITTER_SIM_FLAGS += --stop-time=200us
 
 SCRAMBLER_TB_FILES += \
 	scrambler.vhd \
@@ -36,7 +53,7 @@ MODULATOR_TB_FILES += \
 	serial_to_parallel.vhd \
 	rx_fifo_interface.vhd \
 	modulator_path_tb.vhd
-MODULATOR_SIM_FLAGS += --stop-time=1000us --ieee-asserts=disable-at-0
+MODULATOR_SIM_FLAGS += --stop-time=116076544ns --ieee-asserts=disable-at-0
 
 MODULATOR_SYNTH_TB_FILES += \
 	modulator.vhd \
@@ -87,6 +104,16 @@ all:
 	{split($$1,A,/ /); for(i in A) print A[i]}' | sed '/\.o/d' | grep tb
 
 # Test Benches (Elaboration)
+receiver_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(RECEIVER_TB_FILES:.vhd=_pp.o)
+	$(GHDL) -m $(XILINX_FLAGS) "$@"
+	./"$@" $(RECEIVER_SIM_FLAGS) --wave="$@".ghw
+
+transmitter_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(TRANSMITTER_TB_FILES:.vhd=_pp.o)
+	$(GHDL) -m $(XILINX_FLAGS) "$@"
+	./"$@" $(TRANSMITTER_SIM_FLAGS) --wave="$@".ghw
+#	$(GHDL_MCODE) -c $(XILINX_FLAGS) -r $@ \
+#	$(TRANSMITTER_SIM_FLAGS) --vcd=$@.vcd
+
 c_to_vhd_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(C_TO_VHD_FILES:.vhd=_pp.o)
 	$(GHDL) -m $(XILINX_FLAGS) "$@"
 	./"$@" $(C_TO_VHD_SIM_FLAGS) --wave="$@".ghw
@@ -148,9 +175,12 @@ ieee-obj93.cf:
 transceiver-obj93.cf:
 	$(GHDL) -i --ieee=none --work=transceiver ../lib/*.vhd
 
+work-obj93.cf:
+
 # Preprocessing
 %_pp.vhd: ../%.vhd
-	cpp -DVHDL -D_QUOTE=\" -x assembler-with-cpp -P -I ../ "$<" -o "$@"
+	cpp $(VHHFLAGS) -DVHDL -D_QUOTE=\" -x assembler-with-cpp \
+		-P -I ../ "$<" -o "$@"
 
 # Analysis
 %_pp.o: ../processed/%_pp.vhd
@@ -169,7 +199,7 @@ clean:
 	$(GHDL) --remove
 cleanall:
 	$(GHDL) --remove
-	rm -f *.ghw
+#rm -f *.ghw
 	rm -f *.cf
 	rm -f *.o
 

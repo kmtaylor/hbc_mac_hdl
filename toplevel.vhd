@@ -13,6 +13,7 @@ entity toplevel is
 	serial_clk_out : out std_logic;
 	s_data_out : out std_logic;
 	s_data_in : in std_logic;
+#if USE_MEM
 	-- Physical memory interface
 	ddr2_dq	    : inout std_logic_vector (63 downto 0);
 	ddr2_a	    : out std_logic_vector (12 downto 0);
@@ -28,6 +29,7 @@ entity toplevel is
 	ddr2_dqs_n  : inout std_logic_vector (7 downto 0);
 	ddr2_ck	    : out std_logic_vector (1 downto 0);
 	ddr2_ck_n   : out std_logic_vector (1 downto 0);
+#endif
 	-- USB Interface
 	UsbClk	    : in std_logic;
 	UsbEN	    : in std_logic;
@@ -384,6 +386,7 @@ begin
 	    rd_data_valid => rd_data_valid,
 	    rd_data_fifo_out => rd_data_fifo_out);
 	    
+#if USE_MEM
     ram : entity work.mem_controller
 	port map (
 	    -- Physical RAM interface
@@ -424,6 +427,7 @@ begin
 	    --Read FIFO
 	    rd_data_valid	=> rd_data_valid,
 	    rd_data_fifo_out	=> rd_data_fifo_out);
+#endif
 
     fifo_int_0 : entity work.fifo_interface
 	port map (
