@@ -17,12 +17,16 @@ LOCAL_OBJS += \
 	work-obj93.cf
 
 RECEIVER_TB_FILES += \
+	receiver_afe/ghdl/receiver_afe_1.time \
+	receiver_afe/ghdl/receiver_afe_1.value \
+	receiver_afe/ghdl/receiver_afe_2.time \
+	receiver_afe/ghdl/receiver_afe_2.value \
 	data_synchroniser.vhd \
 	serial_to_parallel.vhd \
 	rx_fifo_interface.vhd \
 	hamming_lut.vhd \
 	receiver_tb.vhd
-RECEIVER_SIM_FLAGS += --stop-time=200us
+RECEIVER_SIM_FLAGS += --stop-time=320us
 
 TRANSMITTER_TB_FILES += \
 	modulator.vhd \
@@ -36,6 +40,11 @@ SCRAMBLER_TB_FILES += \
 	scrambler.vhd \
 	scrambler_tb.vhd
 SCRAMBLER_SIM_FLAGS += --stop-time=1000ns
+
+DATA_SYNCHRONISER_TB_FILES += \
+	data_synchroniser.vhd \
+	data_synchroniser_tb.vhd
+DATA_SYNCHRONISER_SIM_FLAGS += --stop-time=10us
 
 C_TO_VHD_FILES += \
 	c_to_vhd.vhd \
@@ -107,6 +116,7 @@ all:
 receiver_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(RECEIVER_TB_FILES:.vhd=_pp.o)
 	$(GHDL) -m $(XILINX_FLAGS) "$@"
 	./"$@" $(RECEIVER_SIM_FLAGS) --wave="$@".ghw
+	./interpret_output > scrambler_data
 
 transmitter_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(TRANSMITTER_TB_FILES:.vhd=_pp.o)
 	$(GHDL) -m $(XILINX_FLAGS) "$@"
@@ -158,6 +168,11 @@ numeric_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(NUMERIC_TB_FILES:.vhd=_pp.o)
 	$(GHDL) -r "$@" $(NUMERIC_SIM_FLAGS) --wave="$@".ghw #\
 #		--sdf=typ==../testbench/lib_numeric_tb.sdf
 
+data_synchroniser_tb: $(XILINX_OBJS) $(LOCAL_OBJS) \
+		$(DATA_SYNCHRONISER_TB_FILES:.vhd=_pp.o)
+	$(GHDL) -m $(XILINX_FLAGS) "$@"
+	./"$@" $(DATA_SYNCHRONISER_SIM_FLAGS) --wave="$@".ghw
+
 # Xilinx libraries
 xilinxcorelib-obj93.cf:
 	$(GHDL) -i --ieee=none --work=XilinxCoreLib \
@@ -193,6 +208,15 @@ work-obj93.cf:
 	$(GHDL) -i $(XILINX_FLAGS) "$<"
 %_timesim_pp.o: netgen/par/processed/%_timesim_pp.vhd
 	$(GHDL) -i $(XILINX_FLAGS) "$<"
+
+# Spice imports
+%.time: FORCE
+	$(eval SPICE_DIR = $(dir $(subst ghdl/,,$@)))
+	$(MAKE) -C $(SPICE_DIR) $(subst $(SPICE_DIR),,$@)
+%.value: FORCE
+	$(eval SPICE_DIR = $(dir $(subst ghdl/,,$@)))
+	$(MAKE) -C $(SPICE_DIR) $(subst $(SPICE_DIR),,$@)
+FORCE:
 
 # Other Targets
 clean:

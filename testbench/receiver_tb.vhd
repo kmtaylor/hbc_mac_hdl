@@ -39,6 +39,20 @@ architecture behaviour of receiver_tb is
 
     signal s_data_in, s_data_sync : std_logic;
     signal s_data_in_2, s_data_sync_2 : std_logic;
+
+    signal s_data_sync_dbg1 : std_logic;
+    signal s_data_sync_dbg2 : std_logic;
+    signal s_data_sync_dbg3 : std_logic;
+    signal s_data_sync_dbg4 : std_logic;
+    signal s_data_sync_dbg5 : std_logic;
+    signal s_data_sync_dbg6 : std_logic;
+    signal s_data_sync_err1 : std_logic;
+    signal s_data_sync_err2 : std_logic;
+    signal s_data_sync_err3 : std_logic;
+    signal s_data_sync_err4 : std_logic;
+    signal s_data_sync_err5 : std_logic;
+    signal s_data_sync_err6 : std_logic;
+
     signal serial_clk : std_logic;
     signal serial_clk_90 : std_logic;
     signal s2p_full, s2p_overflow, s2p_empty, s2p_underflow : std_logic;
@@ -55,14 +69,21 @@ architecture behaviour of receiver_tb is
  
     -- Clock period definitions
     constant clk_period : time := 10 ns;
-    constant s_clk_period : time := 24 ns;
+    constant s_clk_period : time := 23.81 ns;
     
     type val_ft is file of std_logic;
     type time_ft is file of time;
-    file val_file : val_ft open READ_MODE is "spice_channel.value";
-    file val_file_2 : val_ft open READ_MODE is "receiver_tb_stim.value";
-    file time_file : time_ft open READ_MODE is "spice_channel.time";
-    file time_file_2 : time_ft open READ_MODE is "receiver_tb_stim.time";
+    file val_file : val_ft open READ_MODE is 
+		    "receiver_afe/ghdl/receiver_afe_1.value";
+    file val_file_2 : val_ft open READ_MODE is 
+		    "receiver_afe/ghdl/receiver_afe_2.value";
+    file time_file : time_ft open READ_MODE is 
+		    "receiver_afe/ghdl/receiver_afe_1.time";
+    file time_file_2 : time_ft open READ_MODE is 
+		    "receiver_afe/ghdl/receiver_afe_2.time";
+
+    type output_ft is file of std_logic_vector;
+    file output_file : output_ft open WRITE_MODE is "output_data";
 
     function read_time return time is 
 	variable val : time;
@@ -99,6 +120,10 @@ architecture behaviour of receiver_tb is
     function data_available_2 return boolean is begin
 	return not endfile(val_file_2);
     end function data_available_2;
+
+    procedure write_output(val: std_logic_vector(31 downto 0)) is begin
+	write(output_file, val);
+    end procedure write_output;
 
 begin
  
@@ -203,25 +228,35 @@ begin
 	prev_wait := next_wait;
     end process;
 
-    -- Stimulus process
     stim_proc: process begin	
 	-- hold reset state for 60 ns.
 	reset <= '1';
 	wait for 60 ns;
 	reset <= '0';
 
-	wait for clk_period * 5.5;
-
-#define READ_RX_FIFO()			    \
-	io_read_strobe <= '1';		    \
-	io_addr_strobe <= '1';		    \
-	io_addr <= HEX(RX_FIFO_ADDR);	    \
-	wait for clk_period;		    \
-	io_read_strobe <= '0';		    \
-	io_addr_strobe <= '0';		    \
-	wait for clk_period * 3;
-
 	wait;
+    end process;
+
+    output_proc : process begin
+	wait until s2p_fifo_wren = '1';
+	write_output(s2p_fifo_data);
+    end process;
+
+    debug_proc : process (serial_clk) begin
+	if serial_clk'event and serial_clk = '1' then
+	    s_data_sync_dbg1 <= s_data_sync_2;
+	    s_data_sync_dbg2 <= s_data_sync_dbg1;
+	    s_data_sync_dbg3 <= s_data_sync_dbg2;
+	    s_data_sync_dbg4 <= s_data_sync_dbg3;
+	    s_data_sync_dbg5 <= s_data_sync_dbg4;
+	    s_data_sync_dbg6 <= s_data_sync_dbg5;
+	end if;
+	s_data_sync_err1 <= (s_data_sync_dbg1 xor s_data_sync);
+	s_data_sync_err2 <= (s_data_sync_dbg2 xor s_data_sync);
+	s_data_sync_err3 <= (s_data_sync_dbg3 xor s_data_sync);
+	s_data_sync_err4 <= (s_data_sync_dbg4 xor s_data_sync);
+	s_data_sync_err5 <= (s_data_sync_dbg5 xor s_data_sync);
+	s_data_sync_err6 <= (s_data_sync_dbg6 xor s_data_sync);
     end process;
 
 end;
