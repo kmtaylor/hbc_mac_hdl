@@ -61,6 +61,7 @@ MODULATOR_TB_FILES += \
 	fifo_tx_sim.vhd \
 	data_synchroniser.vhd \
 	hamming_lut.vhd \
+	walsh_decoder.vhd \
 	serial_to_parallel.vhd \
 	rx_fifo_interface.vhd \
 	modulator_path_tb.vhd

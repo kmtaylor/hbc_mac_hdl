@@ -109,9 +109,7 @@ package body numeric is
 
     -- Whenever the hamming distance from a walsh code is greater than 12, we
     -- have an unambiguous match. Otherwise, return 0
-    -- FIXME: The following optimisation should be possible (requires 16 cycles
-    -- per Walsh code)
-    -- refer to walsh_decode_init.c nearest_code()
+    -- Refer to walsh_decoder.vhd for an optimised implementation.
     function walsh_decode (input : walsh_code_t) return walsh_sym_t is
     begin
 	if calc_hamming(input, WALSH_15) > 12 then

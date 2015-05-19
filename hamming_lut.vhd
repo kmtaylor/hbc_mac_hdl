@@ -14,6 +14,7 @@ entity hamming_lut is
 	weight : out std_logic_vector (6 downto 0));
 end entity hamming_lut;
 
+----------------- 36 bit LUT -------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -27,6 +28,21 @@ entity hamming_lut_36 is
 	weight : out std_logic_vector (5 downto 0));
 end entity hamming_lut_36;
 
+----------------- 16 bit LUT -------------------------------
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+library unisim;
+use unisim.vcomponents.all;
+
+entity hamming_lut_16 is
+    port (
+	val : in std_logic_vector (15 downto 0);
+	weight : out std_logic_vector (4 downto 0));
+end entity hamming_lut_16;
+
+----------------- Architectures ----------------------------
 architecture toplevel of hamming_lut is
 
     signal sum : unsigned(6 downto 0);
@@ -48,6 +64,7 @@ begin
 
 end architecture toplevel;
 
+----------------- 36 bit LUT -------------------------------
 architecture hamming_lut_arch of hamming_lut_36 is
 #define SIGNAL_HAMMING_LUT(layer, num) \
     signal tmp_##layer##_##num : std_logic_vector (5 downto 0);		    \
@@ -136,5 +153,32 @@ begin
     sum_b <= (sum_a & '0' ) + unsigned(tmp_out_1_0);
 
     weight <= std_logic_vector(sum_b);
+
+end architecture hamming_lut_arch;
+
+----------------- 16 bit LUT -------------------------------
+architecture hamming_lut_arch of hamming_lut_16 is
+
+    SIGNAL_HAMMING_LUT(0, 0)
+    SIGNAL_HAMMING_LUT(0, 1)
+    SIGNAL_HAMMING_LUT(0, 2)
+    
+    signal sum : unsigned (4 downto 0);
+
+begin
+
+    HAMMING_LUT(0, 0)
+    HAMMING_LUT(0, 1)
+    HAMMING_LUT(0, 2)
+
+    tmp_0_0 <= val(5 downto 0);
+    tmp_0_1 <= val(11 downto 6);
+    tmp_0_2 <= "00" & val(15 downto 12);
+
+    sum <=  unsigned("00" & tmp_out_0_0) + 
+	    unsigned("00" & tmp_out_0_1) + 
+	    unsigned("00" & tmp_out_0_2);
+
+    weight <= std_logic_vector(sum);
 
 end architecture hamming_lut_arch;

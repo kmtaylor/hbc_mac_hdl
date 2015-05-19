@@ -436,7 +436,8 @@ begin
 	end if;
     end process store_walsh;
 
-    decoded_sym <= walsh_decode(walsh_reg);
+    walsh_decoder : entity work.walsh_decoder
+	port map (clk => serial_clk, data => walsh_reg, sym => decoded_sym);
 
     walsh_clk_proc : process(serial_clk) begin
 	if serial_clk'event and serial_clk = '1' then
