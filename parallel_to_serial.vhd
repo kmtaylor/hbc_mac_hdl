@@ -1,8 +1,9 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-
-use IEEE.NUMERIC_STD.ALL;
+library transceiver;
+use transceiver.bits.all;
 
 entity parallel_to_serial is
 	port (
@@ -85,8 +86,7 @@ begin
 		tmp_data_i <= fifo_d_in;
 		next_state <= st_output_data;
 	    when st_output_data =>
-		tmp_data_i <= std_logic_vector(
-				shift_left(unsigned(tmp_data), 1));
+		tmp_data_i <= shift_left(tmp_data, 1);
 		if cur_bit = 31 - 3 then
 		    cur_bit_i <= 0;
 		    next_state <= st_chain_1;
@@ -94,23 +94,20 @@ begin
 		    cur_bit_i <= cur_bit + 1;
 		end if;
 	    when st_chain_1 =>
-		tmp_data_i <= std_logic_vector(
-				shift_left(unsigned(tmp_data), 1));
+		tmp_data_i <= shift_left(tmp_data, 1);
 		if fifo_empty = '0' then
 		    next_state <= st_chain_2;
 		else
 		    next_state <= st_finish_1;
 		end if;
 	    when st_chain_2 =>
-		tmp_data_i <= std_logic_vector(
-				shift_left(unsigned(tmp_data), 1));
+		tmp_data_i <= shift_left(tmp_data, 1);
 		next_state <= st_chain_3;
 	    when st_chain_3 =>
 		tmp_data_i <= fifo_d_in;
 		next_state <= st_output_data;
 	    when st_finish_1 =>
-		tmp_data_i <= std_logic_vector(
-				shift_left(unsigned(tmp_data), 1));
+		tmp_data_i <= shift_left(tmp_data, 1);
 		next_state <= st_finish_2;
 	    when st_finish_2 =>
 		en_reset <= '1';

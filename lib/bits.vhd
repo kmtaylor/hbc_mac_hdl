@@ -5,6 +5,10 @@ use ieee.numeric_std.all;
 package bits is
     function bit_swap(input : std_logic_vector) return std_logic_vector;
     function bits_for_val(val: natural) return natural;
+    function shift_right(input : std_logic_vector; count : natural) 
+	return std_logic_vector;
+    function shift_left(input : std_logic_vector; count : natural) 
+	return std_logic_vector;
 end package bits;
 
 package body bits is
@@ -40,5 +44,17 @@ package body bits is
         end loop;
         return ret;
     end function bits_for_val;
+
+    function shift_right(input : std_logic_vector; count : natural) 
+	return std_logic_vector is
+    begin
+	return std_logic_vector(shift_right(unsigned(input), count));
+    end function shift_right;
+ 
+    function shift_left(input : std_logic_vector; count : natural) 
+	return std_logic_vector is
+    begin
+	return std_logic_vector(shift_left(unsigned(input), count));
+    end function shift_left;
  
 end package body bits;

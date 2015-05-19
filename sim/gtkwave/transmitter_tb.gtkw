@@ -1,19 +1,20 @@
 [*]
 [*] GTKWave Analyzer v3.3.45 (w)1999-2012 BSI
-[*] Wed Mar 25 02:49:21 2015
+[*] Tue May 19 02:51:13 2015
 [*]
 [dumpfile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/transmitter_tb.ghw"
-[dumpfile_mtime] "Wed Mar 25 02:41:29 2015"
-[dumpfile_size] 667637
-[savefile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/transmitter_tb.gtkw"
-[timestart] 0
-[size] 1920 1027
-[pos] -1 26
-*-29.000000 115000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[dumpfile_mtime] "Tue May 19 02:28:13 2015"
+[dumpfile_size] 3431730
+[savefile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/gtkwave/transmitter_tb.gtkw"
+[timestart] 30470000000
+[size] 1680 1024
+[pos] -1 -1
+*-28.000000 23781300000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] top.
 [treeopen] top.transmitter_tb.
+[treeopen] top.transmitter_tb.modulator.
 [sst_width] 224
-[signals_width] 230
+[signals_width] 310
 [sst_expanded] 1
 [sst_vpaned_height] 292
 @28
@@ -42,7 +43,34 @@ top.transmitter_tb.fi_addr_strobe
 @28
 top.transmitter_tb.p_to_s.state
 top.transmitter_tb.parallel_to_serial_enable
-@29
 top.transmitter_tb.s_data_out
+@200
+-
+-
+@28
+top.transmitter_tb.modulator.state
+@24
+#{top.transmitter_tb.modulator.symbol_count[2:0]} top.transmitter_tb.modulator.symbol_count[2] top.transmitter_tb.modulator.symbol_count[1] top.transmitter_tb.modulator.symbol_count[0]
+#{top.transmitter_tb.modulator.bit_count[3:0]} top.transmitter_tb.modulator.bit_count[3] top.transmitter_tb.modulator.bit_count[2] top.transmitter_tb.modulator.bit_count[1] top.transmitter_tb.modulator.bit_count[0]
+@28
+top.transmitter_tb.modulator.symbol_shift
+top.transmitter_tb.modulator.symbol_load
+@22
+#{top.transmitter_tb.modulator.io_d_in_r[31:0]} top.transmitter_tb.modulator.io_d_in_r[31] top.transmitter_tb.modulator.io_d_in_r[30] top.transmitter_tb.modulator.io_d_in_r[29] top.transmitter_tb.modulator.io_d_in_r[28] top.transmitter_tb.modulator.io_d_in_r[27] top.transmitter_tb.modulator.io_d_in_r[26] top.transmitter_tb.modulator.io_d_in_r[25] top.transmitter_tb.modulator.io_d_in_r[24] top.transmitter_tb.modulator.io_d_in_r[23] top.transmitter_tb.modulator.io_d_in_r[22] top.transmitter_tb.modulator.io_d_in_r[21] top.transmitter_tb.modulator.io_d_in_r[20] top.transmitter_tb.modulator.io_d_in_r[19] top.transmitter_tb.modulator.io_d_in_r[18] top.transmitter_tb.modulator.io_d_in_r[17] top.transmitter_tb.modulator.io_d_in_r[16] top.transmitter_tb.modulator.io_d_in_r[15] top.transmitter_tb.modulator.io_d_in_r[14] top.transmitter_tb.modulator.io_d_in_r[13] top.transmitter_tb.modulator.io_d_in_r[12] top.transmitter_tb.modulator.io_d_in_r[11] top.transmitter_tb.modulator.io_d_in_r[10] top.transmitter_tb.modulator.io_d_in_r[9] top.transmitter_tb.modulator.io_d_in_r[8] top.transmitter_tb.modulator.io_d_in_r[7] top.transmitter_tb.modulator.io_d_in_r[6] top.transmitter_tb.modulator.io_d_in_r[5] top.transmitter_tb.modulator.io_d_in_r[4] top.transmitter_tb.modulator.io_d_in_r[3] top.transmitter_tb.modulator.io_d_in_r[2] top.transmitter_tb.modulator.io_d_in_r[1] top.transmitter_tb.modulator.io_d_in_r[0]
+#{top.transmitter_tb.modulator.symbol_r[31:0]} top.transmitter_tb.modulator.symbol_r[31] top.transmitter_tb.modulator.symbol_r[30] top.transmitter_tb.modulator.symbol_r[29] top.transmitter_tb.modulator.symbol_r[28] top.transmitter_tb.modulator.symbol_r[27] top.transmitter_tb.modulator.symbol_r[26] top.transmitter_tb.modulator.symbol_r[25] top.transmitter_tb.modulator.symbol_r[24] top.transmitter_tb.modulator.symbol_r[23] top.transmitter_tb.modulator.symbol_r[22] top.transmitter_tb.modulator.symbol_r[21] top.transmitter_tb.modulator.symbol_r[20] top.transmitter_tb.modulator.symbol_r[19] top.transmitter_tb.modulator.symbol_r[18] top.transmitter_tb.modulator.symbol_r[17] top.transmitter_tb.modulator.symbol_r[16] top.transmitter_tb.modulator.symbol_r[15] top.transmitter_tb.modulator.symbol_r[14] top.transmitter_tb.modulator.symbol_r[13] top.transmitter_tb.modulator.symbol_r[12] top.transmitter_tb.modulator.symbol_r[11] top.transmitter_tb.modulator.symbol_r[10] top.transmitter_tb.modulator.symbol_r[9] top.transmitter_tb.modulator.symbol_r[8] top.transmitter_tb.modulator.symbol_r[7] top.transmitter_tb.modulator.symbol_r[6] top.transmitter_tb.modulator.symbol_r[5] top.transmitter_tb.modulator.symbol_r[4] top.transmitter_tb.modulator.symbol_r[3] top.transmitter_tb.modulator.symbol_r[2] top.transmitter_tb.modulator.symbol_r[1] top.transmitter_tb.modulator.symbol_r[0]
+#{top.transmitter_tb.modulator.symbol[3:0]} top.transmitter_tb.modulator.symbol[3] top.transmitter_tb.modulator.symbol[2] top.transmitter_tb.modulator.symbol[1] top.transmitter_tb.modulator.symbol[0]
+@29
+top.transmitter_tb.modulator.walsh_load
+@28
+top.transmitter_tb.modulator.walsh_shift
+@22
+#{top.transmitter_tb.modulator.walsh_data[15:0]} top.transmitter_tb.modulator.walsh_data[15] top.transmitter_tb.modulator.walsh_data[14] top.transmitter_tb.modulator.walsh_data[13] top.transmitter_tb.modulator.walsh_data[12] top.transmitter_tb.modulator.walsh_data[11] top.transmitter_tb.modulator.walsh_data[10] top.transmitter_tb.modulator.walsh_data[9] top.transmitter_tb.modulator.walsh_data[8] top.transmitter_tb.modulator.walsh_data[7] top.transmitter_tb.modulator.walsh_data[6] top.transmitter_tb.modulator.walsh_data[5] top.transmitter_tb.modulator.walsh_data[4] top.transmitter_tb.modulator.walsh_data[3] top.transmitter_tb.modulator.walsh_data[2] top.transmitter_tb.modulator.walsh_data[1] top.transmitter_tb.modulator.walsh_data[0]
+#{top.transmitter_tb.modulator.walsh_data_r[15:0]} top.transmitter_tb.modulator.walsh_data_r[15] top.transmitter_tb.modulator.walsh_data_r[14] top.transmitter_tb.modulator.walsh_data_r[13] top.transmitter_tb.modulator.walsh_data_r[12] top.transmitter_tb.modulator.walsh_data_r[11] top.transmitter_tb.modulator.walsh_data_r[10] top.transmitter_tb.modulator.walsh_data_r[9] top.transmitter_tb.modulator.walsh_data_r[8] top.transmitter_tb.modulator.walsh_data_r[7] top.transmitter_tb.modulator.walsh_data_r[6] top.transmitter_tb.modulator.walsh_data_r[5] top.transmitter_tb.modulator.walsh_data_r[4] top.transmitter_tb.modulator.walsh_data_r[3] top.transmitter_tb.modulator.walsh_data_r[2] top.transmitter_tb.modulator.walsh_data_r[1] top.transmitter_tb.modulator.walsh_data_r[0]
+@28
+top.transmitter_tb.modulator.sub_write_strobe
+@22
+#{top.transmitter_tb.modulator.sub_d_out[31:0]} top.transmitter_tb.modulator.sub_d_out[31] top.transmitter_tb.modulator.sub_d_out[30] top.transmitter_tb.modulator.sub_d_out[29] top.transmitter_tb.modulator.sub_d_out[28] top.transmitter_tb.modulator.sub_d_out[27] top.transmitter_tb.modulator.sub_d_out[26] top.transmitter_tb.modulator.sub_d_out[25] top.transmitter_tb.modulator.sub_d_out[24] top.transmitter_tb.modulator.sub_d_out[23] top.transmitter_tb.modulator.sub_d_out[22] top.transmitter_tb.modulator.sub_d_out[21] top.transmitter_tb.modulator.sub_d_out[20] top.transmitter_tb.modulator.sub_d_out[19] top.transmitter_tb.modulator.sub_d_out[18] top.transmitter_tb.modulator.sub_d_out[17] top.transmitter_tb.modulator.sub_d_out[16] top.transmitter_tb.modulator.sub_d_out[15] top.transmitter_tb.modulator.sub_d_out[14] top.transmitter_tb.modulator.sub_d_out[13] top.transmitter_tb.modulator.sub_d_out[12] top.transmitter_tb.modulator.sub_d_out[11] top.transmitter_tb.modulator.sub_d_out[10] top.transmitter_tb.modulator.sub_d_out[9] top.transmitter_tb.modulator.sub_d_out[8] top.transmitter_tb.modulator.sub_d_out[7] top.transmitter_tb.modulator.sub_d_out[6] top.transmitter_tb.modulator.sub_d_out[5] top.transmitter_tb.modulator.sub_d_out[4] top.transmitter_tb.modulator.sub_d_out[3] top.transmitter_tb.modulator.sub_d_out[2] top.transmitter_tb.modulator.sub_d_out[1] top.transmitter_tb.modulator.sub_d_out[0]
+@28
+top.transmitter_tb.modulator.sub_io_ready
 [pattern_trace] 1
 [pattern_trace] 0

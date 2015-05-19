@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.45 (w)1999-2012 BSI
-[*] Fri May  8 04:01:19 2015
+[*] Fri May  8 04:51:28 2015
 [*]
 [dumpfile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/receiver_tb.ghw"
-[dumpfile_mtime] "Fri May  8 03:55:07 2015"
-[dumpfile_size] 19253647
+[dumpfile_mtime] "Fri May  8 04:39:54 2015"
+[dumpfile_size] 19283681
 [savefile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/gtkwave/receiver_tb.gtkw"
-[timestart] 68600000000
+[timestart] 0
 [size] 1680 1024
 [pos] -1 -1
-*-35.000000 168992000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-35.000000 136217010000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] top.
 [treeopen] top.receiver_tb.
 [treeopen] top.receiver_tb.s_to_p_2.comma_distance_lut.
@@ -22,26 +22,13 @@
 @28
 top.receiver_tb.clk
 top.receiver_tb.serial_clk
-top.receiver_tb.sync.serial_clk_90
-top.receiver_tb.sync.serial_clk_180
-top.receiver_tb.sync.serial_clk_270
 top.receiver_tb.reset
 top.receiver_tb.s_data_in
-top.receiver_tb.s_data_in_2
 [color] 1
 top.receiver_tb.s_data_sync
+top.receiver_tb.s_data_in_2
 [color] 1
 top.receiver_tb.s_data_sync_2
-top.receiver_tb.s_data_sync_err6
-top.receiver_tb.s_data_sync_err5
-@24
-[color] 1
-top.receiver_tb.s_data_sync_err4
-@28
-[color] 1
-top.receiver_tb.s_data_sync_err3
-top.receiver_tb.s_data_sync_err2
-top.receiver_tb.s_data_sync_err1
 @200
 -
 ---------Sync 1----------
@@ -59,18 +46,18 @@ top.receiver_tb.sync.d_90_p
 top.receiver_tb.sync.d_180_p
 top.receiver_tb.sync.d_270_p
 top.receiver_tb.sync.use_0
-top.receiver_tb.sync.use_0_hold
 top.receiver_tb.sync.use_90
-top.receiver_tb.sync.use_90_hold
 top.receiver_tb.sync.use_180
-top.receiver_tb.sync.use_180_hold
 top.receiver_tb.sync.use_270
+top.receiver_tb.sync.use_0_hold
+top.receiver_tb.sync.use_90_hold
+top.receiver_tb.sync.use_180_hold
 top.receiver_tb.sync.use_270_hold
 @24
 #{top.receiver_tb.sync.delay_time[5:0]} top.receiver_tb.sync.delay_time[5] top.receiver_tb.sync.delay_time[4] top.receiver_tb.sync.delay_time[3] top.receiver_tb.sync.delay_time[2] top.receiver_tb.sync.delay_time[1] top.receiver_tb.sync.delay_time[0]
 @200
 --------Sync 2------
-@25
+@24
 #{top.receiver_tb.sync_2.delay_time[5:0]} top.receiver_tb.sync_2.delay_time[5] top.receiver_tb.sync_2.delay_time[4] top.receiver_tb.sync_2.delay_time[3] top.receiver_tb.sync_2.delay_time[2] top.receiver_tb.sync_2.delay_time[1] top.receiver_tb.sync_2.delay_time[0]
 @200
 -

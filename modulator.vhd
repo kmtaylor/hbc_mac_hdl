@@ -6,6 +6,7 @@ use ieee.numeric_std.all;
 
 library transceiver;
 use transceiver.numeric.all;
+use transceiver.bits.all;
 
 entity modulator is
     port (
@@ -46,63 +47,100 @@ architecture modulator_arch of modulator is
     signal enabled : std_logic;
     signal set_sf_op : std_logic;
     signal got_write : std_logic := '0';
-    signal ack_write : std_logic;
     signal do_ack : std_logic;
+    signal walsh_load : std_logic;
+    signal walsh_shift : std_logic;
+    signal symbol_load : std_logic;
+    signal symbol_shift : std_logic;
     signal io_ready_s, io_ready_d : std_logic;
 
     type state_type is (st_idle,
+			st_load,
 			st_fifo_write,
 			st_fifo_ack,
+			st_shift,
 			st_bus_ack);
     signal state, state_i : state_type;
     
-    type bit_counter is range 0 to WALSH_CODE_SIZE - 1;
-    type sym_counter is range 0 to SYM_LIMIT - 1;
-    signal symbol_count, symbol_count_i : sym_counter;
-    signal bit_count, bit_count_i : bit_counter;
+    constant BIT_COUNTER_BITS : natural := bits_for_val(WALSH_CODE_SIZE - 1);
+    constant SYM_COUNTER_BITS : natural := bits_for_val(SYM_LIMIT - 1);
+    signal symbol_count, symbol_count_i : unsigned(SYM_COUNTER_BITS-1 downto 0);
+    signal bit_count, bit_count_i : unsigned(BIT_COUNTER_BITS-1 downto 0);
     signal repeat, repeat_i : std_logic;
 
-    signal walsh_data : std_logic_vector (WALSH_CODE_SIZE - 1 downto 0);
+    signal walsh_data, walsh_data_r : walsh_code_t;
     signal walsh_bit : std_logic;
-    signal symbol : std_logic_vector (WALSH_SYM_SIZE - 1 downto 0);
+    signal symbol : walsh_sym_t;
+    signal symbol_r : std_logic_vector (31 downto 0);
 
 begin
     io_ready <= io_ready_s or io_ready_d;
 
-    walsh_data <= walsh_encode(symbol);
+    walsh_bit <= walsh_data_r(0);
+    symbol <= symbol_r(WALSH_SYM_SIZE - 1 downto 0);
 
-    walsh_bit <= walsh_data(integer(bit_count));
+    walsh_encoder : entity work.walsh_encode_lut
+	port map (
+	    symbol => symbol,
+	    walsh => walsh_data);
 
-    symbol <= std_logic_vector(shift_right( unsigned(io_d_in_r),
-					    natural(symbol_count) * 4)
-				(WALSH_SYM_SIZE - 1 downto 0));
+    walsh_shifter : process (clk) begin
+	if clk'event and clk = '1' then
+	    if walsh_load = '1' then
+		walsh_data_r <= walsh_data;
+	    elsif walsh_shift = '1' then 
+		walsh_data_r <= shift_right(walsh_data_r, 1);
+	    end if;
+	end if;
+    end process walsh_shifter;
 
-    output_decode : process (state, walsh_bit) begin
+    symbol_shifter : process (clk) begin
+	if clk'event and clk = '1' then
+	    if symbol_load = '1' then
+		symbol_r <= io_d_in_r;
+	    elsif symbol_shift = '1' then
+		symbol_r <= shift_right(symbol_r, WALSH_SYM_SIZE);
+	    end if;
+	end if;
+    end process symbol_shifter;
+
+    output_decode : process (state, walsh_bit, sf, repeat) begin
 	sub_addr_out <= FIFO_ADDR;
 	sub_d_out <= (others => 'Z');
 	sub_write_strobe <= '0';
 	sub_addr_strobe <= '0';
 	bus_master <= '1';
+	io_ready_s <= '0';
+	walsh_shift <= '0';
+	walsh_load <= '0';
+	symbol_load <= '0';
+	symbol_shift <= '0';
 
-	if state = st_idle then
-	    bus_master <= '0';
-	end if;
-
-	if state = st_fifo_write then
-	    sub_write_strobe <= '1';
-	    sub_addr_strobe <= '1';
-	    if walsh_bit = '1' then
-		sub_d_out <= BIT_MAP_32_1;
-	    else
-		sub_d_out <= BIT_MAP_32_0;
-	    end if;
-	end if;
-	
-	if state = st_bus_ack then
-	    io_ready_s <= '1';
-	else
-	    io_ready_s <= '0';
-	end if;
+	case (state) is
+	    when st_idle =>
+		bus_master <= '0';
+		symbol_load <= '1';
+	    when st_load =>
+		walsh_load <= '1';
+	    when st_fifo_write =>
+		sub_write_strobe <= '1';
+		sub_addr_strobe <= '1';
+		if walsh_bit = '1' then
+		    sub_d_out <= BIT_MAP_32_1;
+		else
+		    sub_d_out <= BIT_MAP_32_0;
+		end if;
+	    when st_fifo_ack =>
+		if sf = DOUBLE_WRITE then
+		    walsh_shift <= repeat;
+		else
+		    walsh_shift <= '1';
+		end if;
+	    when st_shift =>
+		symbol_shift <= '1';
+	    when st_bus_ack =>
+		io_ready_s <= '1';
+	end case;
     end process;
 
     next_state_decode : process (state, got_write, sub_io_ready, enabled,
@@ -111,16 +149,17 @@ begin
         state_i <= state;
 	bit_count_i <= bit_count;
 	symbol_count_i <= symbol_count;
-	ack_write <= '0';
 	repeat_i <= repeat;
 
         case (state) is
             when st_idle =>
 		if got_write = '1' and enabled = '1' and set_sf_op = '0' then
-		    state_i <= st_fifo_write;
+		    state_i <= st_load;
 		end if;
-		symbol_count_i <= 0;
-		bit_count_i <= 0;
+		bit_count_i <= to_unsigned(0, bit_count_i'length);
+		symbol_count_i <= to_unsigned(0, symbol_count_i'length);
+	    when st_load =>
+		state_i <= st_fifo_write;
 	    when st_fifo_write =>
 		state_i <= st_fifo_ack;
 	    when st_fifo_ack =>
@@ -129,31 +168,32 @@ begin
 		    if sf = DOUBLE_WRITE and repeat = '0' then
 			state_i <= st_fifo_write;
 			repeat_i <= '1';
-		    elsif bit_count /= bit_counter(WALSH_CODE_SIZE - 1) then
+		    elsif bit_count /= WALSH_CODE_SIZE - 1 then
 			state_i <= st_fifo_write;
 			bit_count_i <= bit_count + 1;
 			repeat_i <= '0';
-		    elsif symbol_count /= sym_counter(SYM_LIMIT - 1) then 
-			state_i <= st_fifo_write;
-			symbol_count_i <= symbol_count + 1;
-			bit_count_i <= 0;
+		    elsif symbol_count /= SYM_LIMIT - 1 then 
+			state_i <= st_shift;
 			repeat_i <= '0';
 		    else
 			state_i <= st_bus_ack;
 			repeat_i <= '0';
 		    end if;
 		end if;
+	    when st_shift =>
+		state_i <= st_load;
+		symbol_count_i <= symbol_count + 1;
+		bit_count_i <= to_unsigned(0, bit_count_i'length);
 	    when st_bus_ack =>
 		state_i <= st_idle;
-		ack_write <= '1';
         end case;
     end process;
 
     sync_proc : process (clk, reset) begin
         if reset = '1' then
             state <= st_idle;
-	    bit_count <= 0;
-	    symbol_count <= 0;
+	    bit_count <= to_unsigned(0, bit_count'length);
+	    symbol_count <= to_unsigned(0, symbol_count'length);
 	    repeat <= '0';
         elsif clk'event and clk = '1' then
             state <= state_i;
@@ -178,8 +218,8 @@ begin
     end process sf_proc;
 
     -- Get IO data
-    io_proc : process(clk, reset, ack_write) begin
-	if reset = '1' or ack_write = '1' then
+    io_proc : process(clk, reset, io_ready_s) begin
+	if reset = '1' or io_ready_s = '1' then
 	    io_d_in_r <= (others => '0');
 	    got_write <= '0';
 	    do_ack <= '0';

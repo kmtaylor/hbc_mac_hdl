@@ -5,6 +5,10 @@
 #define SERIAL_CLK_NS 24
 #endif
 
+#ifndef STIMULUS
+#define STIMULUS 1
+#endif
+
 library ieee;
 use ieee.std_logic_1164.all;
 
@@ -81,8 +85,10 @@ begin
 	wait for clk_period * 5.5;
 
 	-- Trigger P2S
+#if STIMULUS
 	TRIGGER()
 	SEND_PACKET()
+#endif
 
 	wait;
     end process;

@@ -80,7 +80,7 @@ architecture behaviour of modulator_tb is
  
     -- Clock period definitions
     constant clk_period : time := 10 ns;
-    constant s_clk_period : time := 1667 ns; --24 ns;
+    constant s_clk_period : time := 24 ns;
     constant s_clk_dly_period : time := 23997 ps;
     
     type val_ft is file of std_logic;

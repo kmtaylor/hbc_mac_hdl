@@ -4,6 +4,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+library transceiver;
+use transceiver.bits.all;
+
 entity scrambler is
     port (
 	cpu_clk, reset : in std_logic;
@@ -55,8 +58,7 @@ begin
 		    tmp_bit :=	scram_reg_i(32 - 11) xor
 				scram_reg_i(32 - 31) xor
 				scram_reg_i(32 - 32);
-		    scram_reg_i := std_logic_vector(
-				shift_right(unsigned(scram_reg_i), 1));
+		    scram_reg_i := shift_right(scram_reg_i, 1);
 		    scram_reg_i(31) := tmp_bit;
 		end loop;
 		scram_reg <= scram_reg_i;

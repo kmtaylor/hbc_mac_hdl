@@ -4,6 +4,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+library transceiver;
+use transceiver.bits.all;
+
 entity fifo_interface is
     port (
 	clk, reset  : in std_logic;
@@ -36,9 +39,10 @@ architecture fifo_interface_arch of fifo_interface is
     signal do_ack : std_logic := '0';
     signal reading : std_logic := '0';
 
-    subtype counter_type is unsigned (5 downto 0);
+    constant COUNTER_BITS : natural := bits_for_val(32);
+    subtype counter_type is unsigned (COUNTER_BITS-1 downto 0);
     constant unity : unsigned (31 downto 0) := to_unsigned(1, 32);
-    constant reset_32 : counter_type := to_unsigned(32, 6);
+    constant reset_32 : counter_type := to_unsigned(32, COUNTER_BITS);
     signal num_bits : counter_type := reset_32;
     signal bit_p : counter_type := reset_32;
     signal bit_p_i : counter_type;
@@ -100,7 +104,8 @@ begin
 		    clear_cur_buf <= clear_cur_buf_i;
 		    write_wrap_buf <= write_wrap_buf_i;
 		else
-		    num_bits <= unsigned(io_d_in_r(5 downto 0));
+		    num_bits <= counter_type(
+				    io_d_in_r(COUNTER_BITS-1 downto 0));
 		end if;
 	    end if;
 	end if;
@@ -108,23 +113,20 @@ begin
 
     push_proc : process(num_bits, bit_p, cur_buf, io_d_in_r, wrap_mask,
 				nowrap_mask, new_mask) begin
-	wrap_buf_i <= cur_buf or std_logic_vector(
-				shift_right(unsigned(io_d_in_r and wrap_mask),
-					    to_integer(num_bits - bit_p)));
+	wrap_buf_i <= cur_buf or shift_right(io_d_in_r and wrap_mask,
+					    to_integer(num_bits - bit_p));
 	flush_i <= '0';
 	write_wrap_buf_i <= '0';
 	clear_cur_buf_i <= '0';
 	if num_bits > bit_p then
 	    bit_p_i <= reset_32 - (num_bits - bit_p);
-	    cur_buf_i <= std_logic_vector(
-				shift_left( unsigned(io_d_in_r and new_mask),
-					    32 - to_integer(num_bits - bit_p)));
+	    cur_buf_i <= shift_left(io_d_in_r and new_mask,
+				    32 - to_integer(num_bits - bit_p));
 	    flush_i <= '1';
 	    write_wrap_buf_i <= '1';
 	else
-	    cur_buf_i <= cur_buf or std_logic_vector(
-				shift_left( unsigned(io_d_in_r and nowrap_mask),
-					    to_integer(bit_p - num_bits)));
+	    cur_buf_i <= cur_buf or shift_left(io_d_in_r and nowrap_mask,
+						to_integer(bit_p - num_bits));
 	    if num_bits = bit_p then
 		bit_p_i <= reset_32;
 		flush_i <= '1';

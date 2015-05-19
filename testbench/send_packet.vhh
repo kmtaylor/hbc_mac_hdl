@@ -161,8 +161,8 @@
 					    \
 	PACKET_RATE()			    \
 					    \
-	MODULATE(X"12345678")		    \
-	MODULATE(X"87654321")		    \
+	MODULATE(X"00000000")		    \
+	MODULATE(X"00000001")		    \
 	MODULATE(X"12345678")		    \
 	MODULATE(X"87654321")		    \
 	MODULATE(X"12345678")		    \

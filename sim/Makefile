@@ -29,6 +29,7 @@ RECEIVER_TB_FILES += \
 RECEIVER_SIM_FLAGS += --stop-time=320us
 
 TRANSMITTER_TB_FILES += \
+	walsh_enc_lut.vhd \
 	modulator.vhd \
 	parallel_to_serial.vhd \
 	fifo_interface.vhd \
@@ -53,6 +54,7 @@ C_TO_VHD_FILES += \
 C_TO_VHD_SIM_FLAGS += --stop-time=3000ns
 
 MODULATOR_TB_FILES += \
+	walsh_enc_lut.vhd \
 	modulator.vhd \
 	parallel_to_serial.vhd \
 	fifo_interface.vhd \
@@ -62,9 +64,10 @@ MODULATOR_TB_FILES += \
 	serial_to_parallel.vhd \
 	rx_fifo_interface.vhd \
 	modulator_path_tb.vhd
-MODULATOR_SIM_FLAGS += --stop-time=116076544ns --ieee-asserts=disable-at-0
+MODULATOR_SIM_FLAGS += --stop-time=1000us --ieee-asserts=disable-at-0
 
 MODULATOR_SYNTH_TB_FILES += \
+	walsh_enc_lut.vhd \
 	modulator.vhd \
 	parallel_to_serial.vhd \
 	fifo_interface.vhd \

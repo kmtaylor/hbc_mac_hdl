@@ -36,17 +36,18 @@ architecture test of numeric_tb is
  
 begin
 
-#if 0
+#if TEST_WALSH
     process
 	variable l : line;
-	variable w_code_1 : walsh_code_t;
-	variable w_code_2 : walsh_code_t;
+	variable w_code_1 : walsh_code_t := X"0000";
+	variable w_code_2 : walsh_code_t := X"0000";
 	variable w_sym : walsh_sym_t;
 	variable distance : natural;
     begin
-	for j in 0 to 15 loop
-	    w_sym := std_logic_vector(to_unsigned(j, 4));
-	    w_code_1 := X"9549"; --walsh_encode(w_sym);
+	for j in 0 to 0 loop
+	    --w_sym := std_logic_vector(to_unsigned(j, 4));
+	    --w_code_1 := walsh_encode(w_sym);
+	    w_code_1 := X"FFF1";
 
 	    for i in 0 to 15 loop
 		w_sym := std_logic_vector(to_unsigned(i, 4));
@@ -65,6 +66,7 @@ begin
     end process;
 #endif
 
+#if TEST_VITAL
     process
 	variable l : line;
     begin
@@ -83,7 +85,9 @@ begin
 
 	wait;
     end process;
+#endif
 
+#if TEST_HAMMING
     test_hamming : entity work.hamming_lut
 	port map (
 	    val => std_logic_vector(val),
@@ -93,5 +97,6 @@ begin
 	wait for clk_period;
 	val <= val + 1;
     end process inc_val;
+#endif
 
 end;
