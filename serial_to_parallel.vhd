@@ -19,29 +19,23 @@ entity serial_to_parallel is
 		data_in : in std_logic;
 		pkt_reset : out std_logic;
 		pkt_ready : out std_logic;
-		pkt_ack : in std_logic;
-		dbg : out std_logic_vector (7 downto 0));
+		pkt_ack : in std_logic);
 end serial_to_parallel;
 
 architecture serial_to_parallel_arch of serial_to_parallel is
 
-#define _COUNT_OFFSET(val) COMMA_SIZE-1 + INT(val)
+#define _COUNT_OFFSET(val) COMMA_SIZE + INT(val)
 #define COUNT_OFFSET(val) _COUNT_OFFSET(val)
 
     constant RESET_DELAY : natural := 16;
     constant MAX_SYMBOL_SIZE : natural := 64;
-    constant COMMA_SIZE : natural := 64;
     constant SYMBOL_INDEX_BITS : natural := bits_for_val(MAX_SYMBOL_SIZE-1);
     constant RATE_SELECT_BITS : natural := bits_for_val(MAX_SYMBOL_SIZE);
     constant COMMA_WEIGHT_BITS : natural := bits_for_val(COMMA_SIZE);
-    constant COMMA : std_logic_vector (COMMA_SIZE-1 downto 0) := HEX(PREAMBLE);
     constant SFD : std_logic_vector (COMMA_SIZE-1 downto 0) := HEX(SFD);
-    constant WALSH_SIZE : natural := 16;
     constant NIBBLE_SIZE : natural := 8;
     constant WORD_SIZE : natural := 32;
     constant PKT_END_THRESH : natural := 8;
-
-    signal data_in_r : std_logic;
 
     signal using_ri : std_logic;
     signal rate_found : std_logic;
@@ -59,18 +53,23 @@ architecture serial_to_parallel_arch of serial_to_parallel is
     attribute max_fanout of reset : signal is "10";
     attribute shreg_extract of reset : signal is "no"; 
 
-    signal s2p_index : unsigned (SYMBOL_INDEX_BITS-1 downto 0);
-    signal s2p_align_index : unsigned (SYMBOL_INDEX_BITS-1 downto 0);
+    signal data_in_sync : std_logic;
+    signal re_align : std_logic;
+    signal expected_phase : std_logic;
+    signal phase_sum : unsigned (SYMBOL_INDEX_BITS-1 downto 0);
+    signal current_phase : std_logic;
+
+    signal s2p_index : unsigned (SYMBOL_INDEX_BITS-1 downto 0) := (others => '0');
     signal s2p_sym : std_logic_vector (MAX_SYMBOL_SIZE-1 downto 0);
     signal allow_re_align : std_logic;
     signal latch_sfd : std_logic;
 
-    signal walsh_count : unsigned (bits_for_val(WALSH_SIZE-1)-1 downto 0);
+    signal walsh_count : unsigned (bits_for_val(WALSH_CODE_SIZE-1)-1 downto 0);
     signal walsh_msb : std_logic_vector (1 downto 0);
     signal walsh_clk : std_logic;
     signal walsh_detect_i : std_logic;
     signal walsh_detect : std_logic;
-    signal walsh_reg : std_logic_vector (WALSH_SIZE-1 downto 0);
+    signal walsh_reg : std_logic_vector (WALSH_CODE_SIZE-1 downto 0);
     signal nibble_count : unsigned (bits_for_val(NIBBLE_SIZE-1)-1 downto 0);
     signal nibble_ready : std_logic;
     signal nibble_ready_prev : std_logic;
@@ -80,15 +79,10 @@ architecture serial_to_parallel_arch of serial_to_parallel is
 
     signal phase_change : std_logic;
     signal phase_changes : std_logic_vector(PKT_END_THRESH-1 downto 0);
-    signal expected_phase : std_logic;
-    signal current_phase : std_logic;
-    signal phase_sum : unsigned (SYMBOL_INDEX_BITS-1 downto 0);
     signal chk_pkt_end : std_logic;
     signal pkt_end : std_logic;
 
-    signal comma_weight : std_logic_vector (COMMA_WEIGHT_BITS-1 downto 0);
     signal sfd_weight : std_logic_vector (COMMA_WEIGHT_BITS-1 downto 0);
-    signal comma_xnor : std_logic_vector (COMMA_SIZE-1 downto 0);
     signal sfd_xnor : std_logic_vector (COMMA_SIZE-1 downto 0);
     signal demod_reg : std_logic_vector (COMMA_SIZE-1 downto 0);
     signal comma_found : std_logic;
@@ -99,6 +93,8 @@ architecture serial_to_parallel_arch of serial_to_parallel is
 		    bits_for_val(COUNT_OFFSET(RI_OFFSET_MAX))-1 downto 0);
 
     type state_type is (
+			st_align_1,	-- Wait for alignment from phase_align
+			st_align_2,	-- Wait for alignment from phase_align
 			st_preamble,	-- Load in phase changes until
 					-- successful comma detect.
 			st_sfd,		-- Detect SFD and padding (data rate).
@@ -127,6 +123,10 @@ begin
 	sym_reset_i <= '0';
 	latch_sfd <= '0';
 	case(state) is
+	    when st_align_1 =>
+		allow_re_align <= '1';
+	    when st_align_2 =>
+		allow_re_align <= '1';
 	    when st_preamble =>
 		allow_re_align <= '1';
 	    when st_sfd =>
@@ -143,6 +143,14 @@ begin
 			    nibble_count) begin
 	state_i <= state;
 	case (state) is
+	    when st_align_1 =>
+		if comma_found = '1' then
+		    state_i <= st_align_2;
+		end if;
+	    when st_align_2 =>
+		if comma_found = '0' then
+		    state_i <= st_preamble;
+		end if;
 	    when st_preamble =>
 		if comma_found = '1' then
 		    state_i <= st_sfd;
@@ -163,7 +171,7 @@ begin
     sync_proc : process(serial_clk) begin
 	if serial_clk'event and serial_clk = '1' then
 	    if reset = '1' then
-		state <= st_preamble;
+		state <= st_align_1;
 	    else
 		state <= state_i;
 	    end if;
@@ -173,14 +181,46 @@ begin
 ------------------------------------------------------------------------------
 
     -- Demodulator: 
-    -- When detecting the correct phase early in the packet. Use two shift
-    -- registers. One always tracks the input, the other resets whenever there
-    -- is a phase change.
-    -- If the reset register then detects a consistent phase block, it takes
-    -- over as the tracking register.
+    phase_aligner : entity work.phase_align
+	port map (
+	    pkt_reset => sym_reset,
+	    serial_clk => serial_clk,
+	    data_in => data_in,
+	    data_in_sync => data_in_sync,
+	    phase_change => phase_change,
+	    comma_found_out => comma_found,
+	    re_align => re_align);
 
     sym_reset <= reset or sym_reset_i;
     pkt_reset <= sym_reset;
+
+    s2p_reg : process (serial_clk) begin
+        if serial_clk'event and serial_clk = '1' then
+            s2p_sym <= s2p_sym(MAX_SYMBOL_SIZE-2 downto 0) & data_in_sync;
+        end if;
+    end process s2p_reg;
+
+    re_align_proc : process (serial_clk) begin
+        if serial_clk'event and serial_clk = '1' then
+            if (allow_re_align = '1') and (re_align = '1') then
+                phase_sum <= (others => '0');
+                s2p_index <= (others => '0');
+                expected_phase <= '1';
+            elsif s2p_index = r_sf-1 then
+                phase_sum <= (others => '0');
+                s2p_index <= (others => '0');
+                expected_phase <= '1';
+            else
+                if (s2p_sym(0) = expected_phase) then
+                    phase_sum <= phase_sum + 1;
+                end if;
+                s2p_index <= s2p_index + 1;
+                expected_phase <= not expected_phase;
+            end if;
+        end if;
+    end process re_align_proc;
+
+    current_phase <= bool_to_bit(phase_sum >= r_sf/2);  
 
     packet_ack : process (reset, pkt_ack, serial_clk) begin
 	if pkt_ack = '1' or reset = '1'then
@@ -192,101 +232,17 @@ begin
 	end if;
     end process packet_ack;
 
-    data_sync : process (serial_clk) begin
-	if serial_clk'event and serial_clk = '1' then
-	    data_in_r <= data_in;
-	end if;
-    end process data_sync;
-
-    s2p_reg : process (serial_clk) begin
-	if serial_clk'event and serial_clk = '1' then
-	    if sym_reset = '1' then
-		s2p_sym <= (others => '0');
-	    else
-		s2p_sym <= s2p_sym(MAX_SYMBOL_SIZE-2 downto 0) & data_in_r;
-	    end if;
-	end if;
-    end process s2p_reg;
-    
-    detect_phase_shift : process(serial_clk) begin
-	if serial_clk'event and serial_clk = '1' then
-	    if s2p_sym(0) = data_in_r then
-		phase_change <= '1';
-	    else
-		phase_change <= '0';
-	    end if;
-	end if;
-    end process detect_phase_shift;
-
-    s2p_align : process (serial_clk) begin
-	if serial_clk'event and serial_clk = '1' then
-	    if sym_reset = '1' then
-		s2p_align_index <= (others => '0');
-	    else
-		if (phase_change = '1') then
-		    -- We received the same two values in a row, this may be a
-		    -- phase change. 
-		    s2p_align_index <= to_unsigned(1, s2p_align_index'length);
-		elsif s2p_align_index = r_sf-1 then
-		    s2p_align_index <= (others => '0');
-		else
-		    s2p_align_index <= s2p_align_index + 1;
-		end if;
-	    end if;
-	end if;
-    end process s2p_align;
-
-    -- If we are at s2p_align_index = r_sf-1, and phase_sum() = 8 or 0, then the
-    -- alignment register is correctly aligned. Reset s2p_index.
-    re_align : process (serial_clk) begin
-	if serial_clk'event and serial_clk = '1' then
-	    if sym_reset = '1' then
-		s2p_index <= (others => '0');
-		phase_sum <= (others => '0');
-		expected_phase <= '1';
-	    else
-		if (s2p_align_index = INT(SF_8)-1) and 
-			    (allow_re_align = '1') then
-		    if sym_in_phase(s2p_sym) then 
-			s2p_index <= (others => '0');
-			phase_sum <= (others => '0');
-			expected_phase <= '1';
-		    end if;
-		elsif s2p_index = r_sf-1 then
-		    s2p_index <= (others => '0');
-		    phase_sum <= (others => '0');
-		    expected_phase <= '1';
-		else
-		    s2p_index <= s2p_index + 1;
-		    if (s2p_sym(0) = expected_phase) then
-			phase_sum <= phase_sum + 1;
-		    end if;
-		    expected_phase <= not expected_phase;
-		end if;
-	    end if;
-	end if;
-    end process re_align;
-
-    detect_phase : process (phase_sum, r_sf) begin
-	if phase_sum >= r_sf/2 then
-	    current_phase <= '1';
-	else
-	    current_phase <= '0';
-	end if;
-    end process detect_phase;
-
     demodulate : process(serial_clk) begin
 	if serial_clk'event and serial_clk = '1' then
 	    if sym_reset = '1' then
-		demod_reg <= (others => '0');
 		walsh_count <= (others => '1');
 		walsh_detect <= '0';
 	    else
 		if s2p_index = r_sf-1 then
-		    demod_reg <= demod_reg(COMMA_SIZE-2 downto 0) & 
+		    demod_reg <= demod_reg(COMMA_SIZE-2 downto 0) &
 				current_phase;
 		    if walsh_detect_i = '1' then
-			if walsh_count = WALSH_SIZE-1 then
+			if walsh_count = WALSH_CODE_SIZE-1 then
 			    walsh_detect <= '1';
 			    walsh_count <= (others => '0');
 			else
@@ -298,16 +254,10 @@ begin
 	end if;
     end process demodulate;
 
-    comma_xnor <= demod_reg xnor COMMA;
     sfd_xnor <= demod_reg xnor SFD;
-
-    comma_distance_lut : entity work.hamming_lut
-	port map (val => comma_xnor, weight => comma_weight);
 
     sfd_distance_lut : entity work.hamming_lut
 	port map (val => sfd_xnor, weight => sfd_weight);
-
-    comma_found <= weight_threshold(comma_weight);
 
     sfd_found_i <= weight_threshold(sfd_weight);
 
@@ -322,39 +272,6 @@ begin
 	    end if;
 	end if;
     end process latch_sfd_proc;
-
-#if DEBUG
-    dbg_latch : process(serial_clk) begin
-	if serial_clk'event and serial_clk = '1' then
-	    if reset = '1' then
-		dbg <= (others => '0');
-	    else
-		if comma_found = '1' then
-		    dbg(0) <= '1';
-		end if;
-		if sfd_found = '1' then
-		    dbg(1) <= '1';
-		end if;
-		if sym_reset_i = '1' then
-		    dbg(2) <= '1';
-		end if;
-		if sfd_finished = '1' and rate_found = '1' then 
-			if ri_rate = 8 then
-			    dbg(4 downto 3) <= "11";
-			elsif ri_rate = 16 then
-			    dbg(4 downto 3) <= "10";
-			elsif ri_rate = 32 then
-			    dbg(4 downto 3) <= "01";
-			elsif ri_rate = 64 then
-			    dbg(4 downto 3) <= "00";
-			else
-			    dbg(4 downto 3) <= "11";
-			end if;
-		end if;
-	    end if;
-	end if;
-    end process dbg_latch;
-#endif
 
     consume_ri_chips : process(serial_clk) begin
 	if serial_clk'event and serial_clk = '1' then
@@ -408,11 +325,14 @@ begin
 		    if sfd_found = '1' and rate_found = '0' then
 			if ri_count = COUNT_OFFSET(RI_OFFSET_8) then
 			    ri_rate <= to_unsigned(INT(SF_8), ri_rate'length);
-			elsif ri_count = COUNT_OFFSET(RI_OFFSET_16) then
+			end if;
+			if ri_count = COUNT_OFFSET(RI_OFFSET_16) then
 			    ri_rate <= to_unsigned(INT(SF_16), ri_rate'length);
-			elsif ri_count = COUNT_OFFSET(RI_OFFSET_32) then
+			end if;
+			if ri_count = COUNT_OFFSET(RI_OFFSET_32) then
 			    ri_rate <= to_unsigned(INT(SF_32), ri_rate'length);
-			elsif ri_count = COUNT_OFFSET(RI_OFFSET_64) then
+			end if;
+			if ri_count = COUNT_OFFSET(RI_OFFSET_64) then
 			    ri_rate <= to_unsigned(INT(SF_64), ri_rate'length);
 			end if;
 			rate_found <= '1';
@@ -428,8 +348,9 @@ begin
 		walsh_reg <= (others => '0');
 	    else
 		if walsh_detect = '1' then
-		    if walsh_count = WALSH_SIZE-1 then
-			walsh_reg <= bit_swap(demod_reg(WALSH_SIZE-1 downto 0));
+		    if walsh_count = WALSH_CODE_SIZE-1 then
+			walsh_reg <= bit_swap(
+					demod_reg(WALSH_CODE_SIZE-1 downto 0));
 		    end if;
 		end if;
 	    end if;

@@ -5,17 +5,19 @@ TRANSCEIVER_FILES += \
 	processed/debounce_pp.vhd					\
 	processed/fifo_bus_arbitrator_pp.vhd				\
 	processed/fifo_interface_pp.vhd					\
+	processed/hamming_lut_pp.vhd					\
 	processed/io_bus_arbitrator_pp.vhd				\
 	processed/lcd_interface_pp.vhd					\
 	processed/mem_interface_pp.vhd					\
 	processed/modulator_pp.vhd					\
 	processed/parallel_to_serial_pp.vhd				\
+	processed/rx_fifo_interface_pp.vhd				\
 	processed/scrambler_pp.vhd					\
-	processed/hamming_lut_pp.vhd					\
 	processed/serial_to_parallel_pp.vhd				\
 	processed/toplevel_pp.vhd					\
-	processed/rx_fifo_interface_pp.vhd				\
-	processed/usb_fifo_interface_pp.vhd
+	processed/usb_fifo_interface_pp.vhd				\
+	processed/walsh_decoder_pp.vhd					\
+	processed/walsh_enc_lut_pp.vhd
 
 all: $(TRANSCEIVER_FILES)
 

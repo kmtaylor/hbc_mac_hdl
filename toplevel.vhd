@@ -204,6 +204,7 @@ architecture toplevel_arch of toplevel is
     signal pkt_reset : std_logic;
     signal clk_debounce, clkin_ibufg : std_logic;
     signal pll_clk, cpu_clk, serial_clk, serial_clk_90, usb_clk : std_logic;
+    signal serial_clk_tmp : std_logic;
     signal mem_clk0, mem_clk90, mem_clkdiv0, mem_clk200 : std_logic;
     signal pll_locked, mem_pll_locked : std_logic;
     signal serial_dcm_locked : std_logic;
@@ -279,6 +280,22 @@ begin
     --	LOCKED_OUT => cpu_dcm_locked);
     cpu_dcm_locked <= '1';
 
+
+#define SERIAL_DIV 0
+#if SERIAL_DIV
+    clk_div_1 : entity work.clock_divider
+	generic map (DIV_BY => 8)
+	port map (clk => serial_clk_tmp, clk_div => serial_clk);
+
+    -- 42MHz PLL to 42MHz serial clock for TX
+    serial_clk_dcm : entity work.dcm_serial
+	port map (
+	    CLKIN_IN => pll_clk,
+	    RST_IN => '0',
+	    CLK0_OUT => serial_clk_tmp,
+	    CLK90_OUT => serial_clk_90,
+	    LOCKED_OUT => serial_dcm_locked);
+#else
     -- 42MHz PLL to 42MHz serial clock for TX
     serial_clk_dcm : entity work.dcm_serial
 	port map (
@@ -287,6 +304,7 @@ begin
 	    CLK0_OUT => serial_clk,
 	    CLK90_OUT => serial_clk_90,
 	    LOCKED_OUT => serial_dcm_locked);
+#endif
 	    
     -- 125MHz cpu_clk to 6.25kHz clk for pushbutton debouncing 
     clk_div_0 : entity work.clock_divider

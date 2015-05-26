@@ -15,7 +15,7 @@ use ieee.std_logic_1164.all;
 entity transmitter_stim_tb is
 end transmitter_stim_tb;
  
-architecture behaviour of transmitter_stim_tb is 
+architecture testbench of transmitter_stim_tb is 
  
    --Inputs
     signal clk : std_logic := '0';

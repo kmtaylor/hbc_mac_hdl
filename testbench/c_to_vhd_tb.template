@@ -4,7 +4,7 @@ use ieee.std_logic_1164.all;
 entity c_to_vhd_tb is
 end c_to_vhd_tb;
  
-architecture behaviour of c_to_vhd_tb is 
+architecture testbench of c_to_vhd_tb is 
  
    --Inputs
     signal clk : std_logic := '0';

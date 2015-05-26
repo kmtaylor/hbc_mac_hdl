@@ -4,7 +4,7 @@ use ieee.std_logic_1164.all;
 entity scrambler_tb is
 end entity scrambler_tb;
  
-architecture behaviour of scrambler_tb is
+architecture testbench of scrambler_tb is
 
     constant clk_period : time := 10 ns;
     
@@ -102,4 +102,4 @@ begin
 	wait;
    end process;
 
-end architecture behaviour;
+end architecture testbench;

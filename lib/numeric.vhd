@@ -5,6 +5,8 @@ use ieee.numeric_std.all;
 package numeric is
     constant WALSH_CODE_SIZE : natural := 16;
     constant WALSH_SYM_SIZE : natural := 4;
+    constant COMMA_SIZE : natural := 64;
+
     subtype walsh_code_t is std_logic_vector(WALSH_CODE_SIZE-1 downto 0);
     subtype walsh_sym_t is std_logic_vector(WALSH_SYM_SIZE-1 downto 0);
 
@@ -13,6 +15,8 @@ package numeric is
     function walsh_encode (input : walsh_sym_t) return walsh_code_t;
     function walsh_decode (input : walsh_code_t) return walsh_sym_t;
     function weight_threshold (weight : std_logic_vector) return std_logic;
+    function weight_comp (new_weight, old_weight : std_logic_vector) 
+	return boolean;
 
     function bool_to_bit(input : boolean) return std_logic;
     function ones(length : natural) return std_logic_vector;
@@ -59,6 +63,23 @@ package body numeric is
             return '0';
         end if;
     end function weight_threshold;
+
+    function weight_comp (new_weight, old_weight : std_logic_vector) 
+	return boolean is
+    begin
+	-- Do a three bit comparison on to find the best match, after passing
+	-- the threshold
+	if new_weight(3 downto 0) = X"0" then
+	    return true;
+	elsif old_weight(3 downto 0) = X"0" then
+	    return false;
+	end if;
+	if new_weight(2 downto 0) >= old_weight(2 downto 0) then
+	    return true;
+	else
+	    return false;
+	end if;
+    end function weight_comp;
  
     function sym_in_phase (sym : std_logic_vector) return boolean is
     begin

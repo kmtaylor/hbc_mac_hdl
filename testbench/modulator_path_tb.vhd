@@ -7,7 +7,7 @@ use ieee.std_logic_1164.all;
 entity modulator_tb is
 end modulator_tb;
  
-architecture behaviour of modulator_tb is 
+architecture testbench of modulator_tb is 
  
     component fifo_tx port (
         rst : IN STD_LOGIC;

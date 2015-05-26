@@ -15,8 +15,9 @@ end entity walsh_decoder;
 
 architecture walsh_decoder_arch of walsh_decoder is
     
-    subtype distance_t is unsigned (bits_for_val(WALSH_CODE_SIZE)-1 downto 0);
     signal reset : std_logic := '1';
+    subtype distance_t is std_logic_vector (
+		    bits_for_val(WALSH_CODE_SIZE)-1 downto 0);
 
     signal cur_walsh : walsh_code_t;
     signal cur_distance : distance_t;
@@ -34,13 +35,13 @@ begin
     walsh_xnor <= cur_walsh xnor data;
 
     walsh_distance : entity work.hamming_lut_16
-	port map (val => walsh_xnor, unsigned(weight) => cur_distance);
+	port map (val => walsh_xnor, weight => cur_distance);
 
     loop_proc : process (clk) begin
 	if clk'event and clk = '1' then
 	    if reset = '1' then
 		reset <= '0';
-		max <= to_unsigned(0, max'length);
+		max <= (others => '0');
 		sym <= max_index;
 	    else
 		sym_counter <= std_logic_vector(unsigned(sym_counter) + 1);

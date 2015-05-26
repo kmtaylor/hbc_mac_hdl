@@ -5,7 +5,7 @@ use ieee.numeric_std.all;
 entity data_synchroniser_tb is
 end data_synchroniser_tb;
 
-architecture behaviour of data_synchroniser_tb is
+architecture testbench of data_synchroniser_tb is
 
     signal reset : std_logic;
     signal serial_clk : std_logic;
@@ -74,4 +74,4 @@ begin
 	end if;
     end process;
 
-end architecture behaviour;
+end architecture testbench;

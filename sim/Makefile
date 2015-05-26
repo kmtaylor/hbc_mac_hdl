@@ -22,11 +22,16 @@ RECEIVER_TB_FILES += \
 	receiver_afe/ghdl/receiver_afe_2.time \
 	receiver_afe/ghdl/receiver_afe_2.value \
 	data_synchroniser.vhd \
+	walsh_enc_lut.vhd \
+	walsh_decoder.vhd \
+	phase_align.vhd \
 	serial_to_parallel.vhd \
+	serial_to_parallel_old.vhd \
 	rx_fifo_interface.vhd \
 	hamming_lut.vhd \
 	receiver_tb.vhd
-RECEIVER_SIM_FLAGS += --stop-time=320us
+#RECEIVER_SIM_FLAGS += --stop-time=2ms
+RECEIVER_SIM_FLAGS += --stop-time=200us
 
 TRANSMITTER_TB_FILES += \
 	walsh_enc_lut.vhd \

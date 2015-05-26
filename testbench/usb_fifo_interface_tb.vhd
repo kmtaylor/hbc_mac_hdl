@@ -8,7 +8,7 @@ USE ieee.std_logic_1164.ALL;
 ENTITY usb_fifo_interface_tb IS
 END usb_fifo_interface_tb;
  
-ARCHITECTURE behaviour OF usb_fifo_interface_tb IS 
+ARCHITECTURE testbench OF usb_fifo_interface_tb IS 
  
    --Inputs
    signal usb_clk : std_logic := '0';

@@ -6,7 +6,7 @@ use ieee.std_logic_1164.all;
 entity receiver_tb is
 end receiver_tb;
  
-architecture behaviour of receiver_tb is 
+architecture testbench of receiver_tb is 
  
     component fifo_rx port (
         rst : IN STD_LOGIC;
@@ -69,7 +69,7 @@ architecture behaviour of receiver_tb is
  
     -- Clock period definitions
     constant clk_period : time := 10 ns;
-    constant s_clk_period : time := 23.81 ns;
+    constant s_clk_period : time := 11.905 ns;
     
     type val_ft is file of std_logic;
     type time_ft is file of time;
@@ -151,7 +151,7 @@ begin
 	data_in => s_data_in_2,
 	data_out => s_data_sync_2);
 
-    s_to_p_2 : entity work.serial_to_parallel port map (
+    s_to_p_2 : entity work.serial_to_parallel_old port map (
 	reset_i => reset,
 	pkt_reset => pkt_reset_2,
 	serial_clk => serial_clk,

@@ -28,7 +28,7 @@ entity transmitter_tb is
 #endif
 end transmitter_tb;
  
-architecture behaviour of transmitter_tb is 
+architecture testbench of transmitter_tb is 
  
     component fifo_tx port (
         rst : IN STD_LOGIC;

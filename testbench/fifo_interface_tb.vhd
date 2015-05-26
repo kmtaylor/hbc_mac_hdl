@@ -4,7 +4,7 @@ use ieee.std_logic_1164.all;
 entity fifo_interface_tb is
 end fifo_interface_tb;
  
-architecture behaviour of fifo_interface_tb is 
+architecture testbench of fifo_interface_tb is 
  
     component fifo_tx port (
 	rst : IN STD_LOGIC;
