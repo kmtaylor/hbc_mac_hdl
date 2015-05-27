@@ -59,8 +59,7 @@ architecture serial_to_parallel_arch of serial_to_parallel is
     signal phase_sum : unsigned (SYMBOL_INDEX_BITS-1 downto 0);
     signal current_phase : std_logic;
 
-    signal s2p_index : unsigned (SYMBOL_INDEX_BITS-1 downto 0) := (others => '0');
-    signal s2p_sym : std_logic_vector (MAX_SYMBOL_SIZE-1 downto 0);
+    signal s2p_index : unsigned (SYMBOL_INDEX_BITS-1 downto 0);
     signal allow_re_align : std_logic;
     signal latch_sfd : std_logic;
 
@@ -194,12 +193,6 @@ begin
     sym_reset <= reset or sym_reset_i;
     pkt_reset <= sym_reset;
 
-    s2p_reg : process (serial_clk) begin
-        if serial_clk'event and serial_clk = '1' then
-            s2p_sym <= s2p_sym(MAX_SYMBOL_SIZE-2 downto 0) & data_in_sync;
-        end if;
-    end process s2p_reg;
-
     re_align_proc : process (serial_clk) begin
         if serial_clk'event and serial_clk = '1' then
             if (allow_re_align = '1') and (re_align = '1') then
@@ -211,7 +204,7 @@ begin
                 s2p_index <= (others => '0');
                 expected_phase <= '1';
             else
-                if (s2p_sym(0) = expected_phase) then
+                if (data_in_sync = expected_phase) then
                     phase_sum <= phase_sum + 1;
                 end if;
                 s2p_index <= s2p_index + 1;
@@ -325,14 +318,11 @@ begin
 		    if sfd_found = '1' and rate_found = '0' then
 			if ri_count = COUNT_OFFSET(RI_OFFSET_8) then
 			    ri_rate <= to_unsigned(INT(SF_8), ri_rate'length);
-			end if;
-			if ri_count = COUNT_OFFSET(RI_OFFSET_16) then
+			elsif ri_count = COUNT_OFFSET(RI_OFFSET_16) then
 			    ri_rate <= to_unsigned(INT(SF_16), ri_rate'length);
-			end if;
-			if ri_count = COUNT_OFFSET(RI_OFFSET_32) then
+			elsif ri_count = COUNT_OFFSET(RI_OFFSET_32) then
 			    ri_rate <= to_unsigned(INT(SF_32), ri_rate'length);
-			end if;
-			if ri_count = COUNT_OFFSET(RI_OFFSET_64) then
+			elsif ri_count = COUNT_OFFSET(RI_OFFSET_64) then
 			    ri_rate <= to_unsigned(INT(SF_64), ri_rate'length);
 			end if;
 			rate_found <= '1';

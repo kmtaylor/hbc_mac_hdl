@@ -26,7 +26,6 @@ RECEIVER_TB_FILES += \
 	walsh_decoder.vhd \
 	phase_align.vhd \
 	serial_to_parallel.vhd \
-	serial_to_parallel_old.vhd \
 	rx_fifo_interface.vhd \
 	hamming_lut.vhd \
 	receiver_tb.vhd

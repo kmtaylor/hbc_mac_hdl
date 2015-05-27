@@ -15,11 +15,13 @@ package numeric is
     function walsh_encode (input : walsh_sym_t) return walsh_code_t;
     function walsh_decode (input : walsh_code_t) return walsh_sym_t;
     function weight_threshold (weight : std_logic_vector) return std_logic;
+    function weight_inverted (weight : std_logic_vector) return std_logic;
     function weight_comp (new_weight, old_weight : std_logic_vector) 
 	return boolean;
 
     function bool_to_bit(input : boolean) return std_logic;
     function ones(length : natural) return std_logic_vector;
+    function zeros(length : natural) return std_logic_vector;
 end package numeric;
 
 package body numeric is
@@ -54,15 +56,25 @@ package body numeric is
 
     function weight_threshold (weight : std_logic_vector) return std_logic is
     begin
-    	-- Do a 4 bit comparison to check for values greater than 55 
-        if weight(6 downto 3) = X"8" then
-            return '1';
-        elsif weight(6 downto 3) = X"7" then
+    	-- Do a 4 bit comparison to check for values greater than 55
+        if  (weight(6 downto 3) = X"8") or
+	    (weight(6 downto 3) = X"7") then
             return '1';
         else
             return '0';
         end if;
     end function weight_threshold;
+
+    function weight_inverted (weight : std_logic_vector) return std_logic is
+    begin
+	-- If the hamming distance is less than 8, then the input data is
+	-- inverted
+	if (weight(6 downto 3) = X"0") then
+	    return '1';
+	else
+	    return '0';
+	end if;
+    end function weight_inverted;
 
     function weight_comp (new_weight, old_weight : std_logic_vector) 
 	return boolean is
@@ -73,8 +85,7 @@ package body numeric is
 	    return true;
 	elsif old_weight(3 downto 0) = X"0" then
 	    return false;
-	end if;
-	if new_weight(2 downto 0) >= old_weight(2 downto 0) then
+	elsif new_weight(2 downto 0) >= old_weight(2 downto 0) then
 	    return true;
 	else
 	    return false;
@@ -186,5 +197,14 @@ package body numeric is
 	end loop;
 	return r;
     end function ones;
+
+    function zeros(length : natural) return std_logic_vector is
+	variable r : std_logic_vector(length-1 downto 0);
+    begin
+	for i in length-1 downto 0 loop
+	    r(i) := '0';
+	end loop;
+	return r;
+    end function zeros;
 
 end package body numeric;

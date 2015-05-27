@@ -62,7 +62,9 @@ architecture phase_align_arch of phase_align is
     signal comma_weight :  comma_weight_array_t;
     signal max_comma_weight : comma_weight_t;
     signal comma_found : std_logic_vector(EARLY_SYMBOL_SIZE-1 downto 0); 
+    signal data_inverted : std_logic_vector(EARLY_SYMBOL_SIZE-1 downto 0); 
     signal comma_xnor : demod_reg_array_t;
+    signal invert_data : std_logic;
 
 begin
 
@@ -72,7 +74,13 @@ begin
 	end if;
     end process data_sync;
 
-    data_in_sync <= data_in_r;
+    -- Need to delay the data stream, as the upstream re-align process will
+    -- require one clock cycle.
+    sync_data_proc : process (serial_clk) begin
+	if serial_clk'event and serial_clk = '1' then
+	    data_in_sync <= data_in_r xor best_phase(0) xor invert_data;
+	end if;
+    end process sync_data_proc;
 
     phase_change <= bool_to_bit(data_in = data_in_r);
 
@@ -80,7 +88,7 @@ begin
 	if serial_clk'event and serial_clk = '1' then
 	    if s2p_align_index = 7 then
 		phase_sum(0) <= (others => '0');
-		expected_phase <= '1';
+		expected_phase <= not invert_data;
 	    else
 		expected_phase <= not expected_phase;
 		if (data_in_r = expected_phase) then
@@ -126,13 +134,29 @@ begin
 	comma_distance_lut : entity work.hamming_lut
 	    port map (val => comma_xnor(i), weight => comma_weight(i));
 	comma_found(i) <= weight_threshold(comma_weight(i));
+	data_inverted(i) <= weight_inverted(comma_weight(i));
     end generate comma_gen;
 
+    check_inverted : process(serial_clk) begin
+	if serial_clk'event and serial_clk = '1' then
+	    if pkt_reset = '1' then
+		invert_data <= '0';
+	    elsif data_inverted /= zeros(data_inverted'length) then 
+		invert_data <= '1';
+	    end if;
+	end if;
+    end process check_inverted;
+
+    -- Mod 8 counters can't actually show a perfect phase match
     choose_phase : process (serial_clk) begin
 	if serial_clk'event and serial_clk = '1' then
 	    if pkt_reset = '1' then
 		max_phase_sum <= (others => '0');
-		max_comma_weight <= (others => '0');
+		-- Need to initialise this to 1 so that weight_comp can do a
+		-- three bit comparison, but also cover 64
+		max_comma_weight <= std_logic_vector(
+				to_unsigned(1, max_comma_weight'length));
+		best_phase <= (others => '0');
 	    else
 		for i in 0 to EARLY_SYMBOL_SIZE-1 loop
 		    if (s2p_align_index = i) and (comma_found(wrap(i)) = '1') 
@@ -143,7 +167,7 @@ begin
 			    if phase_sum(wrap(i)) > max_phase_sum then
 				max_phase_sum <= phase_sum(wrap(i));
 				best_phase <= to_unsigned(
-					    wrap(i), best_phase'length);
+						wrap(i), best_phase'length);
 			    end if;
 			end if;
 		    end if;

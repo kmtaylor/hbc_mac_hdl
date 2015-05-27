@@ -182,37 +182,31 @@ begin
 		-- On packet reset, initialise the delay to the centre of 
 		-- the array.
 		delay_time <= to_unsigned(WRAP_REG_SIZE/2, delay_time'length);
-	    else
-		if (use_270_hold and use_0) = '1' then
-		    delay_time <= delay_time - 1;
-		    previous_shift <= '0';
-		end if;
-		if (use_0_hold and use_270) = '1' then
-		    delay_time <= delay_time + 1;
-		    previous_shift <= '1';
-		end if;
+	    elsif (use_270_hold and use_0) = '1' then
+		delay_time <= delay_time - 1;
+		previous_shift <= '0';
+	    elsif (use_0_hold and use_270) = '1' then
+		delay_time <= delay_time + 1;
+		previous_shift <= '1';
 #if DOUBLE_SHIFT
-		if ( (use_0_hold and use_90) or
+	    elsif ( (use_0_hold and use_90) or
 		    (use_90_hold and use_180) or
 		    (use_180_hold and use_270) ) = '1' then
-		    previous_shift <= '0';
-		end if;
-		if ( (use_270_hold and use_180) or
+		previous_shift <= '0';
+	    elsif ( (use_270_hold and use_180) or
 		    (use_180_hold and use_90) or
 		    (use_90_hold and use_0) ) = '1' then
-		    previous_shift <= '1';
-		end if;
-		-- For double shifts, it's not so easy. We rely on the previous
-		-- shift direction.
-		if ( (use_0_hold and use_180) or
+		previous_shift <= '1';
+	    -- For double shifts, it's not so easy. We rely on the previous
+	    -- shift direction.
+	    elsif ( (use_0_hold and use_180) or
 		    (use_180_hold and use_0) or 
 		    (use_90_hold and use_270) or
 		    (use_270_hold and use_90) ) = '1' then
-		    if previous_shift = '0' then
-			delay_time <= delay_time - 1;
-		    else
-			delay_time <= delay_time + 1;
-		    end if;
+		if previous_shift = '0' then
+		    delay_time <= delay_time - 1;
+		else
+		    delay_time <= delay_time + 1;
 		end if;
 #endif
 	    end if;

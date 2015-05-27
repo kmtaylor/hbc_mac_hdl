@@ -614,8 +614,7 @@ begin
 	    fifo_full => '0',
 	    data_in => s_data_in_sync,
 	    pkt_ack => s2p_pkt_ack,
-	    pkt_ready => s2p_pkt_ready,
-	    dbg => open);
+	    pkt_ready => s2p_pkt_ready);
 
     fifo_int_1 : entity rx_fifo_interface
 	port map (

@@ -151,7 +151,7 @@ begin
 	data_in => s_data_in_2,
 	data_out => s_data_sync_2);
 
-    s_to_p_2 : entity work.serial_to_parallel_old port map (
+    s_to_p_2 : entity work.serial_to_parallel port map (
 	reset_i => reset,
 	pkt_reset => pkt_reset_2,
 	serial_clk => serial_clk,

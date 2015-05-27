@@ -11,6 +11,7 @@ TRANSCEIVER_FILES += \
 	processed/mem_interface_pp.vhd					\
 	processed/modulator_pp.vhd					\
 	processed/parallel_to_serial_pp.vhd				\
+	processed/phase_align_pp.vhd					\
 	processed/rx_fifo_interface_pp.vhd				\
 	processed/scrambler_pp.vhd					\
 	processed/serial_to_parallel_pp.vhd				\
