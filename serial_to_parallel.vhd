@@ -185,6 +185,7 @@ begin
 	    pkt_reset => sym_reset,
 	    serial_clk => serial_clk,
 	    data_in => data_in,
+	    allow_re_align => allow_re_align,
 	    data_in_sync => data_in_sync,
 	    phase_change => phase_change,
 	    comma_found_out => comma_found,

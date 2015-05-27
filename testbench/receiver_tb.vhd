@@ -69,7 +69,10 @@ architecture testbench of receiver_tb is
  
     -- Clock period definitions
     constant clk_period : time := 10 ns;
-    constant s_clk_period : time := 11.905 ns;
+#ifndef SERIAL_CLK_NS
+#define SERIAL_CLK_NS 23.81
+#endif
+    constant s_clk_period : time := SERIAL_CLK_NS ns;
     
     type val_ft is file of std_logic;
     type time_ft is file of time;

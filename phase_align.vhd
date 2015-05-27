@@ -13,6 +13,7 @@ entity phase_align is
 	pkt_reset : in std_logic;
 	serial_clk : in std_logic;
 	data_in : in std_logic;
+	allow_re_align : in std_logic;
 	data_in_sync : out std_logic;
 	phase_change : out std_logic;
 	comma_found_out : out std_logic;
@@ -55,7 +56,7 @@ architecture phase_align_arch of phase_align is
     signal expected_phase : std_logic;
     signal current_phase : std_logic_vector(EARLY_SYMBOL_SIZE-1 downto 0);
     signal max_phase_sum : phase_index_t;
-    signal best_phase : phase_index_t;
+    signal best_phase, best_phase_r : phase_index_t;
     signal phase_sum : phase_sum_array_t;
     signal demod_regs : demod_reg_array_t;
 
@@ -64,7 +65,7 @@ architecture phase_align_arch of phase_align is
     signal comma_found : std_logic_vector(EARLY_SYMBOL_SIZE-1 downto 0); 
     signal data_inverted : std_logic_vector(EARLY_SYMBOL_SIZE-1 downto 0); 
     signal comma_xnor : demod_reg_array_t;
-    signal invert_data : std_logic;
+    signal invert_data, invert_data_r : std_logic;
 
 begin
 
@@ -78,9 +79,19 @@ begin
     -- require one clock cycle.
     sync_data_proc : process (serial_clk) begin
 	if serial_clk'event and serial_clk = '1' then
-	    data_in_sync <= data_in_r xor best_phase(0) xor invert_data;
+	    data_in_sync <= data_in_r xor invert_data_r xor best_phase_r(0);
 	end if;
     end process sync_data_proc;
+
+    -- If we later choose another phase, don't alter upstream's data feed
+    allow_re_align_proc : process(serial_clk) begin
+	if serial_clk'event and serial_clk = '1' then
+	    if allow_re_align = '1' then
+		invert_data_r <= invert_data;
+		best_phase_r <= best_phase;
+	    end if;
+	end if;
+    end process allow_re_align_proc;
 
     phase_change <= bool_to_bit(data_in = data_in_r);
 
@@ -159,16 +170,15 @@ begin
 		best_phase <= (others => '0');
 	    else
 		for i in 0 to EARLY_SYMBOL_SIZE-1 loop
-		    if (s2p_align_index = i) and (comma_found(wrap(i)) = '1') 
+		    if	(s2p_align_index = i) and 
+			(comma_found(wrap(i)) = '1') and
+			weight_comp(comma_weight(wrap(i)), max_comma_weight) 
 		    then
-			if weight_comp(comma_weight(wrap(i)), max_comma_weight)
-			then
-			    max_comma_weight <= comma_weight(wrap(i));
-			    if phase_sum(wrap(i)) > max_phase_sum then
-				max_phase_sum <= phase_sum(wrap(i));
-				best_phase <= to_unsigned(
-						wrap(i), best_phase'length);
-			    end if;
+			max_comma_weight <= comma_weight(wrap(i));
+			if phase_sum(wrap(i)) > max_phase_sum then
+			    max_phase_sum <= phase_sum(wrap(i));
+			    best_phase <= to_unsigned(
+					    wrap(i), best_phase'length);
 			end if;
 		    end if;
 		end loop;
@@ -176,9 +186,9 @@ begin
 	end if;
     end process choose_phase;
 
-    comma_found_out <= comma_found(to_integer(best_phase));
+    comma_found_out <= comma_found(to_integer(best_phase_r));
 
-    re_align <= bool_to_bit(s2p_align_index = best_phase);
+    re_align <= bool_to_bit(s2p_align_index = best_phase_r);
 
 end phase_align_arch;
 
