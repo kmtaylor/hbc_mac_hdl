@@ -1,25 +1,24 @@
 [*]
 [*] GTKWave Analyzer v3.3.45 (w)1999-2012 BSI
-[*] Wed May 27 04:37:03 2015
+[*] Thu May 28 03:55:52 2015
 [*]
 [dumpfile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/receiver_tb.ghw"
-[dumpfile_mtime] "Wed May 27 04:34:01 2015"
-[dumpfile_size] 29902758
+[dumpfile_mtime] "Thu May 28 03:54:06 2015"
+[dumpfile_size] 147842449
 [savefile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/gtkwave/receiver_tb.gtkw"
-[timestart] 26604200000
+[timestart] 0
 [size] 1680 1024
-[pos] -1 -1
-*-25.000000 26661247500 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] 1919 -28
+*-39.000000 252000000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] top.
 [treeopen] top.receiver_tb.
 [treeopen] top.receiver_tb.s_to_p.phase_aligner.
 [treeopen] top.receiver_tb.s_to_p.phase_aligner.demod_regs.
-[treeopen] top.receiver_tb.s_to_p_2.
-[treeopen] top.receiver_tb.s_to_p_2.phase_aligner.
+[treeopen] top.receiver_tb.sync_2.
 [sst_width] 224
 [signals_width] 379
 [sst_expanded] 1
-[sst_vpaned_height] 290
+[sst_vpaned_height] 289
 @28
 top.receiver_tb.clk
 top.receiver_tb.serial_clk
@@ -34,26 +33,45 @@ top.receiver_tb.s_data_sync_2
 -
 ---------Sync 1----------
 @28
-#{top.receiver_tb.sync.delay_d_0[1:0]} top.receiver_tb.sync.delay_d_0[1] top.receiver_tb.sync.delay_d_0[0]
-#{top.receiver_tb.sync.delay_d_90[1:0]} top.receiver_tb.sync.delay_d_90[1] top.receiver_tb.sync.delay_d_90[0]
-#{top.receiver_tb.sync.delay_d_180[1:0]} top.receiver_tb.sync.delay_d_180[1] top.receiver_tb.sync.delay_d_180[0]
-#{top.receiver_tb.sync.delay_d_270[1:0]} top.receiver_tb.sync.delay_d_270[1] top.receiver_tb.sync.delay_d_270[0]
-top.receiver_tb.sync.d_0_n
-top.receiver_tb.sync.d_90_n
-top.receiver_tb.sync.d_180_n
-top.receiver_tb.sync.d_270_n
-top.receiver_tb.sync.d_0_p
-top.receiver_tb.sync.d_90_p
-top.receiver_tb.sync.d_180_p
-top.receiver_tb.sync.d_270_p
 top.receiver_tb.sync.use_0_hold
 top.receiver_tb.sync.use_90_hold
 top.receiver_tb.sync.use_180_hold
 top.receiver_tb.sync.use_270_hold
+@200
+-
+@28
+top.receiver_tb.sync.use_0_valid
+top.receiver_tb.sync.use_90_valid
+top.receiver_tb.sync.use_180_valid
+@29
+top.receiver_tb.sync.use_270_valid
+@200
+-
+@28
+[color] 2
+top.receiver_tb.sync.shift_valid
+top.receiver_tb.sync.reset_valid
 @24
 #{top.receiver_tb.sync.delay_time[5:0]} top.receiver_tb.sync.delay_time[5] top.receiver_tb.sync.delay_time[4] top.receiver_tb.sync.delay_time[3] top.receiver_tb.sync.delay_time[2] top.receiver_tb.sync.delay_time[1] top.receiver_tb.sync.delay_time[0]
 @200
 --------Sync 2------
+@28
+top.receiver_tb.sync_2.use_0_hold
+top.receiver_tb.sync_2.use_90_hold
+top.receiver_tb.sync_2.use_180_hold
+top.receiver_tb.sync_2.use_270_hold
+@200
+-
+@28
+top.receiver_tb.sync_2.use_0_valid
+top.receiver_tb.sync_2.use_90_valid
+top.receiver_tb.sync_2.use_180_valid
+top.receiver_tb.sync_2.use_270_valid
+@200
+-
+@28
+top.receiver_tb.sync_2.shift_valid
+top.receiver_tb.sync_2.reset_valid
 @24
 #{top.receiver_tb.sync_2.delay_time[5:0]} top.receiver_tb.sync_2.delay_time[5] top.receiver_tb.sync_2.delay_time[4] top.receiver_tb.sync_2.delay_time[3] top.receiver_tb.sync_2.delay_time[2] top.receiver_tb.sync_2.delay_time[1] top.receiver_tb.sync_2.delay_time[0]
 @200
@@ -105,9 +123,8 @@ top.receiver_tb.s_to_p.phase_aligner.data_in_r
 #{top.receiver_tb.s_to_p.phase_aligner.phase_sum[7][2:0]} top.receiver_tb.s_to_p.phase_aligner.phase_sum[7][2] top.receiver_tb.s_to_p.phase_aligner.phase_sum[7][1] top.receiver_tb.s_to_p.phase_aligner.phase_sum[7][0]
 @22
 #{top.receiver_tb.s_to_p.phase_aligner.max_comma_weight[6:0]} top.receiver_tb.s_to_p.phase_aligner.max_comma_weight[6] top.receiver_tb.s_to_p.phase_aligner.max_comma_weight[5] top.receiver_tb.s_to_p.phase_aligner.max_comma_weight[4] top.receiver_tb.s_to_p.phase_aligner.max_comma_weight[3] top.receiver_tb.s_to_p.phase_aligner.max_comma_weight[2] top.receiver_tb.s_to_p.phase_aligner.max_comma_weight[1] top.receiver_tb.s_to_p.phase_aligner.max_comma_weight[0]
-@25
-#{top.receiver_tb.s_to_p.phase_aligner.max_phase_sum[2:0]} top.receiver_tb.s_to_p.phase_aligner.max_phase_sum[2] top.receiver_tb.s_to_p.phase_aligner.max_phase_sum[1] top.receiver_tb.s_to_p.phase_aligner.max_phase_sum[0]
 @24
+#{top.receiver_tb.s_to_p.phase_aligner.max_phase_sum[2:0]} top.receiver_tb.s_to_p.phase_aligner.max_phase_sum[2] top.receiver_tb.s_to_p.phase_aligner.max_phase_sum[1] top.receiver_tb.s_to_p.phase_aligner.max_phase_sum[0]
 #{top.receiver_tb.s_to_p.phase_aligner.best_phase[2:0]} top.receiver_tb.s_to_p.phase_aligner.best_phase[2] top.receiver_tb.s_to_p.phase_aligner.best_phase[1] top.receiver_tb.s_to_p.phase_aligner.best_phase[0]
 @22
 #{top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][63:0]} top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][63] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][62] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][61] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][60] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][59] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][58] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][57] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][56] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][55] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][54] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][53] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][52] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][51] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][50] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][49] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][48] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][47] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][46] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][45] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][44] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][43] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][42] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][41] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][40] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][39] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][38] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][37] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][36] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][35] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][34] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][33] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][32] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][31] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][30] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][29] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][28] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][27] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][26] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][25] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][24] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][23] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][22] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][21] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][20] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][19] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][18] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][17] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][16] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][15] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][14] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][13] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][12] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][11] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][10] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][9] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][8] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][7] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][6] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][5] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][4] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][3] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][2] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][1] top.receiver_tb.s_to_p.phase_aligner.demod_regs[0][0]

@@ -102,6 +102,18 @@ architecture serial_to_parallel_arch of serial_to_parallel is
 			st_pkt_end);
     signal state, state_i : state_type;
 
+#define EXPORT_DATA_STREAM 0
+#if EXPORT_DATA_STREAM
+    signal stream_data : std_logic_vector (7 downto 0);
+
+    type output_ft is file of std_logic_vector;
+    file output_file : output_ft open WRITE_MODE is "bit_data";
+
+    procedure write_output(val: std_logic_vector(7 downto 0)) is begin
+        write(output_file, val);
+    end procedure write_output;
+#endif
+
 begin
 
     reset_sync_proc : process (serial_clk, reset_i) begin
@@ -163,7 +175,7 @@ begin
 		    state_i <= st_pkt_end;
 		end if;
 	    when st_pkt_end =>
-		state_i <= st_preamble;
+		state_i <= st_align_1;
 	end case;
     end process next_state;
 
@@ -178,6 +190,22 @@ begin
     end process sync_proc;
 
 ------------------------------------------------------------------------------
+
+#if EXPORT_DATA_STREAM
+    process (serial_clk) begin
+	if serial_clk'event and serial_clk = '1' then
+	    stream_data <= stream_data(6 downto 0) & data_in_sync;
+	end if;
+    end process;
+
+    process (serial_clk) begin
+	if serial_clk'event and serial_clk = '1' then
+	    if (re_align = '1') and (state = st_demodulate) then
+		write_output(stream_data);
+	    end if;
+	end if;
+    end process;
+#endif
 
     -- Demodulator: 
     phase_aligner : entity work.phase_align
@@ -195,23 +223,23 @@ begin
     pkt_reset <= sym_reset;
 
     re_align_proc : process (serial_clk) begin
-        if serial_clk'event and serial_clk = '1' then
-            if (allow_re_align = '1') and (re_align = '1') then
-                phase_sum <= (others => '0');
-                s2p_index <= (others => '0');
-                expected_phase <= '1';
-            elsif s2p_index = r_sf-1 then
-                phase_sum <= (others => '0');
-                s2p_index <= (others => '0');
-                expected_phase <= '1';
-            else
-                if (data_in_sync = expected_phase) then
-                    phase_sum <= phase_sum + 1;
-                end if;
-                s2p_index <= s2p_index + 1;
-                expected_phase <= not expected_phase;
-            end if;
-        end if;
+	if serial_clk'event and serial_clk = '1' then
+	    if (allow_re_align = '1') and (re_align = '1') then
+		phase_sum <= (others => '0');
+		s2p_index <= (others => '0');
+		expected_phase <= '1';
+	    elsif s2p_index = r_sf-1 then
+		phase_sum <= (others => '0');
+		s2p_index <= (others => '0');
+		expected_phase <= '1';
+	    else
+		if (data_in_sync = expected_phase) then
+		    phase_sum <= phase_sum + 1;
+		end if;
+		s2p_index <= s2p_index + 1;
+		expected_phase <= not expected_phase;
+	    end if;
+	end if;
     end process re_align_proc;
 
     current_phase <= bool_to_bit(phase_sum >= r_sf/2);  

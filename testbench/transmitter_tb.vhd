@@ -2,11 +2,11 @@
 #include "send_packet.vhh"
 
 #ifndef STIMULUS
-#define STIMULUS 0
+#define STIMULUS 1
 #endif
 
 #ifndef SERIAL_CLK_NS
-#define SERIAL_CLK_NS 24
+#define SERIAL_CLK_NS 23.81
 #endif
 
 library ieee;
@@ -96,11 +96,11 @@ architecture testbench of transmitter_tb is
     constant clk_period : time := 10 ns;
     constant s_clk_period : time := SERIAL_CLK_NS ns;
     
-#if 0
+#if STIMULUS
     type val_ft is file of std_logic;
     type time_ft is file of time;
-    file val_file : val_ft open WRITE_MODE is "transmitter_tb_stim.value";
-    file time_file : time_ft open WRITE_MODE is "transmitter_tb_stim.time";
+    file val_file : val_ft open WRITE_MODE is "tx_data.value";
+    file time_file : time_ft open WRITE_MODE is "tx_data.time";
     procedure write_val(val : std_logic) is begin
         write(val_file, val);
         write(time_file, now);
@@ -213,6 +213,12 @@ begin
 	SEND_PACKET()
 
 	wait;
+    end process;
+#endif
+
+#if STIMULUS
+    write_proc : process(s_data_out) begin
+	write_val(s_data_out);
     end process;
 #endif
 

@@ -1,0 +1,3 @@
+(component-library-search ".")
+(define gaf_root (build-path (getenv "HOME") "Work" "gaf"))
+(component-library-search (build-path gaf_root "symbols"))

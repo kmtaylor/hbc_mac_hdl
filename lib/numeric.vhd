@@ -10,18 +10,16 @@ package numeric is
     subtype walsh_code_t is std_logic_vector(WALSH_CODE_SIZE-1 downto 0);
     subtype walsh_sym_t is std_logic_vector(WALSH_SYM_SIZE-1 downto 0);
 
+    -- Not optimised - use for simulation only
     function calc_hamming(slv, target : std_logic_vector) return natural;
     function sym_in_phase(sym : std_logic_vector) return boolean;
     function walsh_encode (input : walsh_sym_t) return walsh_code_t;
     function walsh_decode (input : walsh_code_t) return walsh_sym_t;
+
     function weight_threshold (weight : std_logic_vector) return std_logic;
     function weight_inverted (weight : std_logic_vector) return std_logic;
     function weight_comp (new_weight, old_weight : std_logic_vector) 
 	return boolean;
-
-    function bool_to_bit(input : boolean) return std_logic;
-    function ones(length : natural) return std_logic_vector;
-    function zeros(length : natural) return std_logic_vector;
 end package numeric;
 
 package body numeric is
@@ -179,32 +177,5 @@ package body numeric is
 	end if;
 	return "0000";
     end function walsh_decode;
-
-    function bool_to_bit(input : boolean) return std_logic is
-    begin
-	if input then
-	    return '1';
-	else
-	    return '0';
-	end if;
-    end function bool_to_bit;
-
-    function ones(length : natural) return std_logic_vector is
-	variable r : std_logic_vector(length-1 downto 0);
-    begin
-	for i in length-1 downto 0 loop
-	    r(i) := '1';
-	end loop;
-	return r;
-    end function ones;
-
-    function zeros(length : natural) return std_logic_vector is
-	variable r : std_logic_vector(length-1 downto 0);
-    begin
-	for i in length-1 downto 0 loop
-	    r(i) := '0';
-	end loop;
-	return r;
-    end function zeros;
 
 end package body numeric;

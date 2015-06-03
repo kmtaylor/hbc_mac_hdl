@@ -17,10 +17,6 @@ LOCAL_OBJS += \
 	work-obj93.cf
 
 RECEIVER_TB_FILES += \
-	receiver_afe/ghdl/receiver_afe_1.time \
-	receiver_afe/ghdl/receiver_afe_1.value \
-	receiver_afe/ghdl/receiver_afe_2.time \
-	receiver_afe/ghdl/receiver_afe_2.value \
 	data_synchroniser.vhd \
 	walsh_enc_lut.vhd \
 	walsh_decoder.vhd \

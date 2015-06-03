@@ -6,9 +6,18 @@ use ieee.numeric_std.all;
 library transceiver;
 use transceiver.bits.all;
 
--- Double shifting may help where the clock frequencies are significantly
--- different, and the data contains long runs of 0 or 1
+    -- Double shifting may help where the clock frequencies are significantly
+    -- different, and the data contains long runs of 0 or 1
 #define DOUBLE_SHIFT 0
+    -- Glitches can cause case a delay shift if they happen to trigger the right
+    -- sequence of use_0, use_90, use_180, use_270 in order (or reverse order)
+    -- A possible work around is to require n consecutive counts of each 
+    -- phase_hold.
+    -- That means that we only shift the delay time after seeing all four phases
+    -- for a significant amount of time. Defining significant may require some
+    -- experimentation. These counts should be reset when a successful delay
+    -- shift is done.
+#define SLOW_SHIFT 0
 
 entity data_synchroniser is
 	port (
@@ -53,6 +62,17 @@ architecture data_synchroniser_arch of data_synchroniser is
     signal delay_d_90 : std_logic_vector (1 downto 0);
     signal delay_d_180 : std_logic_vector (1 downto 0);
     signal delay_d_270 : std_logic_vector (1 downto 0);
+
+#if SLOW_SHIFT
+    constant VALID_COUNT : natural := 8;
+    signal use_0_valid, use_90_valid, use_180_valid, use_270_valid : std_logic;
+    signal use_0_valid_sum : std_logic_vector (VALID_COUNT-1 downto 0);
+    signal use_90_valid_sum : std_logic_vector (VALID_COUNT-1 downto 0);
+    signal use_180_valid_sum : std_logic_vector (VALID_COUNT-1 downto 0);
+    signal use_270_valid_sum : std_logic_vector (VALID_COUNT-1 downto 0);
+    signal shift_valid : std_logic;
+#endif
+    signal reset_valid : std_logic;
 
 begin
 
@@ -176,6 +196,46 @@ begin
 	end if;
     end process hold_phase;
 
+
+#if SLOW_SHIFT
+    acc_phase : process (serial_clk) begin
+	if serial_clk'event and serial_clk = '1' then
+	    use_0_valid_sum <=	    use_0_valid_sum(VALID_COUNT-2 downto 0) & 
+				    use_0_hold;
+	    use_90_valid_sum <=	    use_90_valid_sum(VALID_COUNT-2 downto 0) & 
+				    use_90_hold;
+	    use_180_valid_sum <=    use_180_valid_sum(VALID_COUNT-2 downto 0) & 
+				    use_180_hold;
+	    use_270_valid_sum <=    use_270_valid_sum(VALID_COUNT-2 downto 0) & 
+				    use_270_hold;
+	end if;
+    end process acc_phase;
+
+    phase_valid : process (serial_clk) begin
+	if serial_clk'event and serial_clk = '1' then
+	    if reset_valid = '1' or reset = '1' then
+		use_0_valid <= '0';
+		use_90_valid <= '0';
+		use_180_valid <= '0';
+		use_270_valid <= '0';
+	    else
+		if use_0_valid_sum = ones(VALID_COUNT) then
+		    use_0_valid <= '1';
+		elsif use_90_valid_sum = ones(VALID_COUNT) then
+		    use_90_valid <= '1';
+		elsif use_180_valid_sum = ones(VALID_COUNT) then
+		    use_180_valid <= '1';
+		elsif use_270_valid_sum = ones(VALID_COUNT) then
+		    use_270_valid <= '1';
+		end if;
+	    end if;
+	end if;
+    end process phase_valid;
+
+    shift_valid <=  use_0_valid and use_90_valid and 
+		    use_180_valid and use_270_valid;
+#endif
+
     wrap_detect : process(serial_clk, reset) begin
 	if serial_clk'event and serial_clk = '1' then
 	    if reset = '1' then
@@ -183,11 +243,27 @@ begin
 		-- the array.
 		delay_time <= to_unsigned(WRAP_REG_SIZE/2, delay_time'length);
 	    elsif (use_270_hold and use_0) = '1' then
+#if SLOW_SHIFT
+		if shift_valid = '1' then
+		    delay_time <= delay_time - 1;
+		    previous_shift <= '0';
+		    reset_valid <= '1';
+		end if;
+#else
 		delay_time <= delay_time - 1;
 		previous_shift <= '0';
+#endif
 	    elsif (use_0_hold and use_270) = '1' then
+#if SLOW_SHIFT
+		if shift_valid = '1' then
+		    delay_time <= delay_time + 1;
+		    previous_shift <= '1';
+		    reset_valid <= '1';
+		end if;
+#else
 		delay_time <= delay_time + 1;
 		previous_shift <= '1';
+#endif
 #if DOUBLE_SHIFT
 	    elsif ( (use_0_hold and use_90) or
 		    (use_90_hold and use_180) or
@@ -209,6 +285,8 @@ begin
 		    delay_time <= delay_time + 1;
 		end if;
 #endif
+	    else
+		reset_valid <= '0';
 	    end if;
 	end if;
     end process wrap_detect;

@@ -76,14 +76,10 @@ architecture testbench of receiver_tb is
     
     type val_ft is file of std_logic;
     type time_ft is file of time;
-    file val_file : val_ft open READ_MODE is 
-		    "receiver_afe/ghdl/receiver_afe_1.value";
-    file val_file_2 : val_ft open READ_MODE is 
-		    "receiver_afe/ghdl/receiver_afe_2.value";
-    file time_file : time_ft open READ_MODE is 
-		    "receiver_afe/ghdl/receiver_afe_1.time";
-    file time_file_2 : time_ft open READ_MODE is 
-		    "receiver_afe/ghdl/receiver_afe_2.time";
+    file val_file : val_ft open READ_MODE is "rx_data.value";
+    file val_file_2 : val_ft open READ_MODE is "tx_data.value";
+    file time_file : time_ft open READ_MODE is "rx_data.time";
+    file time_file_2 : time_ft open READ_MODE is "tx_data.time";
 
     type output_ft is file of std_logic_vector;
     file output_file : output_ft open WRITE_MODE is "output_data";
