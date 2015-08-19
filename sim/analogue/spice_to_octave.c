@@ -14,9 +14,11 @@
 #define FILENAME_STR xstr(FILENAME)
 
 static FILE *val_fp;
+static double *im_val_buf;
 static double *val_buf;
 static double *time_buf;
-static int val_buf_count, time_buf_count;
+static int im_val_buf_count, val_buf_count, time_buf_count;
+static int complex_data;
 
 static int octave_open_file(const char *filename) {
     val_fp = fopen(filename, "w");
@@ -31,9 +33,10 @@ static int octave_open_file(const char *filename) {
     return 0;
 }
 
-static void print_var_header(const char *var_name, int num_samples) {
+static void print_var_header(const char *var_name, int num_samples, int real) {
     fprintf(val_fp, "# name: %s\n", var_name);
-    fprintf(val_fp, "# type: matrix\n");
+    if (real) fprintf(val_fp, "# type: matrix\n");
+    else fprintf(val_fp, "# type: complex matrix\n");
     fprintf(val_fp, "# rows: 1\n");
     fprintf(val_fp, "# columns: %i\n", num_samples);
 }
@@ -41,23 +44,33 @@ static void print_var_header(const char *var_name, int num_samples) {
 #define SKIP 0
 static void octave_dump_vals(const char *val_name) {
     int index;
-    print_var_header("t", time_buf_count);
+    if (complex_data) print_var_header("f_spice", time_buf_count, 1);
+    else print_var_header("t", time_buf_count, 1);
     for (index = SKIP; index < time_buf_count; index++) {
 	fprintf(val_fp, "%e ", time_buf[index]);
     }
     fprintf(val_fp, "\n");
 
-    print_var_header(val_name, val_buf_count);
+    print_var_header(val_name, val_buf_count, !complex_data);
     for (index = SKIP; index < val_buf_count; index++) {
-	fprintf(val_fp, "%e ", val_buf[index]);
+	if (complex_data) {
+	    fprintf(val_fp, "(%e,%e) ", val_buf[index], im_val_buf[index]);
+	} else {
+	    fprintf(val_fp, "%e ", val_buf[index]);
+	}
     }
     fprintf(val_fp, "\n");
 }
 
 #define BUF_SIZE 1024
 /* Allocate buffers of BUF_SIZE doubles and fill them. */
-static void octave_write_val(double time, double value) {
-    static int val_buf_size, time_buf_size;
+static void octave_write_val(double time, double value, double im_value) {
+    static int val_buf_size, time_buf_size, im_val_buf_size;
+
+    if ((!im_val_buf) || (im_val_buf_count >= im_val_buf_size)) {
+	im_val_buf_size += BUF_SIZE;
+	im_val_buf = realloc(im_val_buf, sizeof(double) * im_val_buf_size);
+    }
 
     if ((!val_buf) || (val_buf_count >= val_buf_size)) {
 	val_buf_size += BUF_SIZE;
@@ -69,6 +82,7 @@ static void octave_write_val(double time, double value) {
 	time_buf = realloc(time_buf, sizeof(double) * time_buf_size);
     }
 
+    im_val_buf[im_val_buf_count++] = im_value;
     val_buf[val_buf_count++] = value;
     time_buf[time_buf_count++] = time;
 }
@@ -78,7 +92,7 @@ int main(int argc, char **argv) {
     WvTable *table;
     int i;
     WaveVar *var;
-    double time, val;
+    double time, val, im_val;
 
     if (argc < 4) {
 	printf("Usage: spice_to_octave net_name "
@@ -100,7 +114,9 @@ int main(int argc, char **argv) {
 	printf("Variable %s not found\n", argv[1]);
 	return 1;
     }
-    printf("Found var: %s\n", var->sv->name);
+    if (var->wv_ncols == 2) complex_data = 1;
+    printf("Found %s var: %s\n", 
+		    complex_data ? "complex" : "real", var->wv_name);
 
     if (octave_open_file(argv[2]) < 0) {
 	printf("Couldn't open %s for writing\n", argv[2]);
@@ -118,14 +134,14 @@ int main(int argc, char **argv) {
      * double wds_get_point(WDataSet *ds, int n);
      */
 
-    /* Loop through data and find edges. Consider an edge where the value
-     * passes a threshold point. We'll use (2/3)Vdd and (1/3)Vdd */
-
     for (i = 0; i < table->nvalues; i++) {
 	time = wds_get_point(var->wv_iv->wds, i);
-	val = wds_get_point(var->wds, i);
+	val = wds_get_point(&var->wds[0], i);
 
-	octave_write_val(time, val);
+	if (complex_data) im_val = wds_get_point(&var->wds[1], i);
+	else im_val = 0;
+
+	octave_write_val(time, val, im_val);
     }
 
     wf_free(wf);

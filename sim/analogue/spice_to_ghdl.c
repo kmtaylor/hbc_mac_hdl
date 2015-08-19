@@ -67,6 +67,7 @@ static int ghdl_open_file(const char *filename) {
     return 0;
 }
 
+//#define DELAY 100e-9
 #define DELAY 100e-9
 #define DEBUG_EDGES 0
 static int ghdl_write_val(double time, int value) {
@@ -152,7 +153,7 @@ int main(int argc, char **argv) {
 
     for (i = 0; i < table->nvalues; i++) {
 	time = wds_get_point(var->wv_iv->wds, i);
-	new_val = wds_get_point(var->wds, i);
+	new_val = wds_get_point(var->wds, i) + 1.65;
 
 	if ((old_val < hi_threshold) && (new_val >= hi_threshold)) {
 	    /* Found a positive edge */

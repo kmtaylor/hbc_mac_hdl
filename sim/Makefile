@@ -35,7 +35,7 @@ TRANSMITTER_TB_FILES += \
 	fifo_interface.vhd \
 	fifo_tx_sim.vhd \
 	transmitter_tb.vhd
-TRANSMITTER_SIM_FLAGS += --stop-time=200us
+TRANSMITTER_SIM_FLAGS += --stop-time=2000us
 
 SCRAMBLER_TB_FILES += \
 	scrambler.vhd \

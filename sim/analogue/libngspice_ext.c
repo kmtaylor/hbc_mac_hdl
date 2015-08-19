@@ -168,7 +168,7 @@ double getvsrcval(double time, char *srcname) {
 	if ((index + 1) >= num_stim) break;
     }
 
-    return stim_val[index] * 3.3; 
+    return stim_val[index] * 2.5; 
 }
 
 double getisrcval(double time, char *srcname) {
