@@ -29,10 +29,14 @@ end mem_interface;
 architecture mem_interface_arch of mem_interface is
 
 	-- MEM_ADDR must be word aligned
-	constant MEM_RD_WR_ADDR	: std_logic_vector := HEX(MEM_RD_WR_ADDR);
-	constant MEM_FLAGS_ADDR	: std_logic_vector := HEX(MEM_FLAGS_ADDR);
-	constant MEM_RD_P_ADDR	: std_logic_vector := HEX(MEM_RD_P_ADDR);
-	constant MEM_WR_P_ADDR	: std_logic_vector := HEX(MEM_WR_P_ADDR);
+	constant MEM_RD_WR_ADDR	: std_logic_vector (7 downto 0)
+							:= HEX(MEM_RD_WR_ADDR);
+	constant MEM_FLAGS_ADDR	: std_logic_vector (7 downto 0)
+							:= HEX(MEM_FLAGS_ADDR);
+	constant MEM_RD_P_ADDR	: std_logic_vector (7 downto 0)
+							:= HEX(MEM_RD_P_ADDR);
+	constant MEM_WR_P_ADDR	: std_logic_vector (7 downto 0) 
+							:= HEX(MEM_WR_P_ADDR);
 
 	signal io_addr_reg : std_logic_vector (7 downto 0);
 	signal io_write_reg : std_logic_vector (31 downto 0);
@@ -107,7 +111,9 @@ begin
 	    elsif cpu_clk'event and cpu_clk = '1' then
 		if do_app_op = '1' then
 		    -- triggered by I/O R/W
-		    if (mem_op = '1') and (reading = '1') then
+		    -- FIXME: also use rd_data_valid for write blocking
+		    -- if (mem_op = '1') and (reading = '1') then
+		    if mem_op = '1' then
 			ack_pending <= '1';
 		    else
 			do_ack <= '1';

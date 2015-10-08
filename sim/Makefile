@@ -16,6 +16,12 @@ LOCAL_OBJS += \
 	transceiver-obj93.cf \
 	work-obj93.cf
 
+DDR_TB_FILES += \
+	mem_interface.vhd \
+	ddr.vhd \
+	ddr_tb.vhd
+DDR_SIM_FLAGS += --stop-time=200us
+
 RECEIVER_TB_FILES += \
 	data_synchroniser.vhd \
 	walsh_enc_lut.vhd \
@@ -131,6 +137,10 @@ transmitter_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(TRANSMITTER_TB_FILES:.vhd=_pp.o)
 c_to_vhd_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(C_TO_VHD_FILES:.vhd=_pp.o)
 	$(GHDL) -m $(XILINX_FLAGS) "$@"
 	./"$@" $(C_TO_VHD_SIM_FLAGS) --wave="$@".ghw
+
+ddr_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(DDR_TB_FILES:.vhd=_pp.o)
+	$(GHDL) -m $(XILINX_FLAGS) "$@"
+	./"$@" $(DDR_SIM_FLAGS) --wave="$@".ghw
 
 scrambler_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(SCRAMBLER_TB_FILES:.vhd=_pp.o)
 	$(GHDL) -m $(XILINX_FLAGS) "$@"

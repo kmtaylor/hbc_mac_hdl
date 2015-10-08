@@ -1,2 +1,0 @@
-vhdl work "transmitter_gate_tb.vhd"
-vhdl work "../transmitter_stim_tb_pp.vhd"

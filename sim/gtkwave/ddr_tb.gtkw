@@ -1,0 +1,89 @@
+[*]
+[*] GTKWave Analyzer v3.3.45 (w)1999-2012 BSI
+[*] Wed Oct  7 05:17:28 2015
+[*]
+[dumpfile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/ddr_tb.ghw"
+[dumpfile_mtime] "Wed Oct  7 05:10:42 2015"
+[dumpfile_size] 14065456
+[savefile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/gtkwave/ddr_tb.gtkw"
+[timestart] 0
+[size] 1680 1024
+[pos] -1 -1
+*-27.000000 7600000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.ddr_tb.
+[sst_width] 419
+[signals_width] 216
+[sst_expanded] 1
+[sst_vpaned_height] 292
+@28
+top.ddr_tb.reset_i
+top.ddr_tb.ddr.reset
+top.ddr_tb.mem_clk
+top.ddr_tb.mem_clk_90
+top.ddr_tb.ddr.mem_clk_180
+top.ddr_tb.ddr.mem_clk_270
+@200
+-
+-
+@28
+top.ddr_tb.ram_clk
+top.ddr_tb.ram_clk_n
+#{top.ddr_tb.ram_cmd[2:0]} top.ddr_tb.ram_cmd[2] top.ddr_tb.ram_cmd[1] top.ddr_tb.ram_cmd[0]
+#{top.ddr_tb.ram_ba[1:0]} top.ddr_tb.ram_ba[1] top.ddr_tb.ram_ba[0]
+@22
+#{top.ddr_tb.ram_addr[12:0]} top.ddr_tb.ram_addr[12] top.ddr_tb.ram_addr[11] top.ddr_tb.ram_addr[10] top.ddr_tb.ram_addr[9] top.ddr_tb.ram_addr[8] top.ddr_tb.ram_addr[7] top.ddr_tb.ram_addr[6] top.ddr_tb.ram_addr[5] top.ddr_tb.ram_addr[4] top.ddr_tb.ram_addr[3] top.ddr_tb.ram_addr[2] top.ddr_tb.ram_addr[1] top.ddr_tb.ram_addr[0]
+@28
+#{top.ddr_tb.ram_dm[1:0]} top.ddr_tb.ram_dm[1] top.ddr_tb.ram_dm[0]
+@22
+#{top.ddr_tb.ram_dq[15:0]} top.ddr_tb.ram_dq[15] top.ddr_tb.ram_dq[14] top.ddr_tb.ram_dq[13] top.ddr_tb.ram_dq[12] top.ddr_tb.ram_dq[11] top.ddr_tb.ram_dq[10] top.ddr_tb.ram_dq[9] top.ddr_tb.ram_dq[8] top.ddr_tb.ram_dq[7] top.ddr_tb.ram_dq[6] top.ddr_tb.ram_dq[5] top.ddr_tb.ram_dq[4] top.ddr_tb.ram_dq[3] top.ddr_tb.ram_dq[2] top.ddr_tb.ram_dq[1] top.ddr_tb.ram_dq[0]
+@28
+#{top.ddr_tb.ram_dqs[1:0]} top.ddr_tb.ram_dqs[1] top.ddr_tb.ram_dqs[0]
+@200
+-
+-
+@28
+top.ddr_tb.ddr.state
+top.ddr_tb.ddr.start_delay
+@22
+#{top.ddr_tb.ddr.delay[6:0]} top.ddr_tb.ddr.delay[6] top.ddr_tb.ddr.delay[5] top.ddr_tb.ddr.delay[4] top.ddr_tb.ddr.delay[3] top.ddr_tb.ddr.delay[2] top.ddr_tb.ddr.delay[1] top.ddr_tb.ddr.delay[0]
+#{top.ddr_tb.ddr.delay_r[6:0]} top.ddr_tb.ddr.delay_r[6] top.ddr_tb.ddr.delay_r[5] top.ddr_tb.ddr.delay_r[4] top.ddr_tb.ddr.delay_r[3] top.ddr_tb.ddr.delay_r[2] top.ddr_tb.ddr.delay_r[1] top.ddr_tb.ddr.delay_r[0]
+@28
+top.ddr_tb.ddr.new_state
+top.ddr_tb.ddr.end_state
+@200
+-
+-
+@22
+#{top.ddr_tb.ddr.refresh_count[9:0]} top.ddr_tb.ddr.refresh_count[9] top.ddr_tb.ddr.refresh_count[8] top.ddr_tb.ddr.refresh_count[7] top.ddr_tb.ddr.refresh_count[6] top.ddr_tb.ddr.refresh_count[5] top.ddr_tb.ddr.refresh_count[4] top.ddr_tb.ddr.refresh_count[3] top.ddr_tb.ddr.refresh_count[2] top.ddr_tb.ddr.refresh_count[1] top.ddr_tb.ddr.refresh_count[0]
+@28
+top.ddr_tb.ddr.do_refresh
+@200
+-
+-
+@22
+#{top.ddr_tb.io_addr[7:0]} top.ddr_tb.io_addr[7] top.ddr_tb.io_addr[6] top.ddr_tb.io_addr[5] top.ddr_tb.io_addr[4] top.ddr_tb.io_addr[3] top.ddr_tb.io_addr[2] top.ddr_tb.io_addr[1] top.ddr_tb.io_addr[0]
+#{top.ddr_tb.io_d_in[31:0]} top.ddr_tb.io_d_in[31] top.ddr_tb.io_d_in[30] top.ddr_tb.io_d_in[29] top.ddr_tb.io_d_in[28] top.ddr_tb.io_d_in[27] top.ddr_tb.io_d_in[26] top.ddr_tb.io_d_in[25] top.ddr_tb.io_d_in[24] top.ddr_tb.io_d_in[23] top.ddr_tb.io_d_in[22] top.ddr_tb.io_d_in[21] top.ddr_tb.io_d_in[20] top.ddr_tb.io_d_in[19] top.ddr_tb.io_d_in[18] top.ddr_tb.io_d_in[17] top.ddr_tb.io_d_in[16] top.ddr_tb.io_d_in[15] top.ddr_tb.io_d_in[14] top.ddr_tb.io_d_in[13] top.ddr_tb.io_d_in[12] top.ddr_tb.io_d_in[11] top.ddr_tb.io_d_in[10] top.ddr_tb.io_d_in[9] top.ddr_tb.io_d_in[8] top.ddr_tb.io_d_in[7] top.ddr_tb.io_d_in[6] top.ddr_tb.io_d_in[5] top.ddr_tb.io_d_in[4] top.ddr_tb.io_d_in[3] top.ddr_tb.io_d_in[2] top.ddr_tb.io_d_in[1] top.ddr_tb.io_d_in[0]
+#{top.ddr_tb.io_d_out[31:0]} top.ddr_tb.io_d_out[31] top.ddr_tb.io_d_out[30] top.ddr_tb.io_d_out[29] top.ddr_tb.io_d_out[28] top.ddr_tb.io_d_out[27] top.ddr_tb.io_d_out[26] top.ddr_tb.io_d_out[25] top.ddr_tb.io_d_out[24] top.ddr_tb.io_d_out[23] top.ddr_tb.io_d_out[22] top.ddr_tb.io_d_out[21] top.ddr_tb.io_d_out[20] top.ddr_tb.io_d_out[19] top.ddr_tb.io_d_out[18] top.ddr_tb.io_d_out[17] top.ddr_tb.io_d_out[16] top.ddr_tb.io_d_out[15] top.ddr_tb.io_d_out[14] top.ddr_tb.io_d_out[13] top.ddr_tb.io_d_out[12] top.ddr_tb.io_d_out[11] top.ddr_tb.io_d_out[10] top.ddr_tb.io_d_out[9] top.ddr_tb.io_d_out[8] top.ddr_tb.io_d_out[7] top.ddr_tb.io_d_out[6] top.ddr_tb.io_d_out[5] top.ddr_tb.io_d_out[4] top.ddr_tb.io_d_out[3] top.ddr_tb.io_d_out[2] top.ddr_tb.io_d_out[1] top.ddr_tb.io_d_out[0]
+@28
+top.ddr_tb.io_addr_strobe
+top.ddr_tb.io_read_strobe
+top.ddr_tb.io_write_strobe
+top.ddr_tb.io_ready
+@200
+-
+@28
+top.ddr_tb.app_af_cmd
+@22
+#{top.ddr_tb.app_af_addr[23:0]} top.ddr_tb.app_af_addr[23] top.ddr_tb.app_af_addr[22] top.ddr_tb.app_af_addr[21] top.ddr_tb.app_af_addr[20] top.ddr_tb.app_af_addr[19] top.ddr_tb.app_af_addr[18] top.ddr_tb.app_af_addr[17] top.ddr_tb.app_af_addr[16] top.ddr_tb.app_af_addr[15] top.ddr_tb.app_af_addr[14] top.ddr_tb.app_af_addr[13] top.ddr_tb.app_af_addr[12] top.ddr_tb.app_af_addr[11] top.ddr_tb.app_af_addr[10] top.ddr_tb.app_af_addr[9] top.ddr_tb.app_af_addr[8] top.ddr_tb.app_af_addr[7] top.ddr_tb.app_af_addr[6] top.ddr_tb.app_af_addr[5] top.ddr_tb.app_af_addr[4] top.ddr_tb.app_af_addr[3] top.ddr_tb.app_af_addr[2] top.ddr_tb.app_af_addr[1] top.ddr_tb.app_af_addr[0]
+#{top.ddr_tb.app_wdf_data[31:0]} top.ddr_tb.app_wdf_data[31] top.ddr_tb.app_wdf_data[30] top.ddr_tb.app_wdf_data[29] top.ddr_tb.app_wdf_data[28] top.ddr_tb.app_wdf_data[27] top.ddr_tb.app_wdf_data[26] top.ddr_tb.app_wdf_data[25] top.ddr_tb.app_wdf_data[24] top.ddr_tb.app_wdf_data[23] top.ddr_tb.app_wdf_data[22] top.ddr_tb.app_wdf_data[21] top.ddr_tb.app_wdf_data[20] top.ddr_tb.app_wdf_data[19] top.ddr_tb.app_wdf_data[18] top.ddr_tb.app_wdf_data[17] top.ddr_tb.app_wdf_data[16] top.ddr_tb.app_wdf_data[15] top.ddr_tb.app_wdf_data[14] top.ddr_tb.app_wdf_data[13] top.ddr_tb.app_wdf_data[12] top.ddr_tb.app_wdf_data[11] top.ddr_tb.app_wdf_data[10] top.ddr_tb.app_wdf_data[9] top.ddr_tb.app_wdf_data[8] top.ddr_tb.app_wdf_data[7] top.ddr_tb.app_wdf_data[6] top.ddr_tb.app_wdf_data[5] top.ddr_tb.app_wdf_data[4] top.ddr_tb.app_wdf_data[3] top.ddr_tb.app_wdf_data[2] top.ddr_tb.app_wdf_data[1] top.ddr_tb.app_wdf_data[0]
+@28
+top.ddr_tb.app_wdf_wren
+@22
+#{top.ddr_tb.app_wdf_mask_data[3:0]} top.ddr_tb.app_wdf_mask_data[3] top.ddr_tb.app_wdf_mask_data[2] top.ddr_tb.app_wdf_mask_data[1] top.ddr_tb.app_wdf_mask_data[0]
+@29
+top.ddr_tb.rd_data_valid
+@22
+#{top.ddr_tb.rd_data_fifo_out[31:0]} top.ddr_tb.rd_data_fifo_out[31] top.ddr_tb.rd_data_fifo_out[30] top.ddr_tb.rd_data_fifo_out[29] top.ddr_tb.rd_data_fifo_out[28] top.ddr_tb.rd_data_fifo_out[27] top.ddr_tb.rd_data_fifo_out[26] top.ddr_tb.rd_data_fifo_out[25] top.ddr_tb.rd_data_fifo_out[24] top.ddr_tb.rd_data_fifo_out[23] top.ddr_tb.rd_data_fifo_out[22] top.ddr_tb.rd_data_fifo_out[21] top.ddr_tb.rd_data_fifo_out[20] top.ddr_tb.rd_data_fifo_out[19] top.ddr_tb.rd_data_fifo_out[18] top.ddr_tb.rd_data_fifo_out[17] top.ddr_tb.rd_data_fifo_out[16] top.ddr_tb.rd_data_fifo_out[15] top.ddr_tb.rd_data_fifo_out[14] top.ddr_tb.rd_data_fifo_out[13] top.ddr_tb.rd_data_fifo_out[12] top.ddr_tb.rd_data_fifo_out[11] top.ddr_tb.rd_data_fifo_out[10] top.ddr_tb.rd_data_fifo_out[9] top.ddr_tb.rd_data_fifo_out[8] top.ddr_tb.rd_data_fifo_out[7] top.ddr_tb.rd_data_fifo_out[6] top.ddr_tb.rd_data_fifo_out[5] top.ddr_tb.rd_data_fifo_out[4] top.ddr_tb.rd_data_fifo_out[3] top.ddr_tb.rd_data_fifo_out[2] top.ddr_tb.rd_data_fifo_out[1] top.ddr_tb.rd_data_fifo_out[0]
+[pattern_trace] 1
+[pattern_trace] 0

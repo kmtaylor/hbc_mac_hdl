@@ -1,0 +1,24 @@
+#!/usr/bin/gwave -s
+!#
+; gwave script
+(require-n-wavepanels 2)
+(set! default-measure1-function 5)
+(let ((df (if script-target-datafile
+           script-target-datafile
+           (find-or-load-wavefile "analogue.raw"))))
+ (wavepanel-add-var-setup df (nth-wavepanel 0) "v(filter_in)" 0)
+ (wavepanel-add-var-setup df (nth-wavepanel 1) "v(filter_out)" 0)
+)
+(x-zoom! 1.10319666435024e-6 2.66569666435029e-6)
+(wtable-set-xlogscale! #f)
+(set! default-wavepanel-type 0)
+(set-wtable-vcursor! 0 7.76502363268084e-7)
+(gtk-tooltips-enable gwave-tooltips)
+(let ((wp (nth-wavepanel 0)))
+ (set-wavepanel-ylogscale! wp #f)
+ (set-wavepanel-type! wp 0)
+)
+(let ((wp (nth-wavepanel 1)))
+ (set-wavepanel-ylogscale! wp #f)
+ (set-wavepanel-type! wp 0)
+)

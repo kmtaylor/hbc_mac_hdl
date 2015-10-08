@@ -1,10 +1,12 @@
+VHHFLAGS ?= -DFPGA_TYPE=SPARTAN
+
 TRANSCEIVER_FILES += \
 	processed/clk_div_pp.vhd					\
 	processed/c_to_vhd_pp.vhd					\
 	processed/data_synchroniser_pp.vhd				\
 	processed/debounce_pp.vhd					\
 	processed/fifo_bus_arbitrator_pp.vhd				\
-	processed/fifo_interface_pp.vhd					\
+	processed/tx_fifo_interface_pp.vhd				\
 	processed/hamming_lut_pp.vhd					\
 	processed/io_bus_arbitrator_pp.vhd				\
 	processed/lcd_interface_pp.vhd					\
@@ -24,7 +26,8 @@ all: $(TRANSCEIVER_FILES)
 
 # Preprocessing
 %_pp.vhd: ../%.vhd
-	cpp -DVHDL -D_QUOTE=\" -x assembler-with-cpp -P -I ./ "$<" -o "$@"
+	cpp $(VHHFLAGS) -DVHDL -D_QUOTE=\" -x assembler-with-cpp \
+		-P -I ./ "$<" -o "$@"
 
 # Other Targets
 clean:

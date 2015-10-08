@@ -12,6 +12,8 @@ package bits is
 	return std_logic_vector;
     function shift_left(input : std_logic_vector; count : natural) 
 	return std_logic_vector;
+    function pad(in_val : std_logic_vector; length : natural)
+	return std_logic_vector;
 end package bits;
 
 package body bits is
@@ -86,5 +88,14 @@ package body bits is
     begin
 	return std_logic_vector(shift_left(unsigned(input), count));
     end function shift_left;
+
+    function pad(in_val : std_logic_vector; length : natural)
+	return std_logic_vector is
+        variable retval : std_logic_vector (length-1 downto 0) :=
+                (others => '0');
+    begin
+        retval(in_val'length-1 downto 0) := in_val;
+        return retval;
+    end function pad;
  
 end package body bits;

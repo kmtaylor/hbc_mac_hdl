@@ -5,42 +5,55 @@ use ieee.std_logic_1164.all;
 
 entity toplevel is
     port(
-	sw : in std_logic_vector (7 downto 0);
-	Led : out std_logic_vector (7 downto 0);
-	LCDD : inout std_logic_vector (7 downto 0);
-	LCDEN, LCDRW, LCDRS : out std_logic;
-	clkin, rstbtn, btn1, btn2 : in std_logic;
-	serial_clk_out : out std_logic;
-	s_data_out : out std_logic;
-	s_data_in : in std_logic;
+	clkin, rstbtn : in std_logic
+	; s_data_out : out std_logic
+	; s_data_in : in std_logic
+#if CLK_OUT
+	; serial_clk_out : out std_logic
+#endif
+#if USE_SWITCH
+	; sw : in std_logic_vector (7 downto 0)
+#endif
+#if USE_LED
+	; Led : out std_logic_vector (7 downto 0)
+#endif
+#if USE_LCD
+	; LCDD : inout std_logic_vector (7 downto 0)
+	; LCDEN, LCDRW, LCDRS : out std_logic
+#endif
+#if USE_BUTTON
+	; btn1, btn2 : in std_logic
+#endif
 #if USE_MEM
 	-- Physical memory interface
-	ddr2_dq	    : inout std_logic_vector (63 downto 0);
-	ddr2_a	    : out std_logic_vector (12 downto 0);
-	ddr2_ba	    : out std_logic_vector (1 downto 0);
-	ddr2_ras_n  : out std_logic;
-	ddr2_cas_n  : out std_logic;
-	ddr2_we_n   : out std_logic;
-	ddr2_cs_n   : out std_logic_vector (0 downto 0);
-	ddr2_odt    : out std_logic_vector (0 downto 0);
-	ddr2_cke    : out std_logic_vector (0 downto 0);
-	ddr2_dm	    : out std_logic_vector (7 downto 0);
-	ddr2_dqs    : inout std_logic_vector (7 downto 0);
-	ddr2_dqs_n  : inout std_logic_vector (7 downto 0);
-	ddr2_ck	    : out std_logic_vector (1 downto 0);
-	ddr2_ck_n   : out std_logic_vector (1 downto 0);
+	; ddr2_dq	: inout std_logic_vector (63 downto 0)
+	; ddr2_a	: out std_logic_vector (12 downto 0)
+	; ddr2_ba	: out std_logic_vector (1 downto 0)
+	; ddr2_ras_n	: out std_logic
+	; ddr2_cas_n	: out std_logic
+	; ddr2_we_n	: out std_logic
+	; ddr2_cs_n	: out std_logic_vector (0 downto 0)
+	; ddr2_odt	: out std_logic_vector (0 downto 0)
+	; ddr2_cke	: out std_logic_vector (0 downto 0)
+	; ddr2_dm	: out std_logic_vector (7 downto 0)
+	; ddr2_dqs	: inout std_logic_vector (7 downto 0)
+	; ddr2_dqs_n	: inout std_logic_vector (7 downto 0)
+	; ddr2_ck	: out std_logic_vector (1 downto 0)
+	; ddr2_ck_n	: out std_logic_vector (1 downto 0)
 #endif
+#if USE_PAR_USB
 	-- USB Interface
-	UsbClk	    : in std_logic;
-	UsbEN	    : in std_logic;
-	UsbEmpty    : in std_logic;
-	UsbFull	    : in std_logic;
-	UsbOE	    : out std_logic;
-	UsbAdr	    : out std_logic_vector (1 downto 0);
-	UsbWR	    : out std_logic;
-	UsbRD	    : out std_logic;
-	UsbPktEnd   : out std_logic;
-	UsbDB	    : inout std_logic_vector (7 downto 0)
+	; UsbClk    : in std_logic
+	; UsbEN	    : in std_logic
+	; UsbEmpty  : in std_logic
+	; UsbFull   : in std_logic
+	; UsbOE	    : out std_logic
+	; UsbAdr    : out std_logic_vector (1 downto 0)
+	; UsbWR	    : out std_logic
+	; UsbRD	    : out std_logic
+	; UsbPktEnd : out std_logic
+	; UsbDB	    : inout std_logic_vector (7 downto 0)
+#endif
 	);
 end toplevel;
 
@@ -58,9 +71,13 @@ architecture toplevel_arch of toplevel is
 	    IO_Read_Data : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 	    IO_Ready : IN STD_LOGIC;
 	    GPO1 : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+#if USE_LED
 	    GPO2 : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+#endif
 	    GPI1 : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+#if USE_SWITCH
 	    GPI2 : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+#endif
 	    INTC_Interrupt : IN STD_LOGIC_VECTOR(15 DOWNTO 0)
 	);
     END COMPONENT;
@@ -203,7 +220,8 @@ architecture toplevel_arch of toplevel is
 
     signal pkt_reset : std_logic;
     signal clk_debounce, clkin_ibufg : std_logic;
-    signal pll_clk, cpu_clk, serial_clk, serial_clk_90, usb_clk : std_logic;
+    signal pll_clk, cpu_clk, serial_clk, serial_clk_90 : std_logic;
+    signal usb_clk : std_logic;
     signal serial_clk_tmp : std_logic;
     signal mem_clk0, mem_clk90, mem_clkdiv0, mem_clk200 : std_logic;
     signal pll_locked, mem_pll_locked : std_logic;
@@ -235,7 +253,9 @@ begin
 
     serial_reset <= s_reset_shift_r(RESET_DELAY-1);
 
+#if CLK_OUT
     serial_clk_out <= serial_clk;
+#endif
 
     cpu_clk <= mem_clk0;
 
@@ -245,6 +265,7 @@ begin
     mem_fifo_full <= app_af_afull or app_wdf_afull;
 
     -- 100MHz XTal to 42MHz PLL
+#if PORT
     core_pll : entity work.pll_core
 	port map (
 	    CLKIN1_IN => clkin,
@@ -252,8 +273,10 @@ begin
 	    CLKOUT0_OUT => pll_clk,
 	    CLKIN_IBUFG => clkin_ibufg,
 	    LOCKED_OUT => pll_locked);
+#endif
 
     -- 100MHz XTal to 125MHz Mem clock (Also 200MHz and 62.5MHz)
+#if PORT
     mem_pll : entity work.pll_mem
 	port map (
 	    CLKIN1_IN => clkin_ibufg,
@@ -263,11 +286,14 @@ begin
 	    CLKOUT2_OUT => mem_clkdiv0,
 	    CLKOUT3_OUT => mem_clk200,
 	    LOCKED_OUT => mem_pll_locked);
+#endif
 
+#if USE_PAR_USB
     usb_bufr : component BUFR
 	port map (
 	    I => UsbClk,
 	    O => usb_clk);
+#endif
     
     -- 90MHz PLL to 100MHz cpu clock (unused, operating CPU at MEM HZ)
     -- To reinstate, two FIFOs are requred between the mem controller and
@@ -280,7 +306,7 @@ begin
     --	LOCKED_OUT => cpu_dcm_locked);
     cpu_dcm_locked <= '1';
 
-
+#if PORT
 #define SERIAL_DIV 0
 #if SERIAL_DIV
     clk_div_1 : entity work.clock_divider
@@ -305,11 +331,14 @@ begin
 	    CLK90_OUT => serial_clk_90,
 	    LOCKED_OUT => serial_dcm_locked);
 #endif
+#endif
 	    
+#if USE_BUTTON
     -- 125MHz cpu_clk to 6.25kHz clk for pushbutton debouncing 
     clk_div_0 : entity work.clock_divider
 	generic map (DIV_BY => 20E3)
 	port map (clk => cpu_clk, clk_div => clk_debounce);
+#endif
 	    
     cpu_0 : component mcs_0
 	port map (
@@ -322,7 +351,9 @@ begin
 	    IO_Write_Data => io_write_data,
 	    IO_Read_Data => io_read_data,
 	    IO_Ready => io_ready,
+#if USE_SWITCH
 	    GPI2 => sw,
+#endif
 	    GPO1 (0) => parallel_to_serial_enable,
 	    GPO1 (1) => usb_pkt_end,
 	    GPO1 (2) => reseed,
@@ -331,7 +362,9 @@ begin
 	    GPO1 (5) => tx_fifo_flush,
 	    GPO1 (6) => s2p_pkt_ack,
 	    GPO1 (7) => open,
+#if USE_LED
 	    GPO2 => Led,
+#endif
 	    INTC_Interrupt (INT(IRQ_BUTTON)) => btn1_d,
 	    INTC_Interrupt (INT(IRQ_FIFO_FULL)) => tx_fifo_full,
 	    INTC_Interrupt (INT(IRQ_FIFO_ALMOST_FULL)) => tx_fifo_almost_full,
@@ -342,10 +375,17 @@ begin
 	    INTC_Interrupt (INT(IRQ_CLOCK_LOSS)) => clk_lock_int,
 	    INTC_Interrupt (INT(IRQ_RAM_INIT)) => not(phy_init_done),
 	    INTC_Interrupt (INT(IRQ_RAM_FIFO_FULL)) => mem_fifo_full,
+#if USE_PAR_USB
 	    INTC_Interrupt (INT(IRQ_USB_INT)) => usb_irq,
 	    INTC_Interrupt (INT(IRQ_USB_FULL)) => UsbFull,
 	    INTC_Interrupt (INT(IRQ_USB_EN)) => UsbEN,
 	    INTC_Interrupt (INT(IRQ_USB_EMPTY)) => UsbEmpty,
+#else
+	    INTC_Interrupt (INT(IRQ_USB_INT)) => '0',
+	    INTC_Interrupt (INT(IRQ_USB_FULL)) => '0',
+	    INTC_Interrupt (INT(IRQ_USB_EN)) => '0',
+	    INTC_Interrupt (INT(IRQ_USB_EMPTY)) => '0',
+#endif
 	    INTC_Interrupt (INT(IRQ_BUTTON_2)) => btn2_d,
 	    INTC_Interrupt (15) => '0',
 	    GPI1 (INT(IRQ_BUTTON)) => btn1_d,
@@ -358,10 +398,17 @@ begin
 	    GPI1 (INT(IRQ_CLOCK_LOSS)) => clk_lock_int,
 	    GPI1 (INT(IRQ_RAM_INIT)) => not(phy_init_done),
 	    GPI1 (INT(IRQ_RAM_FIFO_FULL)) => mem_fifo_full,
+#if USE_PAR_USB
 	    GPI1 (INT(IRQ_USB_INT)) => usb_irq,
 	    GPI1 (INT(IRQ_USB_FULL)) => UsbFull,
 	    GPI1 (INT(IRQ_USB_EN)) => UsbEN,
 	    GPI1 (INT(IRQ_USB_EMPTY)) => UsbEmpty,
+#else
+	    GPI1 (INT(IRQ_USB_INT)) => '0',
+	    GPI1 (INT(IRQ_USB_FULL)) => '0',
+	    GPI1 (INT(IRQ_USB_EN)) => '0',
+	    GPI1 (INT(IRQ_USB_EMPTY)) => '0',
+#endif
 	    GPI1 (INT(IRQ_BUTTON_2)) => btn2_d,
 	    GPI1 (15) => '0');
     
@@ -447,7 +494,7 @@ begin
 	    rd_data_fifo_out	=> rd_data_fifo_out);
 #endif
 
-    fifo_int_0 : entity work.fifo_interface
+    fifo_int_0 : entity work.tx_fifo_interface
 	port map (
 	    clk => cpu_clk,
 	    reset => cpu_reset,
@@ -491,6 +538,7 @@ begin
 	    fifo_empty => tx_fifo_empty,
 	    data_out => s_data_out);
 
+#if USE_PAR_USB
     usb_0 : entity work.usb_fifo
 	port map (
 	    usb_clk => usb_clk,
@@ -515,7 +563,9 @@ begin
 	    UsbFull => UsbFull,
 	    UsbEN => UsbEN,
 	    UsbDBG => open);
+#endif
 
+#if USE_LCD
     lcd_0 : entity work.lcd_interface
 	port map (
 	    clk => cpu_clk,
@@ -532,6 +582,7 @@ begin
 	    lcd_en => LCDEN,
 	    lcd_rw => LCDRW,
 	    lcd_rs => LCDRS);
+#endif
 	
     scrambler : entity work.scrambler
 	port map (
@@ -546,7 +597,7 @@ begin
 	    io_read_strobe => io_read_strobe,
 	    io_ready => bus5_ready);
 
-    ba1 : entity work.fifo_bus_arbitrator
+    ba_1 : entity work.fifo_bus_arbitrator
 	port map (
 	    mod_bus_master => mod_bus_master,
 	    io_addr => io_address (7 downto 0),
@@ -616,7 +667,7 @@ begin
 	    pkt_ack => s2p_pkt_ack,
 	    pkt_ready => s2p_pkt_ready);
 
-    fifo_int_1 : entity rx_fifo_interface
+    fifo_int_1 : entity work.rx_fifo_interface
 	port map (
 	    clk => cpu_clk,
 	    reset => cpu_reset,
@@ -628,6 +679,7 @@ begin
 	    fifo_d_in => from_rx_fifo,
 	    fifo_rden => rx_fifo_rden);
 
+#if USE_BUTTON
     db_btn1 : entity work.debounce
 	port map (
 	    clk => clk_debounce,
@@ -639,6 +691,7 @@ begin
 	    clk => clk_debounce,
 	    d_in => btn2,
 	    q_out => btn2_d);
+#endif
 
 end toplevel_arch;
 

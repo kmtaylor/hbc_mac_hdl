@@ -7,7 +7,7 @@ use ieee.numeric_std.all;
 library transceiver;
 use transceiver.bits.all;
 
-entity fifo_interface is
+entity tx_fifo_interface is
     port (
 	clk, reset  : in std_logic;
 	trigger	    : in std_logic;
@@ -21,9 +21,9 @@ entity fifo_interface is
 	fifo_wren   : out std_logic;
 	fifo_d_in   : in std_logic_vector (31 downto 0);
 	fifo_rden   : out std_logic);
-end fifo_interface;
+end tx_fifo_interface;
 
-architecture fifo_interface_arch of fifo_interface is
+architecture tx_fifo_interface_arch of tx_fifo_interface is
 
     -- FIFO_ADDR must be word aligned
     constant FIFO_ADDR : std_logic_vector (7 downto 0) :=   HEX(FIFO_ADDR);
@@ -219,5 +219,5 @@ begin
 	end if;
     end process fifo_enable;
 
-end fifo_interface_arch;
+end tx_fifo_interface_arch;
 
