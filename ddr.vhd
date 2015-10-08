@@ -1,3 +1,5 @@
+#define USE_DDR_HIZ 0
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -102,13 +104,15 @@ architecture ddr_arch of ddr is
 
     -- Signals for mem_clk to DDR translation
     signal dqs_ddr : std_logic_vector (DDR_BUS_WIDTH/8-1 downto 0);
-    signal dqs_ddr_hiz : std_logic_vector (DDR_BUS_WIDTH/8-1 downto 0);
     signal dm_ddr : std_logic_vector (DDR_BUS_WIDTH/8-1 downto 0);
     --signal dm_ddr_hiz : std_logic_vector (DDR_BUS_WIDTH/8-1 downto 0);
     signal dq_ddr_out : std_logic_vector (DDR_BUS_WIDTH-1 downto 0);
     signal dq_ddr_in : std_logic_vector (DDR_BUS_WIDTH-1 downto 0);
     signal dq_ddr_in_delay : std_logic_vector (DDR_BUS_WIDTH-1 downto 0);
+#if USE_DDR_HIZ
+    signal dqs_ddr_hiz : std_logic_vector (DDR_BUS_WIDTH/8-1 downto 0);
     signal dq_ddr_hiz : std_logic_vector (DDR_BUS_WIDTH-1 downto 0);
+#endif
 
     -- State machine DDR control
     signal dq_io_read : std_logic; -- Disable DQ & DQS
@@ -124,6 +128,10 @@ architecture ddr_arch of ddr is
     signal bus_bytes : std_logic_vector(DDR_BUS_WIDTH*2/8-1 downto 0);
     signal bus_data : std_logic_vector (DDR_BUS_WIDTH*2-1 downto 0);
 
+    constant CAS_LATENCY : natural := 3 + 1;
+    signal cas_latency_r : unsigned (CAS_LATENCY-1 downto 0);
+    signal start_cas_latency : std_logic;
+
     constant MAX_DELAY : natural := 30000;
     signal delay, delay_r : unsigned (bits_for_val(MAX_DELAY)-1 downto 0);
     signal start_delay : std_logic;
@@ -132,7 +140,7 @@ architecture ddr_arch of ddr is
     signal refresh_count : unsigned (bits_for_val(REFRESH_TIME)-1 downto 0);
     signal do_refresh : std_logic;
     signal do_write, do_read : std_logic;
-    signal write_done, read_done : std_logic;
+    signal cas_done : std_logic;
 
     type state_type is (
 	st_reset,	-- Delay before initialisation
@@ -191,8 +199,8 @@ architecture ddr_arch of ddr is
     constant DDR_INIT_RFSH_DELAY    : natural := 14;
     constant DDR_INIT_MR2_DELAY	    : natural := 1;
     constant DDR_REFRESH_DELAY	    : natural := 14;
-    constant DDR_RAS_DELAY	    : natural := 3;
-    constant DDR_CAS_DELAY	    : natural := 3;
+    constant DDR_RAS_DELAY	    : natural := 1;
+    constant DDR_CAS_DELAY	    : natural := 5;
    
 begin
 
@@ -208,13 +216,19 @@ begin
 	-- Double data rate register for strobe
 	DEFAULT_ODDR2(dqs_ddr, dqs_ddr(i), '0', dqs_out);
 	-- Double data rate register for strobe hi-Z
+#if USE_DDR_HIZ
 	DEFAULT_ODDR2(dqs_ddr_hiz, dqs_ddr_hiz(i), dq_io_read, dq_io_read);
+#endif
 
 	-- IO buffer for strobe 
 	dqs_iobuf : OBUFT port map (
 		O => ram_dqs(i),
 		I => dqs_ddr(i),
+#if USE_DDR_HIZ
 		T => dqs_ddr_hiz(i));
+#else
+		T => dq_io_read);
+#endif
 
 	-- Double data rate register for mask bits
 	DEFAULT_ODDR2_90(dm_ddr, dm_ddr(i), ram_be(i), ram_be(i + 2));
@@ -222,20 +236,26 @@ begin
 	-- FIXME: Always low (does this do anything?)
 	-- DEFAULT_ODDR2_90(dm_ddr_hiz, dm_ddr_hiz(i), '0', '0');
 
+#if 0
 	-- IO buffer for mask bits
 	dm_obuf : OBUFT port map (
 		O => ram_dm(i),
 		I => dm_ddr(i),
 		-- T => dm_ddr_hiz(i));
 		T => '0');
+#else
+	ram_dm(i) <= dm_ddr(i);
+#endif
 
     end generate xilinx_io_2bit_gen;
 
     xilinx_io_16bit_gen : for i in 0 to (DDR_BUS_WIDTH-1) generate
 
 	DEFAULT_ODDR2_90(dq_ddr_out, dq_ddr_out(i), dq_out(i + 16), dq_out(i));
+#if USE_DDR_HIZ
 	-- FIXME: This seems to just mirror the previous ODDR2
 	DEFAULT_ODDR2_90(dq_ddr_hiz, dq_ddr_hiz(i), dq_io_read, dq_io_read);
+#endif
 	DEFAULT_IDDR2_90(dq_ddr_in_delay, dq_in(i + 16), 
 			dq_in(i), dq_ddr_in_delay(i));
 
@@ -244,7 +264,7 @@ begin
 		DATA_RATE => "DDR",
 		DELAY_SRC => "IDATAIN",
 		IDELAY_TYPE => "FIXED",
-		IDELAY_VALUE => 62 -- FIXME
+		IDELAY_VALUE => 20 -- FIXME
 	    )
 	    port map (
 		IDATAIN => dq_ddr_in(i),
@@ -266,7 +286,11 @@ begin
 		IO => ram_dq(i),
 		I => dq_ddr_out(i),
 		O => dq_ddr_in(i),
+#if USE_DDR_HIZ
 		T => dq_ddr_hiz(i));
+#else
+		T => dq_io_read);
+#endif
 
     end generate xilinx_io_16bit_gen;
 
@@ -284,11 +308,17 @@ begin
 	if mem_clk'event and mem_clk = '1' then
 	    if reset = '1' then
 		do_write <= '0';
+		do_read <= '0';
 	    else
-		if app_wdf_wren = '1' then
-		    do_write <= '1';
-		elsif write_done = '1' and end_state = '1' then
+		if cas_done = '1' then
 		    do_write <= '0';
+		    do_read <= '0';
+		elsif app_wdf_wren = '1' then
+		    if app_af_cmd = '1' then
+			do_read <= '1';
+		    else
+			do_write <= '1';
+		    end if;
 		end if;
 	    end if;
 	end if;
@@ -302,9 +332,27 @@ begin
     bus_bank_addr <= app_af_addr(11 downto 10);
     bus_row_addr <= app_af_addr(24 downto 12);
 
+    latch_read_data : process(mem_clk) begin
+	if mem_clk'event and mem_clk = '1' then
+	    if cas_latency_r(1) = '0' and cas_latency_r(0) = '1' then
+		rd_data_fifo_out <= dq_in;
+	    end if;
+	end if;
+    end process latch_read_data;
+
+    cas_latency_proc : process(mem_clk) begin
+	if mem_clk'event and mem_clk = '1' then
+	    if start_cas_latency = '1' then
+		cas_latency_r <= (others => '1');
+	    else
+		cas_latency_r <= shift_right(cas_latency_r, 1);
+	    end if;
+	end if;
+    end process cas_latency_proc;
+
     ddr_control : process(  state, do_write, do_read, bus_data, bus_row_addr,
 			    bus_column_addr, bus_bank_addr, bus_bytes,
-			    new_state) begin
+			    new_state, end_state) begin
 	ram_cs_n <= '0';
 	ram_cke <= '1';
 	ram_cmd <= CMD_NOP;
@@ -314,8 +362,9 @@ begin
 	dq_out <= (others => '0');
 	dqs_out <= '0';
 	dq_io_read <= '0';
-	write_done <= '0';
-	read_done <= '0';
+	cas_done <= '0';
+	rd_data_valid <= '0';
+	start_cas_latency <= '0';
 
 	case (state) is
 	    when st_reset =>
@@ -346,31 +395,38 @@ begin
 		    ram_addr <= pad(MR2_ADDR, ram_addr'length);
 		end if;
 	    when st_ras =>
-		ram_cmd <= CMD_RAS; 
-		ram_addr <= pad(bus_row_addr, ram_addr'length);
-		ram_ba <= bus_bank_addr;
-		ram_be <= bus_bytes;
-		if do_write = '1' then
-		    dq_io_read <= '0';
-		else
-		    dq_io_read <= '1';
+		if new_state = '1' then
+		    ram_cmd <= CMD_RAS; 
+		    ram_addr <= pad(bus_row_addr, ram_addr'length);
+		    ram_ba <= bus_bank_addr;
 		end if;
 	    when st_cas =>
+		-- Issue control signal
+		if new_state = '1' then
+		    ram_addr <= pad(A10_ADDR, ram_addr'length) or 
+				pad(bus_column_addr, ram_addr'length);
+		    ram_ba <= bus_bank_addr;
+		    if do_write = '1' then
+			ram_cmd <= CMD_WRITE;
+			dqs_out <= '1';
+		    else
+			start_cas_latency <= '1';
+			ram_cmd <= CMD_READ;
+		    end if;
+		end if;
+		-- Issue data
 		if do_write = '1' then
-		    ram_cmd <= CMD_WRITE;
 		    dq_io_read <= '0';
 		    dq_out <= bus_data;
-		    dqs_out <= '1';
+		    ram_be <= bus_bytes;
 		else
-		    ram_cmd <= CMD_READ;
 		    dq_io_read <= '1';
 		end if;
-		ram_addr <= pad(A10_ADDR, ram_addr'length) or 
-			    pad(bus_column_addr, ram_addr'length);
-		ram_ba <= bus_bank_addr;
-		ram_be <= bus_bytes;
-		write_done <= '1';
-		read_done <= '1';
+		-- Ack bus
+		if end_state = '1' then
+		    cas_done <= '1';
+		    rd_data_valid <= '1';
+		end if;
 	    when others =>
 	end case;
     end process ddr_control;

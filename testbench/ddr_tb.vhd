@@ -115,6 +115,7 @@ begin
 	io_read_strobe <= '0';
 	io_write_strobe <= '0';
 	io_d_in <= (others => '0');
+	ram_dq <= "ZZZZZZZZZZZZZZZZ";
 	wait for clk_period;
 	reset_i <= '0';
 
@@ -157,7 +158,6 @@ begin
 
 	wait for clk_period*5;
 		-- read flags 
-                rd_data_valid <= '0';
                 io_read_strobe <= '1';
                 io_addr_strobe <= '1';
                 io_addr <= X"05";
@@ -213,11 +213,13 @@ begin
                 io_read_strobe <= '0';
                 io_addr_strobe <= '0';
 
-                wait for clk_period * 7;
-
-                rd_data_valid <= '1';
-                wait for clk_period * 2;
-                rd_data_fifo_out <= X"12345678";
+	wait for clk_period*8;
+		-- simulate data coming with CL=3
+		ram_dq <= X"1234";
+		wait for clk_period/2;
+		ram_dq <= X"5678";
+		wait for clk_period/2;
+		ram_dq <= "ZZZZZZZZZZZZZZZZ";
 
 	
 	wait;

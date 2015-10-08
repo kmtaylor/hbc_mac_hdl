@@ -91,11 +91,13 @@ begin
 	    elsif cpu_clk'event and cpu_clk = '1' then
                 if mem_op = '1' then
                         app_af_wren <= do_app_op;
-			if reading = '0' then
+			-- FIXME: Always issue wren, use cmd to determine
+			-- direction. Not compatible with MIG
+			--if reading = '0' then
 			    app_wdf_wren <= do_app_op;
-			else
-			    app_wdf_wren <= '0';
-			end if;
+			--else
+			--    app_wdf_wren <= '0';
+			--end if;
                 else
                         app_af_wren <= '0';
                         app_wdf_wren <= '0';
