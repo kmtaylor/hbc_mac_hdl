@@ -22,7 +22,6 @@ architecture rx_fifo_interface_arch of rx_fifo_interface is
     constant RX_FIFO_ADDR : std_logic_vector (7 downto 0) := HEX(RX_FIFO_ADDR);
 	    
     signal io_addr_reg : std_logic_vector (7 downto 0);
-    signal io_d_in_r : std_logic_vector (31 downto 0);
 	
     signal enabled : std_logic;
     signal do_fifo_rden : std_logic := '0';
@@ -35,7 +34,6 @@ begin
 	if reset = '1' then
 	    do_fifo_rden <= '0';
 	    do_ack <= '0';
-	    io_d_in_r <= (others => '0');
 	-- Read IO bus on falling edge
 	elsif clk'event and clk = '0' then
 	    if io_read_strobe = '1' then

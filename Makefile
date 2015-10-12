@@ -1,4 +1,4 @@
-VHHFLAGS ?= -DFPGA_TYPE=SPARTAN
+VHHFLAGS ?= -DFPGA_TYPE=SPARTAN -DUSE_MEM=1
 
 TRANSCEIVER_FILES += \
 	processed/clk_div_pp.vhd					\
@@ -11,6 +11,7 @@ TRANSCEIVER_FILES += \
 	processed/io_bus_arbitrator_pp.vhd				\
 	processed/lcd_interface_pp.vhd					\
 	processed/mem_interface_pp.vhd					\
+	processed/ddr_pp.vhd						\
 	processed/modulator_pp.vhd					\
 	processed/parallel_to_serial_pp.vhd				\
 	processed/phase_align_pp.vhd					\

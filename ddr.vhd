@@ -1,4 +1,4 @@
-#define USE_DDR_HIZ 0
+#define USE_DDR_HIZ 1
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -46,7 +46,7 @@ end entity ddr;
 
 #define DEFAULT_ODDR2(instance, output, input_0, input_1) \
     instance##_inst : ODDR2						    \
-	generic map (DDR_ALIGNMENT => "C0")				    \
+	generic map (DDR_ALIGNMENT => "C0", SRTYPE => "ASYNC")		    \
 	port map (							    \
 	    Q => output,						    \
 	    D0 => input_0,						    \
@@ -60,7 +60,7 @@ end entity ddr;
 
 #define DEFAULT_ODDR2_90(instance, output, input_0, input_1) \
     instance##_inst : ODDR2						    \
-	generic map (DDR_ALIGNMENT => "C0")				    \
+	generic map (DDR_ALIGNMENT => "C0", SRTYPE => "ASYNC")		    \
 	port map (							    \
 	    Q => output,						    \
 	    D0 => input_0,						    \
@@ -72,9 +72,23 @@ end entity ddr;
 	    S => '0'							    \
 	)
 
+#define DEFAULT_IDDR2(instance, output_0, output_1, input) \
+    instance##_inst : IDDR2						    \
+	generic map (DDR_ALIGNMENT => "C0", SRTYPE => "ASYNC")		    \
+	port map (							    \
+	    Q0 => output_0,						    \
+	    Q1 => output_1,						    \
+	    D => input,							    \
+	    C0 => mem_clk,						    \
+	    C1 => mem_clk_180,						    \
+	    CE => '1',							    \
+	    R => '0',							    \
+	    S => '0'							    \
+	)
+
 #define DEFAULT_IDDR2_90(instance, output_0, output_1, input) \
     instance##_inst : IDDR2						    \
-	generic map (DDR_ALIGNMENT => "C0")				    \
+	generic map (DDR_ALIGNMENT => "C0", SRTYPE => "ASYNC")		    \
 	port map (							    \
 	    Q0 => output_0,						    \
 	    Q1 => output_1,						    \
@@ -101,6 +115,9 @@ architecture ddr_arch of ddr is
 
     signal mem_clk_180 : std_logic;
     signal mem_clk_270 : std_logic;
+
+    -- FIXME:
+    constant READ_DELAY : natural := 0;
 
     -- Signals for mem_clk to DDR translation
     signal dqs_ddr : std_logic_vector (DDR_BUS_WIDTH/8-1 downto 0);
@@ -232,20 +249,7 @@ begin
 
 	-- Double data rate register for mask bits
 	DEFAULT_ODDR2_90(dm_ddr, dm_ddr(i), ram_be(i), ram_be(i + 2));
-	-- Double data rate register for mask bits hi-Z
-	-- FIXME: Always low (does this do anything?)
-	-- DEFAULT_ODDR2_90(dm_ddr_hiz, dm_ddr_hiz(i), '0', '0');
-
-#if 0
-	-- IO buffer for mask bits
-	dm_obuf : OBUFT port map (
-		O => ram_dm(i),
-		I => dm_ddr(i),
-		-- T => dm_ddr_hiz(i));
-		T => '0');
-#else
 	ram_dm(i) <= dm_ddr(i);
-#endif
 
     end generate xilinx_io_2bit_gen;
 
@@ -253,18 +257,20 @@ begin
 
 	DEFAULT_ODDR2_90(dq_ddr_out, dq_ddr_out(i), dq_out(i + 16), dq_out(i));
 #if USE_DDR_HIZ
-	-- FIXME: This seems to just mirror the previous ODDR2
+	-- Spartan requires that HI-Z control also be a ODDR
 	DEFAULT_ODDR2_90(dq_ddr_hiz, dq_ddr_hiz(i), dq_io_read, dq_io_read);
 #endif
 	DEFAULT_IDDR2_90(dq_ddr_in_delay, dq_in(i + 16), 
 			dq_in(i), dq_ddr_in_delay(i));
 
+	-- If delayed by half a bit period, the sampling should occur at
+	-- mem_clk, not mem_clk_90??
 	dq_delay : IODELAY2
 	    generic map (
 		DATA_RATE => "DDR",
 		DELAY_SRC => "IDATAIN",
 		IDELAY_TYPE => "FIXED",
-		IDELAY_VALUE => 20 -- FIXME
+		IDELAY_VALUE => READ_DELAY
 	    )
 	    port map (
 		IDATAIN => dq_ddr_in(i),

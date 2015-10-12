@@ -249,9 +249,9 @@ begin
 		    previous_shift <= '0';
 		    reset_valid <= '1';
 		end if;
+		previous_shift <= '0';
 #else
 		delay_time <= delay_time - 1;
-		previous_shift <= '0';
 #endif
 	    elsif (use_0_hold and use_270) = '1' then
 #if SLOW_SHIFT
@@ -260,9 +260,9 @@ begin
 		    previous_shift <= '1';
 		    reset_valid <= '1';
 		end if;
+		previous_shift <= '1';
 #else
 		delay_time <= delay_time + 1;
-		previous_shift <= '1';
 #endif
 #if DOUBLE_SHIFT
 	    elsif ( (use_0_hold and use_90) or

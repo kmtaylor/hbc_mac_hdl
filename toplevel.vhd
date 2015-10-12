@@ -1,5 +1,37 @@
 #include <preprocessor/constants.vhh>
 
+#ifndef CLK_OUT
+#define CLK_OUT 0
+#endif
+
+#ifndef USE_SWITCH
+#define USE_SWITCH 0
+#endif
+
+#ifndef USE_LED
+#define USE_LED 0
+#endif
+
+#ifndef USE_LCD
+#define USE_LCD 0
+#endif
+
+#ifndef USE_BUTTON
+#define USE_BUTTON 0
+#endif
+
+#ifndef USE_MEM
+#define USE_MEM 0
+#endif
+
+#ifndef USE_MIG
+#define USE_MIG 0
+#endif
+
+#ifndef USE_PAR_USB
+#define USE_PAR_USB 0
+#endif
+
 library ieee;
 use ieee.std_logic_1164.all;
 
@@ -25,21 +57,25 @@ entity toplevel is
 	; btn1, btn2 : in std_logic
 #endif
 #if USE_MEM
+    #define MEM_DATA_WIDTH 16
+    #define MEM_ADDR_WIDTH 13
+    #define MEM_BYTES_WIDTH 2
+
 	-- Physical memory interface
-	; ddr2_dq	: inout std_logic_vector (63 downto 0)
-	; ddr2_a	: out std_logic_vector (12 downto 0)
+	; ddr2_dq	: inout std_logic_vector (MEM_DATA_WIDTH-1 downto 0)
+	; ddr2_a	: out std_logic_vector (MEM_ADDR_WIDTH-1 downto 0)
 	; ddr2_ba	: out std_logic_vector (1 downto 0)
 	; ddr2_ras_n	: out std_logic
 	; ddr2_cas_n	: out std_logic
 	; ddr2_we_n	: out std_logic
-	; ddr2_cs_n	: out std_logic_vector (0 downto 0)
-	; ddr2_odt	: out std_logic_vector (0 downto 0)
-	; ddr2_cke	: out std_logic_vector (0 downto 0)
-	; ddr2_dm	: out std_logic_vector (7 downto 0)
-	; ddr2_dqs	: inout std_logic_vector (7 downto 0)
-	; ddr2_dqs_n	: inout std_logic_vector (7 downto 0)
-	; ddr2_ck	: out std_logic_vector (1 downto 0)
-	; ddr2_ck_n	: out std_logic_vector (1 downto 0)
+	; ddr2_cs_n	: out std_logic
+--	; ddr2_odt	: out std_logic
+	; ddr2_cke	: out std_logic
+	; ddr2_dm	: out std_logic_vector (MEM_BYTES_WIDTH-1 downto 0)
+	; ddr2_dqs	: inout std_logic_vector (MEM_BYTES_WIDTH-1 downto 0)
+--	; ddr2_dqs_n	: inout std_logic_vector (MEM_BYTES_WIDTH-1 downto 0)
+	; ddr2_ck	: out std_logic
+	; ddr2_ck_n	: out std_logic
 #endif
 #if USE_PAR_USB
 	-- USB Interface
@@ -262,10 +298,13 @@ begin
     clk_lock_int <= not(pll_locked and serial_dcm_locked and 
 		cpu_dcm_locked and mem_pll_locked);
 
+#if USE_MIG
     mem_fifo_full <= app_af_afull or app_wdf_afull;
+#else
+    mem_fifo_full <= '0';
+#endif
 
     -- 100MHz XTal to 42MHz PLL
-#if PORT
     core_pll : entity work.pll_core
 	port map (
 	    CLKIN1_IN => clkin,
@@ -273,20 +312,19 @@ begin
 	    CLKOUT0_OUT => pll_clk,
 	    CLKIN_IBUFG => clkin_ibufg,
 	    LOCKED_OUT => pll_locked);
-#endif
 
     -- 100MHz XTal to 125MHz Mem clock (Also 200MHz and 62.5MHz)
-#if PORT
     mem_pll : entity work.pll_mem
 	port map (
 	    CLKIN1_IN => clkin_ibufg,
 	    RST_IN => '0',
 	    CLKOUT0_OUT => mem_clk0,
 	    CLKOUT1_OUT => mem_clk90,
+#if USE_MIG	    
 	    CLKOUT2_OUT => mem_clkdiv0,
 	    CLKOUT3_OUT => mem_clk200,
-	    LOCKED_OUT => mem_pll_locked);
 #endif
+	    LOCKED_OUT => mem_pll_locked);
 
 #if USE_PAR_USB
     usb_bufr : component BUFR
@@ -295,18 +333,8 @@ begin
 	    O => usb_clk);
 #endif
     
-    -- 90MHz PLL to 100MHz cpu clock (unused, operating CPU at MEM HZ)
-    -- To reinstate, two FIFOs are requred between the mem controller and
-    -- the CPU bus.
-    --cpu_clk_dcm : entity work.dcm_cpu
-    --    port map (
-    --	CLKIN_IN => pll_clk,
-    --	RST_IN => '0',
-    --	CLKFX_OUT => open, --cpu_clk,
-    --	LOCKED_OUT => cpu_dcm_locked);
     cpu_dcm_locked <= '1';
 
-#if PORT
 #define SERIAL_DIV 0
 #if SERIAL_DIV
     clk_div_1 : entity work.clock_divider
@@ -330,7 +358,6 @@ begin
 	    CLK0_OUT => serial_clk,
 	    CLK90_OUT => serial_clk_90,
 	    LOCKED_OUT => serial_dcm_locked);
-#endif
 #endif
 	    
 #if USE_BUTTON
@@ -451,7 +478,7 @@ begin
 	    rd_data_valid => rd_data_valid,
 	    rd_data_fifo_out => rd_data_fifo_out);
 	    
-#if USE_MEM
+#if USE_MIG
     ram : entity work.mem_controller
 	port map (
 	    -- Physical RAM interface
@@ -492,6 +519,36 @@ begin
 	    --Read FIFO
 	    rd_data_valid	=> rd_data_valid,
 	    rd_data_fifo_out	=> rd_data_fifo_out);
+#endif
+
+#if USE_MEM
+    ram : entity work.ddr
+	port map (
+	    mem_clk => mem_clk0,
+	    mem_clk_90 => mem_clk90,
+	    reset_i => cpu_reset,
+	    app_af_cmd => app_af_cmd(0),
+	    app_af_addr(30 downto 0) => app_af_addr,
+	    app_af_addr(31) => '0',
+	    app_wdf_data => app_wdf_data(31 downto 0),
+	    app_wdf_wren => app_wdf_wren,
+	    app_wdf_mask_data => app_wdf_mask_data(3 downto 0),
+	    rd_data_valid => rd_data_valid,
+	    rd_data_fifo_out => rd_data_fifo_out(31 downto 0),
+
+	    ram_clk => ddr2_ck,
+	    ram_clk_n => ddr2_ck_n,
+	    ram_cke => ddr2_cke,
+	    ram_cs_n => ddr2_cs_n,
+	    ram_cmd(0) => ddr2_we_n,
+	    ram_cmd(1) => ddr2_cas_n,
+	    ram_cmd(2) => ddr2_ras_n,
+	    ram_ba => ddr2_ba,
+	    ram_addr => ddr2_a,
+	    ram_dm => ddr2_dm,
+	    ram_dqs => ddr2_dqs,
+	    ram_dq => ddr2_dq);
+
 #endif
 
     fifo_int_0 : entity work.tx_fifo_interface
@@ -631,7 +688,7 @@ begin
 	    sub_addr_strobe => mod_addr_strobe,
 	    sub_write_strobe => mod_write_strobe,
 	    sub_io_ready => mod_io_ready);
-    
+
     rx_fifo : component fifo_rx
 	port map (
 	    rst => cpu_reset,
@@ -691,6 +748,9 @@ begin
 	    clk => clk_debounce,
 	    d_in => btn2,
 	    q_out => btn2_d);
+#else
+    btn1_d <= '0';
+    btn2_d <= '0';
 #endif
 
 end toplevel_arch;
