@@ -209,7 +209,7 @@ architecture ddr_arch of ddr is
 -- DQS start		0.72 to 1.28 cycles	tDQSS
 
 #define DELAY_VAL(val) to_unsigned(val, delay_r'length) 
-    constant DDR_RESET_DELAY	    : natural := 200; -- FIXME Must be 20000
+    constant DDR_RESET_DELAY	    : natural := 20000; -- FIXME Must be 20000
     constant DDR_INIT_PRCH_DELAY    : natural := 1;
     constant DDR_INIT_EMR_DELAY	    : natural := 1;
     constant DDR_INIT_MR1_DELAY	    : natural := 1;

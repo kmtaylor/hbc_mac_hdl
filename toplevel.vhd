@@ -1,5 +1,9 @@
 #include <preprocessor/constants.vhh>
 
+#ifndef RESET_BUTTON
+#define RESET_BUTTON 0
+#endif
+
 #ifndef CLK_OUT
 #define CLK_OUT 0
 #endif
@@ -37,7 +41,10 @@ use ieee.std_logic_1164.all;
 
 entity toplevel is
     port(
-	clkin, rstbtn : in std_logic
+	clkin : in std_logic
+#if RESET_BUTTON
+	; rstbtn : in std_logic
+#endif
 	; s_data_out : out std_logic
 	; s_data_in : in std_logic
 #if CLK_OUT
@@ -153,6 +160,9 @@ architecture toplevel_arch of toplevel is
     END COMPONENT;
 
     constant RESET_DELAY : natural := 16;
+#if !RESET_BUTTON
+    signal rstbtn : std_logic;
+#endif
 
     signal io_read_strobe, io_write_strobe : std_logic;
     signal io_ready, io_addr_strobe : std_logic;
@@ -268,6 +278,10 @@ architecture toplevel_arch of toplevel is
     signal btn2_d : std_logic;
 
 begin
+
+#if !RESET_BUTTON
+    rstbtn <= '1';
+#endif
     
     cpu_reset_sync_proc : process (cpu_clk, rstbtn) begin
         if rstbtn = '0' then
@@ -304,6 +318,7 @@ begin
     mem_fifo_full <= '0';
 #endif
 
+#if XILINX_VIRTEX
     -- 100MHz XTal to 42MHz PLL
     core_pll : entity work.pll_core
 	port map (
@@ -320,10 +335,8 @@ begin
 	    RST_IN => '0',
 	    CLKOUT0_OUT => mem_clk0,
 	    CLKOUT1_OUT => mem_clk90,
-#if USE_MIG	    
 	    CLKOUT2_OUT => mem_clkdiv0,
 	    CLKOUT3_OUT => mem_clk200,
-#endif
 	    LOCKED_OUT => mem_pll_locked);
 
 #if USE_PAR_USB
@@ -359,6 +372,30 @@ begin
 	    CLK90_OUT => serial_clk_90,
 	    LOCKED_OUT => serial_dcm_locked);
 #endif
+#endif /* -- XILINX_VIRTEX */
+
+#if XILINX_SPARTAN
+    -- 62.5MHz XTal to 100MHz PLL
+    mem_pll : entity work.pll_mem
+	port map (
+	    CLKIN1_IN => clkin,
+	    RST_IN => '0',
+	    CLKOUT0_OUT => mem_clk0,
+	    CLKOUT1_OUT => mem_clk90,
+	    LOCKED_OUT => pll_locked);
+
+    mem_pll_locked <= '1';
+    cpu_dcm_locked <= '1';
+
+    -- 100MHz to 42MHz PLL serial clock for TX
+    serial_clk_pll : entity work.pll_serial
+	port map (
+	    CLKIN1_IN => mem_clk0,
+	    RST_IN => '0',
+	    CLKOUT0_OUT => serial_clk,
+	    CLKOUT1_OUT => serial_clk_90,
+	    LOCKED_OUT => serial_dcm_locked);
+#endif /* -- XILINX_SPARTAN */
 	    
 #if USE_BUTTON
     -- 125MHz cpu_clk to 6.25kHz clk for pushbutton debouncing 

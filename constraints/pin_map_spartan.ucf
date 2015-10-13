@@ -1,0 +1,118 @@
+# FS604 and FS609 UCF
+# (C) Copyright 2011 Silicon On Inspiration
+
+# Flash is M25P40
+
+#
+# DDR
+#
+
+Net ddr2_dq[0]       LOC=P5   | IOSTANDARD=SSTL2_II           | OUT_TERM=UNTUNED_50   | IN_TERM=UNTUNED_SPLIT_75;
+Net ddr2_dq[1]       LOC=P6   | IOSTANDARD=SSTL2_II           | OUT_TERM=UNTUNED_50   | IN_TERM=UNTUNED_SPLIT_75;
+Net ddr2_dq[2]       LOC=P7   | IOSTANDARD=SSTL2_II           | OUT_TERM=UNTUNED_50   | IN_TERM=UNTUNED_SPLIT_75;
+Net ddr2_dq[3]       LOC=P8   | IOSTANDARD=SSTL2_II           | OUT_TERM=UNTUNED_50   | IN_TERM=UNTUNED_SPLIT_75;
+Net ddr2_dq[4]       LOC=P9   | IOSTANDARD=SSTL2_II           | OUT_TERM=UNTUNED_50   | IN_TERM=UNTUNED_SPLIT_75;
+Net ddr2_dq[5]       LOC=P10  | IOSTANDARD=SSTL2_II           | OUT_TERM=UNTUNED_50   | IN_TERM=UNTUNED_SPLIT_75;
+Net ddr2_dq[6]       LOC=P11  | IOSTANDARD=SSTL2_II           | OUT_TERM=UNTUNED_50   | IN_TERM=UNTUNED_SPLIT_75;
+Net ddr2_dq[7]       LOC=P12  | IOSTANDARD=SSTL2_II           | OUT_TERM=UNTUNED_50   | IN_TERM=UNTUNED_SPLIT_75;
+Net ddr2_dq[8]       LOC=P35  | IOSTANDARD=SSTL2_II           | OUT_TERM=UNTUNED_50   | IN_TERM=UNTUNED_SPLIT_75;
+Net ddr2_dq[9]       LOC=P33  | IOSTANDARD=SSTL2_II           | OUT_TERM=UNTUNED_50   | IN_TERM=UNTUNED_SPLIT_75;
+Net ddr2_dq[10]      LOC=P32  | IOSTANDARD=SSTL2_II           | OUT_TERM=UNTUNED_50   | IN_TERM=UNTUNED_SPLIT_75;
+Net ddr2_dq[11]      LOC=P30  | IOSTANDARD=SSTL2_II           | OUT_TERM=UNTUNED_50   | IN_TERM=UNTUNED_SPLIT_75;
+Net ddr2_dq[12]      LOC=P29  | IOSTANDARD=SSTL2_II           | OUT_TERM=UNTUNED_50   | IN_TERM=UNTUNED_SPLIT_75;
+Net ddr2_dq[13]      LOC=P27  | IOSTANDARD=SSTL2_II           | OUT_TERM=UNTUNED_50   | IN_TERM=UNTUNED_SPLIT_75;
+Net ddr2_dq[14]      LOC=P26  | IOSTANDARD=SSTL2_II           | OUT_TERM=UNTUNED_50   | IN_TERM=UNTUNED_SPLIT_75;
+Net ddr2_dq[15]      LOC=P23  | IOSTANDARD=SSTL2_II           | OUT_TERM=UNTUNED_50   | IN_TERM=UNTUNED_SPLIT_75;
+
+Net ddr2_dqs[0]      LOC=P14  | IOSTANDARD=SSTL2_II           | OUT_TERM=UNTUNED_50   | IN_TERM=UNTUNED_SPLIT_75;
+Net ddr2_dqs[1]      LOC=P22  | IOSTANDARD=SSTL2_II           | OUT_TERM=UNTUNED_50   | IN_TERM=UNTUNED_SPLIT_75;
+
+Net ddr2_dm[0]       LOC=P2   | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+Net ddr2_dm[1]       LOC=P21  | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+
+Net ddr2_a[0]        LOC=P132 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+Net ddr2_a[1]        LOC=P131 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+Net ddr2_a[2]        LOC=P127 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+Net ddr2_a[3]        LOC=P126 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+Net ddr2_a[4]        LOC=P111 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+Net ddr2_a[5]        LOC=P112 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+Net ddr2_a[6]        LOC=P114 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+Net ddr2_a[7]        LOC=P115 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+Net ddr2_a[8]        LOC=P116 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+Net ddr2_a[9]        LOC=P117 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+Net ddr2_a[10]       LOC=P133 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;  # A10 is also Precharge
+Net ddr2_a[11]       LOC=P121 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+Net ddr2_a[12]       LOC=P123 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+#Net ddr2_a[13]       LOC=P124 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+
+Net ddr2_ba[0]       LOC=P138 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+Net ddr2_ba[1]       LOC=P137 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+
+Net ddr2_cs_n        LOC=P139 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+Net ddr2_ras_n       LOC=P140 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;	# RAS
+Net ddr2_cas_n       LOC=P141 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;	# CAS
+Net ddr2_we_n        LOC=P142 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;	# WE
+
+Net ddr2_cke         LOC=P15  | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
+Net ddr2_ck          LOC=P17  | IOSTANDARD=SSTL2_I;
+Net ddr2_ck_n        LOC=P16  | IOSTANDARD=SSTL2_I;
+
+#
+# LED
+#
+
+#Net LED         LOC=P118  | IOSTANDARD=LVCMOS25 | SLEW=QUIETIO | DRIVE=16;
+
+#
+# Clocks
+#
+
+# FIXME: Reset pin - Use SWD pins
+Net clkin         LOC=P94  | IOSTANDARD=LVCMOS25 | PULLUP;
+#Net XCLK        LOC=P92  | IOSTANDARD=LVCMOS25 | PULLUP;
+
+#
+# Pin out of 64 way expansion connector
+#
+
+Net s_data_out	    LOC=P105; # X2
+#Net X4		    LOC=P104;
+#Net X6		    LOC=P102;
+#Net X8		    LOC=P101;
+#Net X10	    LOC=P100;
+#Net X12	    LOC=P99;
+#Net X14	    LOC=P98;
+#Net X16	    LOC=P97;
+#Net X18	    LOC=P88;
+#Net s_data_out_2   LOC=P87; # X20
+#Net X24	    LOC=P85;
+Net s_data_in       LOC=P84; # X26
+#Net X28	    LOC=P83;
+#Net X30	    LOC=P82;
+#Net X32	    LOC=P81;
+#Net X34	    LOC=P80;
+#Net X36	    LOC=P79;
+#Net X38	    LOC=P78;
+#Net X40	    LOC=P75;
+#Net X42	    LOC=P74;
+
+#Net X44	    LOC=P67;
+#Net X46	    LOC=P66;
+#Net X48	    LOC=P62;
+#Net X50	    LOC=P61;
+#Net X52	    LOC=P58;
+#Net X54	    LOC=P57;
+#Net swdck	    LOC=P56; # X56
+#Net X58	    LOC=P55;
+#Net hbc_ctrl_sclk  LOC=P51; # X60
+#Net hbc_data_sclk  LOC=P50; # X62
+
+#Net X35	    LOC=P40;
+#Net X37	    LOC=P41;
+#Net xres	    LOC=P43; # X43
+#Net swdio	    LOC=P44; # X45
+#Net hbc_ctrl_miso  LOC=P45; # X51
+#Net hbc_ctrl_mosi  LOC=P46; # X53
+#Net hbc_data_miso  LOC=P48; # X59
+#Net hbc_data_mosi  LOC=P47; # X61
+
