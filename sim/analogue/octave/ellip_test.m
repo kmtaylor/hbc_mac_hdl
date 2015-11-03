@@ -1,5 +1,5 @@
 
-internal_params = 1;
+internal_params = 0;
 
 if internal_params == 1
     % Design parameters

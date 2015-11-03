@@ -54,6 +54,9 @@
 
 #define CONST_HEX_RX_FIFO_ADDR		20
 
+#define CONST_HEX_SPI_DATA_ADDR		24
+#define CONST_HEX_SPI_CTRL_ADDR		25
+
 /* ----------------------- Module IRQ Map --------------------------------- */
 #define CONST_INT_IRQ_BUTTON		0
 #define CONST_INT_IRQ_FIFO_FULL		1

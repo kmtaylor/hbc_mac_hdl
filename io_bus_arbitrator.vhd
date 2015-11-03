@@ -26,7 +26,10 @@ entity io_bus_arbitrator is
 		bus6_ready	: in std_logic;
 		
 		bus7_d_in	: in std_logic_vector (31 downto 0);
-		bus7_ready	: in std_logic);
+		bus7_ready	: in std_logic;
+		
+		bus8_d_in	: in std_logic_vector (31 downto 0);
+		bus8_ready	: in std_logic);
 end io_bus_arbitrator;
 
 architecture io_bus_arbitrator_arch of io_bus_arbitrator is
@@ -60,6 +63,9 @@ begin
 			io_ready <= '1';
 		elsif bus7_ready = '1' then
 			io_d_out <= bus7_d_in;
+			io_ready <= '1';
+		elsif bus8_ready = '1' then
+			io_d_out <= bus8_d_in;
 			io_ready <= '1';
 		else
 			io_d_out <= (others => 'Z');

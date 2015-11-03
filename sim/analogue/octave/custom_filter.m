@@ -62,12 +62,13 @@ elseif plot_spectrum == 1
     plot(f, input_f, f, output_sim_f, f, mask);
 elseif plot_freqs == 1
     h_db = 20*log10(abs(freqs(g * real(num), real(den), 2*pi*f)));
+h_db = h_db - max(h_db);
     load("../v_filter_out.octave");
 %    output_f = input_f + h_db;
     output_f = input_f + 20*log10(abs(v_filter_out));
     output_f = output_f - max(output_f);
     %plot(f, input_f, f, output_f, f, mask, f, h_db);
-    plot(f, output_f, f, mask, f, h_db, f_spice, 20*log10(abs(v_filter_out)));
+    plot(f(1:1:numel(f)), output_f(1:1:numel(output_f)), f, mask, f, h_db, f_spice, 20*log10(abs(v_filter_out)));
   %  plot(f, output_f, f, mask, f_spice, 20*log10(abs(v_filter_out)));
 %    plot(f, mask, f, h_db, f_spice, 20*log10(v_filter_out));
     axis([0, 42e6, -130, 0]);

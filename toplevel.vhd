@@ -20,6 +20,10 @@
 #define USE_LCD 0
 #endif
 
+#ifndef USE_SPI
+#define USE_SPI 0
+#endif
+
 #ifndef USE_BUTTON
 #define USE_BUTTON 0
 #endif
@@ -96,6 +100,14 @@ entity toplevel is
 	; UsbRD	    : out std_logic
 	; UsbPktEnd : out std_logic
 	; UsbDB	    : inout std_logic_vector (7 downto 0)
+#endif
+#if USE_SPI
+	; hbc_ctrl_sclk : in std_logic
+	; hbc_ctrl_mosi : in std_logic
+	; hbc_ctrl_miso : out std_logic
+	; hbc_data_sclk : in std_logic
+	; hbc_data_mosi : in std_logic
+	; hbc_data_miso : out std_logic
 #endif
 	);
 end toplevel;
@@ -186,6 +198,8 @@ architecture toplevel_arch of toplevel is
     signal bus6_ready : std_logic;
     signal bus7_data : std_logic_vector (31 downto 0);
     signal bus7_ready : std_logic;
+    signal bus8_data : std_logic_vector (31 downto 0);
+    signal bus8_ready : std_logic;
     
     -- Internal memory signals
     signal phy_init_done    : std_logic;
@@ -493,7 +507,9 @@ begin
 	    bus6_d_in => (others => '0'),
 	    bus6_ready => bus6_ready,
 	    bus7_d_in => bus7_data,
-	    bus7_ready => bus7_ready);
+	    bus7_ready => bus7_ready,
+	    bus8_d_in => bus8_data,
+	    bus8_ready => bus8_ready);
 	    
     mem_if : entity work.mem_interface
 	port map (
@@ -772,6 +788,24 @@ begin
 	    io_ready => bus7_ready,
 	    fifo_d_in => from_rx_fifo,
 	    fifo_rden => rx_fifo_rden);
+
+#if USE_SPI
+    spi_hbc : entity work.spi_interface
+	port map (
+	    clk => cpu_clk,
+	    reset => cpu_reset,
+	    io_addr => io_address (7 downto 0),
+	    io_d_out => bus8_data,
+	    io_addr_strobe => io_addr_strobe,
+	    io_read_strobe => io_read_strobe,
+	    io_ready => bus8_ready,
+	    hbc_data_sclk => hbc_data_sclk,
+	    hbc_data_mosi => hbc_data_mosi,
+	    hbc_data_miso => hbc_data_miso,
+	    hbc_ctrl_sclk => hbc_ctrl_sclk,
+	    hbc_ctrl_mosi => hbc_ctrl_mosi,
+	    hbc_ctrl_miso => hbc_ctrl_miso);
+#endif
 
 #if USE_BUTTON
     db_btn1 : entity work.debounce

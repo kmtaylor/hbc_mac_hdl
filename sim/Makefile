@@ -31,14 +31,14 @@ RECEIVER_TB_FILES += \
 	rx_fifo_interface.vhd \
 	hamming_lut.vhd \
 	receiver_tb.vhd
-#RECEIVER_SIM_FLAGS += --stop-time=2ms
-RECEIVER_SIM_FLAGS += --stop-time=200us
+RECEIVER_SIM_FLAGS += --stop-time=2ms
+#RECEIVER_SIM_FLAGS += --stop-time=200us
 
 TRANSMITTER_TB_FILES += \
 	walsh_enc_lut.vhd \
 	modulator.vhd \
 	parallel_to_serial.vhd \
-	fifo_interface.vhd \
+	tx_fifo_interface.vhd \
 	fifo_tx_sim.vhd \
 	transmitter_tb.vhd
 TRANSMITTER_SIM_FLAGS += --stop-time=2000us

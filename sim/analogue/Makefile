@@ -46,7 +46,7 @@ spice_to_octave: spice_to_octave.c
 	$(eval base_name = 	$(notdir $(basename $@)))
 	$(eval net_name = 	$(subst i_,i$(L_PAREN), \
 				$(subst v_,v$(L_PAREN),$(base_name)))$(R_PAREN))
-	./spice_to_octave "$(net_name)" $@ $(base_name)
+	./spice_to_octave $(PROJECT).raw "$(net_name)" $@ $(base_name)
 
 $(GHDL_RX_DATA): spice_to_ghdl $(PROJECT).raw
 	./spice_to_ghdl $(GHDL_RX_NODE) $(notdir $(basename $@))

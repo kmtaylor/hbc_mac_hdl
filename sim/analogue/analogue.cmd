@@ -14,11 +14,17 @@
 *.OPTIONS METHOD=GEAR
 *.OPTIONS ACCURATE=1 GMIN=1e-9
 
-.SAVE v(filter_in) v(filter_out)
-.SAVE v(filter_out_100) v(filter_out_200) v(filter_out_300) v(filter_out_400)
-.SAVE v(filter_out_400_att) v(filter_out_100_att) v(filter_in_att)
-.SAVE v(rx_data)
+* Remove the .SAVE commands when doing a sensitivity analysis
+*.SAVE v(filter_in) v(filter_out)
+*.SAVE v(filter_out_100) v(filter_out_200) v(filter_out_300) v(filter_out_400)
+*.SAVE v(filter_out_400_att) v(filter_out_100_att) v(filter_in_att)
+*.SAVE v(rx_data)
 
-.TRAN 1n 200u
+* Set V_TX to "external"
+* Filter testing
+*.TRAN 1n 200u
+* Packet testing
 *.TRAN 1n 2000u
+* Set V_TX to "AC 1.25 DC 1.25"
 *.AC LIN 100K 5K 500Meg
+.SENS v(filter_out) AC LIN 1000 5K 100Meg

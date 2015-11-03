@@ -30,9 +30,9 @@ tr_func_hpf = tr_func;
 if lpf_first == 1
     output_sim_lpf = lsim(tr_func_lpf, input_int, time);
     output_sim_hpf = lsim(tr_func_hpf, output_sim_lpf, time);
-    plot(time, input_int, time, output_sim_hpf);
+    plot(time, input_int, ":", time, output_sim_hpf);
     axis([3.5321e-06   4.0226e-06  -1  1]); eng_axis;
-%    return;
+    return;
     output_sim_f = 20*log10(abs(fft(output_sim_hpf)(2:fft_points)));
     output_sim_f = output_sim_f - max(output_sim_f);
     plot(f, input_f, f, output_sim_f, f, mask);

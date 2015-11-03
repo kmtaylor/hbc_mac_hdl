@@ -94,13 +94,13 @@ int main(int argc, char **argv) {
     WaveVar *var;
     double time, val, im_val;
 
-    if (argc < 4) {
-	printf("Usage: spice_to_octave net_name "
+    if (argc < 5) {
+	printf("Usage: spice_to_octave input_file net_name "
 		"octave_file_name octave_var_name\n");
 	return 1;
     }
 
-    wf = wf_read(FILENAME_STR, NULL);
+    wf = wf_read(argv[1], NULL);
     printf("Number of tables: %i\n", wf->wf_ntables);
 
     table = wf_wtable(wf, 0);
@@ -108,18 +108,18 @@ int main(int argc, char **argv) {
     printf("Independent variable: %s\n", table->iv->sv->name);
     printf("%i dependent variables\n", table->wt_ndv); 
 
-    var = wf_find_variable(wf, argv[1], 0);
+    var = wf_find_variable(wf, argv[2], 0);
 
     if (!var) {
-	printf("Variable %s not found\n", argv[1]);
+	printf("Variable %s not found\n", argv[2]);
 	return 1;
     }
     if (var->wv_ncols == 2) complex_data = 1;
     printf("Found %s var: %s\n", 
 		    complex_data ? "complex" : "real", var->wv_name);
 
-    if (octave_open_file(argv[2]) < 0) {
-	printf("Couldn't open %s for writing\n", argv[2]);
+    if (octave_open_file(argv[3]) < 0) {
+	printf("Couldn't open %s for writing\n", argv[3]);
 	return 1;
     }
 
@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
 
     wf_free(wf);
 
-    octave_dump_vals(argv[3]);
+    octave_dump_vals(argv[4]);
 
     return 0;
 }

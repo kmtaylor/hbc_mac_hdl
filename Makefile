@@ -1,4 +1,4 @@
-VHHFLAGS ?= -DXILINX_SPARTAN=1 -DUSE_MEM=1
+VHHFLAGS ?= -DXILINX_SPARTAN=1 -DUSE_MEM=1 -DUSE_SPI=1
 
 TRANSCEIVER_FILES += \
 	processed/clk_div_pp.vhd					\
@@ -21,12 +21,17 @@ TRANSCEIVER_FILES += \
 	processed/toplevel_pp.vhd					\
 	processed/usb_fifo_interface_pp.vhd				\
 	processed/walsh_decoder_pp.vhd					\
-	processed/walsh_enc_lut_pp.vhd
+	processed/walsh_enc_lut_pp.vhd					\
+	processed/spi_slave_core_pp.vhd					\
+	processed/spi_interface_pp.vhd
 
 all: $(TRANSCEIVER_FILES)
 
 # Preprocessing
 %_pp.vhd: ../%.vhd
+	cpp $(VHHFLAGS) -DVHDL -D_QUOTE=\" -x assembler-with-cpp \
+		-P -I ./ "$<" -o "$@"
+%_core_pp.vhd: ../cores/%.vhd
 	cpp $(VHHFLAGS) -DVHDL -D_QUOTE=\" -x assembler-with-cpp \
 		-P -I ./ "$<" -o "$@"
 
