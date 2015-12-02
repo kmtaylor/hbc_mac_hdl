@@ -14,6 +14,8 @@ package bits is
 	return std_logic_vector;
     function pad(in_val : std_logic_vector; length : natural)
 	return std_logic_vector;
+    function concat_bit(vector : std_logic_vector; bit : std_logic)
+	return std_logic_vector;
 end package bits;
 
 package body bits is
@@ -97,5 +99,11 @@ package body bits is
         retval(in_val'length-1 downto 0) := in_val;
         return retval;
     end function pad;
+
+    function concat_bit(vector : std_logic_vector; bit : std_logic)
+	return std_logic_vector is
+    begin
+	return vector(vector'length-2 downto 0) & bit;
+    end function concat_bit;
  
 end package body bits;

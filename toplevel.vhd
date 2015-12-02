@@ -12,8 +12,12 @@
 #define USE_SWITCH 0
 #endif
 
-#ifndef USE_LED
-#define USE_LED 0
+#ifndef USE_8BIT_LED
+#define USE_8BIT_LED 0
+#endif
+
+#ifndef USE_1BIT_LED
+#define USE_1BIT_LED 0
 #endif
 
 #ifndef USE_LCD
@@ -57,8 +61,11 @@ entity toplevel is
 #if USE_SWITCH
 	; sw : in std_logic_vector (7 downto 0)
 #endif
-#if USE_LED
+#if USE_8BIT_LED
 	; Led : out std_logic_vector (7 downto 0)
+#endif
+#if USE_1BIT_LED
+	; Led : out std_logic
 #endif
 #if USE_LCD
 	; LCDD : inout std_logic_vector (7 downto 0)
@@ -109,6 +116,11 @@ entity toplevel is
 	; hbc_data_mosi : in std_logic
 	; hbc_data_miso : out std_logic
 #endif
+#if USE_PSOC
+	; psoc_swdio : inout std_logic
+	; psoc_swdck : out std_logic
+	; psoc_reset : out std_logic
+#endif
 	);
 end toplevel;
 
@@ -126,11 +138,11 @@ architecture toplevel_arch of toplevel is
 	    IO_Read_Data : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 	    IO_Ready : IN STD_LOGIC;
 	    GPO1 : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
-#if USE_LED
+#if USE_8BIT_LED | USE_PSOC
 	    GPO2 : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
 #endif
 	    GPI1 : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-#if USE_SWITCH
+#if USE_SWITCH | USE_PSOC
 	    GPI2 : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
 #endif
 	    INTC_Interrupt : IN STD_LOGIC_VECTOR(15 DOWNTO 0)
@@ -288,6 +300,10 @@ architecture toplevel_arch of toplevel is
     signal serial_dcm_locked : std_logic;
     signal cpu_dcm_locked : std_logic;
 
+    signal psoc_write : std_logic;
+    signal psoc_gpi : std_logic;
+    signal psoc_gpo : std_logic;
+
     signal btn1_d : std_logic;
     signal btn2_d : std_logic;
 
@@ -301,7 +317,7 @@ begin
         if rstbtn = '0' then
             c_reset_shift_r <= (others => '1');
         elsif cpu_clk'event and cpu_clk = '1' then
-            c_reset_shift_r <= c_reset_shift_r(RESET_DELAY-2 downto 0) & '0';
+	    c_reset_shift_r <= shift_left(c_reset_shift_r, 1);
         end if;
     end process cpu_reset_sync_proc;
 
@@ -311,7 +327,7 @@ begin
         if rstbtn = '0' then
             s_reset_shift_r <= (others => '1');
         elsif serial_clk'event and serial_clk = '1' then
-            s_reset_shift_r <= s_reset_shift_r(RESET_DELAY-2 downto 0) & '0';
+	    s_reset_shift_r <= shift_left(s_reset_shift_r, 1);
         end if;
     end process serial_reset_sync_proc;
 
@@ -432,16 +448,29 @@ begin
 #if USE_SWITCH
 	    GPI2 => sw,
 #endif
-	    GPO1 (0) => parallel_to_serial_enable,
-	    GPO1 (1) => usb_pkt_end,
-	    GPO1 (2) => reseed,
-	    GPO1 (3) => seed_val,
-	    GPO1 (4) => seed_clk,
-	    GPO1 (5) => tx_fifo_flush,
-	    GPO1 (6) => s2p_pkt_ack,
+	    GPO1 (GPO(1, P2S_ENABLE)) => parallel_to_serial_enable,
+	    GPO1 (GPO(1, USB_PKT_END)) => usb_pkt_end,
+	    GPO1 (GPO(1, RESEED)) => reseed,
+	    GPO1 (GPO(1, SEED_VAL)) => seed_val,
+	    GPO1 (GPO(1, SEED_CLK)) => seed_clk,
+	    GPO1 (GPO(1, TX_FLUSH)) => tx_fifo_flush,
+	    GPO1 (GPO(1, S2P_PKT_ACK)) => s2p_pkt_ack,
+#if USE_1BIT_LED
+	    GPO1 (7) => Led,
+#else
 	    GPO1 (7) => open,
-#if USE_LED
+#endif
+#if USE_8BIT_LED
 	    GPO2 => Led,
+#endif
+#if USE_PSOC
+	    GPI2 (GPI(2, PSOC_DATA)) => psoc_gpi,
+	    GPI2 (7 downto 1) => (others => '0'),
+	    GPO2 (GPO(2, PSOC_DATA)) => psoc_gpo,
+	    GPO2 (GPO(2, PSOC_CLOCK)) => psoc_swdck,
+	    GPO2 (GPO(2, PSOC_WRITE)) => psoc_write,
+	    GPO2 (GPO(2, PSOC_RESET)) => psoc_reset,
+	    GPO2 (7 downto 4) => open,
 #endif
 	    INTC_Interrupt (INT(IRQ_BUTTON)) => btn1_d,
 	    INTC_Interrupt (INT(IRQ_FIFO_FULL)) => tx_fifo_full,
@@ -602,6 +631,15 @@ begin
 	    ram_dqs => ddr2_dqs,
 	    ram_dq => ddr2_dq);
 
+#endif
+
+#if USE_PSOC
+    psoc_interface : entity work.psoc_interface
+	port map (
+	    write => psoc_write,
+	    gpo => psoc_gpo,
+	    gpi => psoc_gpi,
+	    swdio => psoc_swdio);
 #endif
 
     fifo_int_0 : entity work.tx_fifo_interface

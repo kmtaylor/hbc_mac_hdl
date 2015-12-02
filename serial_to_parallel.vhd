@@ -120,7 +120,7 @@ begin
 	if reset_i = '1' then
 	    reset_shift_r <= (others => '1');
 	elsif serial_clk'event and serial_clk = '1' then
-	    reset_shift_r <= reset_shift_r(RESET_DELAY-2 downto 0) & '0';
+	    reset_shift_r <= shift_left(reset_shift_r, 1);
 	end if;
     end process reset_sync_proc;
 
@@ -194,7 +194,7 @@ begin
 #if EXPORT_DATA_STREAM
     process (serial_clk) begin
 	if serial_clk'event and serial_clk = '1' then
-	    stream_data <= stream_data(6 downto 0) & data_in_sync;
+	    stream_data <= concat_bit(stream_data, data_in_sync);
 	end if;
     end process;
 
@@ -261,8 +261,7 @@ begin
 		walsh_detect <= '0';
 	    else
 		if s2p_index = r_sf-1 then
-		    demod_reg <= demod_reg(COMMA_SIZE-2 downto 0) &
-				current_phase;
+		    demod_reg <= concat_bit(demod_reg, current_phase);
 		    if walsh_detect_i = '1' then
 			if walsh_count = WALSH_CODE_SIZE-1 then
 			    walsh_detect <= '1';
@@ -426,8 +425,7 @@ begin
 		phase_changes <= (others => '0');
 	    else
 		-- Detect packet ending by receiving 8 by phase_change = '1'
-		phase_changes <= phase_changes(PKT_END_THRESH-2 downto 0) & 
-				    phase_change;
+		phase_changes <= concat_bit(phase_changes, phase_change);
 		if chk_pkt_end = '1' then
 		    if phase_changes = ones(phase_changes'length) then
 			pkt_end <= '1';

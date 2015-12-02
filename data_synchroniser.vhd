@@ -13,11 +13,8 @@ use transceiver.bits.all;
     -- sequence of use_0, use_90, use_180, use_270 in order (or reverse order)
     -- A possible work around is to require n consecutive counts of each 
     -- phase_hold.
-    -- That means that we only shift the delay time after seeing all four phases
-    -- for a significant amount of time. Defining significant may require some
-    -- experimentation. These counts should be reset when a successful delay
-    -- shift is done.
-#define SLOW_SHIFT 0
+    -- Should be 2^n
+#define SLOW_SHIFT 32
 
 entity data_synchroniser is
 	port (
@@ -55,6 +52,7 @@ architecture data_synchroniser_arch of data_synchroniser is
     signal use_180, use_180_hold : std_logic;
     signal use_270, use_270_hold : std_logic;
 
+    -- Only used for double shifting, optimised away otherwise
     signal previous_shift : std_logic;
     signal delay_time : unsigned (bits_for_val(WRAP_REG_SIZE-1)-1 downto 0);
 
@@ -64,15 +62,13 @@ architecture data_synchroniser_arch of data_synchroniser is
     signal delay_d_270 : std_logic_vector (1 downto 0);
 
 #if SLOW_SHIFT
-    constant VALID_COUNT : natural := 8;
     signal use_0_valid, use_90_valid, use_180_valid, use_270_valid : std_logic;
-    signal use_0_valid_sum : std_logic_vector (VALID_COUNT-1 downto 0);
-    signal use_90_valid_sum : std_logic_vector (VALID_COUNT-1 downto 0);
-    signal use_180_valid_sum : std_logic_vector (VALID_COUNT-1 downto 0);
-    signal use_270_valid_sum : std_logic_vector (VALID_COUNT-1 downto 0);
-    signal shift_valid : std_logic;
-#endif
+    signal use_0_valid_sum : unsigned (bits_for_val(SLOW_SHIFT-1)-1 downto 0);
+    signal use_90_valid_sum : unsigned (bits_for_val(SLOW_SHIFT-1)-1 downto 0);
+    signal use_180_valid_sum : unsigned (bits_for_val(SLOW_SHIFT-1)-1 downto 0);
+    signal use_270_valid_sum : unsigned (bits_for_val(SLOW_SHIFT-1)-1 downto 0);
     signal reset_valid : std_logic;
+#endif
 
 begin
 
@@ -115,10 +111,10 @@ begin
     -- shorter or longer delay whenever we wrap from 0 to 270 or vice versa.
     wrap_delay : process (serial_clk) begin
 	if serial_clk'event and serial_clk = '1' then
-	    d_0_wrap <= d_0_wrap(WRAP_REG_SIZE-2 downto 0) & d_0(1);
-	    d_90_wrap <= d_90_wrap(WRAP_REG_SIZE-2 downto 0) & d_90(1);
-	    d_180_wrap <= d_180_wrap(WRAP_REG_SIZE-2 downto 0) & d_180(1);
-	    d_270_wrap <= d_270_wrap(WRAP_REG_SIZE-2 downto 0) & d_270(1);
+	    d_0_wrap <= concat_bit(d_0_wrap, d_0(1));
+	    d_90_wrap <= concat_bit(d_90_wrap, d_90(1));
+	    d_180_wrap <= concat_bit(d_180_wrap, d_180(1));
+	    d_270_wrap <= concat_bit(d_270_wrap, d_270(1));
 	end if;
     end process wrap_delay;
 
@@ -179,7 +175,15 @@ begin
 		use_90_hold <= '0';
 		use_180_hold <= '0';
 		use_270_hold <= '0';
-#if DOUBLE_SHIFT
+#if SLOW_SHIFT
+		reset_valid <= '0';
+	    elsif reset_valid = '1' then
+		reset_valid <= '0';
+#endif
+#if SLOW_SHIFT
+	    elsif (use_0_valid or use_90_valid or 
+		    use_180_valid or use_270_valid) = '1' then
+#elif DOUBLE_SHIFT
 	    elsif (use_0 or use_90 or use_180 or use_270) = '1' then
 #else
 	    -- Don't allow double shifts
@@ -188,52 +192,58 @@ begin
 		(use_180 and not use_0_hold) or
 		(use_270 and not use_90_hold)) = '1' then
 #endif
+#if SLOW_SHIFT
+		use_0_hold <= use_0_valid;
+		use_90_hold <= use_90_valid;
+		use_180_hold <= use_180_valid;
+		use_270_hold <= use_270_valid;
+		reset_valid <= '1';
+#else
 		use_0_hold <= use_0;
 		use_90_hold <= use_90;
 		use_180_hold <= use_180;
 		use_270_hold <= use_270;
+#endif
 	    end if;
 	end if;
     end process hold_phase;
 
 
 #if SLOW_SHIFT
-    acc_phase : process (serial_clk) begin
-	if serial_clk'event and serial_clk = '1' then
-	    use_0_valid_sum <=	    use_0_valid_sum(VALID_COUNT-2 downto 0) & 
-				    use_0_hold;
-	    use_90_valid_sum <=	    use_90_valid_sum(VALID_COUNT-2 downto 0) & 
-				    use_90_hold;
-	    use_180_valid_sum <=    use_180_valid_sum(VALID_COUNT-2 downto 0) & 
-				    use_180_hold;
-	    use_270_valid_sum <=    use_270_valid_sum(VALID_COUNT-2 downto 0) & 
-				    use_270_hold;
-	end if;
-    end process acc_phase;
-
     phase_valid : process (serial_clk) begin
 	if serial_clk'event and serial_clk = '1' then
-	    if reset_valid = '1' or reset = '1' then
+	    if (reset_valid or reset) = '1' then
 		use_0_valid <= '0';
 		use_90_valid <= '0';
 		use_180_valid <= '0';
 		use_270_valid <= '0';
+		use_0_valid_sum <= (others => '0');
+		use_90_valid_sum <= (others => '0');
+		use_180_valid_sum <= (others => '0');
+		use_270_valid_sum <= (others => '0');
 	    else
-		if use_0_valid_sum = ones(VALID_COUNT) then
+		if use_0 = '1' then
+		    use_0_valid_sum <= use_0_valid_sum + 1;
+		elsif use_90 = '1' then
+		    use_90_valid_sum <= use_90_valid_sum + 1;
+		elsif use_180 = '1' then
+		    use_180_valid_sum <= use_180_valid_sum + 1;
+		elsif use_270 = '1' then
+		    use_270_valid_sum <= use_270_valid_sum + 1;
+		end if;
+
+		if use_0_valid_sum = SLOW_SHIFT-1 then
 		    use_0_valid <= '1';
-		elsif use_90_valid_sum = ones(VALID_COUNT) then
+		elsif use_90_valid_sum = SLOW_SHIFT-1 then
 		    use_90_valid <= '1';
-		elsif use_180_valid_sum = ones(VALID_COUNT) then
+		elsif use_180_valid_sum = SLOW_SHIFT-1 then
 		    use_180_valid <= '1';
-		elsif use_270_valid_sum = ones(VALID_COUNT) then
+		elsif use_270_valid_sum = SLOW_SHIFT-1 then
 		    use_270_valid <= '1';
 		end if;
 	    end if;
 	end if;
     end process phase_valid;
-
-    shift_valid <=  use_0_valid and use_90_valid and 
-		    use_180_valid and use_270_valid;
 #endif
 
     wrap_detect : process(serial_clk, reset) begin
@@ -242,29 +252,21 @@ begin
 		-- On packet reset, initialise the delay to the centre of 
 		-- the array.
 		delay_time <= to_unsigned(WRAP_REG_SIZE/2, delay_time'length);
+#if SLOW_SHIFT
+	    elsif (use_270_hold and use_0_valid) = '1' then
+#else
 	    elsif (use_270_hold and use_0) = '1' then
-#if SLOW_SHIFT
-		if shift_valid = '1' then
-		    delay_time <= delay_time - 1;
-		    previous_shift <= '0';
-		    reset_valid <= '1';
-		end if;
+#endif
 		previous_shift <= '0';
-#else
 		delay_time <= delay_time - 1;
-#endif
-	    elsif (use_0_hold and use_270) = '1' then
 #if SLOW_SHIFT
-		if shift_valid = '1' then
-		    delay_time <= delay_time + 1;
-		    previous_shift <= '1';
-		    reset_valid <= '1';
-		end if;
-		previous_shift <= '1';
+	    elsif (use_0_hold and use_270_valid) = '1' then
 #else
-		delay_time <= delay_time + 1;
+	    elsif (use_0_hold and use_270) = '1' then
 #endif
-#if DOUBLE_SHIFT
+		previous_shift <= '1';
+		delay_time <= delay_time + 1;
+#if DOUBLE_SHIFT && !SLOW_SHIFT
 	    elsif ( (use_0_hold and use_90) or
 		    (use_90_hold and use_180) or
 		    (use_180_hold and use_270) ) = '1' then
@@ -285,8 +287,6 @@ begin
 		    delay_time <= delay_time + 1;
 		end if;
 #endif
-	    else
-		reset_valid <= '0';
 	    end if;
 	end if;
     end process wrap_detect;

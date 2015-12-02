@@ -131,8 +131,7 @@ begin
 	    if serial_clk'event and serial_clk = '1' then
 		if s2p_align_index = i then
 		    demod_regs(wrap(i)) <= 
-			    demod_regs(wrap(i))(COMMA_SIZE-2 downto 0) &
-			    current_phase(wrap(i));
+			concat_bit(demod_regs(wrap(i)), current_phase(wrap(i)));
 		end if;
 	    end if;
 	end process early_demodulate;

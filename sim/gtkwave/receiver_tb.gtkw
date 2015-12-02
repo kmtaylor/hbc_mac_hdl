@@ -1,24 +1,24 @@
 [*]
 [*] GTKWave Analyzer v3.3.45 (w)1999-2012 BSI
-[*] Thu May 28 03:55:52 2015
+[*] Wed Dec  2 08:13:54 2015
 [*]
 [dumpfile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/receiver_tb.ghw"
-[dumpfile_mtime] "Thu May 28 03:54:06 2015"
-[dumpfile_size] 147842449
+[dumpfile_mtime] "Wed Dec  2 08:13:11 2015"
+[dumpfile_size] 145032014
 [savefile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/gtkwave/receiver_tb.gtkw"
 [timestart] 0
 [size] 1680 1024
-[pos] 1919 -28
-*-39.000000 252000000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] -1 -1
+*-37.000000 165286980000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] top.
 [treeopen] top.receiver_tb.
 [treeopen] top.receiver_tb.s_to_p.phase_aligner.
 [treeopen] top.receiver_tb.s_to_p.phase_aligner.demod_regs.
-[treeopen] top.receiver_tb.sync_2.
+[treeopen] top.receiver_tb.sync.
 [sst_width] 224
 [signals_width] 379
 [sst_expanded] 1
-[sst_vpaned_height] 289
+[sst_vpaned_height] 290
 @28
 top.receiver_tb.clk
 top.receiver_tb.serial_clk
@@ -33,23 +33,31 @@ top.receiver_tb.s_data_sync_2
 -
 ---------Sync 1----------
 @28
-top.receiver_tb.sync.use_0_hold
-top.receiver_tb.sync.use_90_hold
-top.receiver_tb.sync.use_180_hold
-top.receiver_tb.sync.use_270_hold
-@200
--
+top.receiver_tb.sync.use_0
+top.receiver_tb.sync.use_90
+top.receiver_tb.sync.use_180
+top.receiver_tb.sync.use_270
+@22
+#{top.receiver_tb.sync.use_0_valid_sum[6:0]} top.receiver_tb.sync.use_0_valid_sum[4] top.receiver_tb.sync.use_0_valid_sum[3] top.receiver_tb.sync.use_0_valid_sum[2] top.receiver_tb.sync.use_0_valid_sum[1] top.receiver_tb.sync.use_0_valid_sum[0]
+#{top.receiver_tb.sync.use_90_valid_sum[6:0]} top.receiver_tb.sync.use_90_valid_sum[4] top.receiver_tb.sync.use_90_valid_sum[3] top.receiver_tb.sync.use_90_valid_sum[2] top.receiver_tb.sync.use_90_valid_sum[1] top.receiver_tb.sync.use_90_valid_sum[0]
+#{top.receiver_tb.sync.use_180_valid_sum[6:0]} top.receiver_tb.sync.use_180_valid_sum[4] top.receiver_tb.sync.use_180_valid_sum[3] top.receiver_tb.sync.use_180_valid_sum[2] top.receiver_tb.sync.use_180_valid_sum[1] top.receiver_tb.sync.use_180_valid_sum[0]
+#{top.receiver_tb.sync.use_270_valid_sum[6:0]} top.receiver_tb.sync.use_270_valid_sum[4] top.receiver_tb.sync.use_270_valid_sum[3] top.receiver_tb.sync.use_270_valid_sum[2] top.receiver_tb.sync.use_270_valid_sum[1] top.receiver_tb.sync.use_270_valid_sum[0]
 @28
 top.receiver_tb.sync.use_0_valid
 top.receiver_tb.sync.use_90_valid
 top.receiver_tb.sync.use_180_valid
 @29
 top.receiver_tb.sync.use_270_valid
+@28
+top.receiver_tb.sync.use_0_hold
+top.receiver_tb.sync.use_90_hold
+top.receiver_tb.sync.use_180_hold
+top.receiver_tb.sync.use_270_hold
 @200
+-
 -
 @28
 [color] 2
-top.receiver_tb.sync.shift_valid
 top.receiver_tb.sync.reset_valid
 @24
 #{top.receiver_tb.sync.delay_time[5:0]} top.receiver_tb.sync.delay_time[5] top.receiver_tb.sync.delay_time[4] top.receiver_tb.sync.delay_time[3] top.receiver_tb.sync.delay_time[2] top.receiver_tb.sync.delay_time[1] top.receiver_tb.sync.delay_time[0]
@@ -62,15 +70,8 @@ top.receiver_tb.sync_2.use_180_hold
 top.receiver_tb.sync_2.use_270_hold
 @200
 -
-@28
-top.receiver_tb.sync_2.use_0_valid
-top.receiver_tb.sync_2.use_90_valid
-top.receiver_tb.sync_2.use_180_valid
-top.receiver_tb.sync_2.use_270_valid
-@200
 -
 @28
-top.receiver_tb.sync_2.shift_valid
 top.receiver_tb.sync_2.reset_valid
 @24
 #{top.receiver_tb.sync_2.delay_time[5:0]} top.receiver_tb.sync_2.delay_time[5] top.receiver_tb.sync_2.delay_time[4] top.receiver_tb.sync_2.delay_time[3] top.receiver_tb.sync_2.delay_time[2] top.receiver_tb.sync_2.delay_time[1] top.receiver_tb.sync_2.delay_time[0]

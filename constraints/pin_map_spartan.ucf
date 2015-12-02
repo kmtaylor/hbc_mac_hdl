@@ -61,7 +61,7 @@ Net ddr2_ck_n        LOC=P16  | IOSTANDARD=SSTL2_I;
 # LED
 #
 
-#Net LED         LOC=P118  | IOSTANDARD=LVCMOS25 | SLEW=QUIETIO | DRIVE=16;
+Net LED         LOC=P118  | IOSTANDARD=LVCMOS25 | SLEW=QUIETIO | DRIVE=16;
 
 #
 # Clocks
@@ -102,15 +102,15 @@ Net s_data_in       LOC=P84; # X26
 #Net X50	    LOC=P61;
 #Net X52	    LOC=P58;
 #Net X54	    LOC=P57;
-#Net swdck	    LOC=P56; # X56
+Net psoc_swdck	    LOC=P56; # X56
 #Net X58	    LOC=P55;
 Net hbc_ctrl_sclk  LOC=P51; # X60
 Net hbc_data_sclk  LOC=P50; # X62
 
 #Net X35	    LOC=P40;
 #Net X37	    LOC=P41;
-#Net xres	    LOC=P43; # X43
-#Net swdio	    LOC=P44; # X45
+Net psoc_reset	    LOC=P43; # X43
+Net psoc_swdio	    LOC=P44; # X45
 Net hbc_ctrl_miso  LOC=P45; # X51
 Net hbc_ctrl_mosi  LOC=P46; # X53
 Net hbc_data_miso  LOC=P48; # X59

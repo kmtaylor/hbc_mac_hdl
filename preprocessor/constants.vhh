@@ -15,6 +15,8 @@
 #endif
 
 #define INT(val) CONST_INT_##val
+#define GPO(num, val) CONST_GPO##num##_##val
+#define GPI(num, val) CONST_GPI##num##_##val
 
 /* ---------------------- IEEE 802.15.6 Constants ------------------------- */
 #define CONST_HEX_PREAMBLE		C4CA5018FAE4B982
@@ -73,3 +75,19 @@
 #define CONST_INT_IRQ_USB_EN		12
 #define CONST_INT_IRQ_USB_EMPTY         13
 #define CONST_INT_IRQ_BUTTON_2		14
+
+/* ----------------------- GPIO Mapping ------------------------------------*/
+#define CONST_GPO1_P2S_ENABLE		0
+#define CONST_GPO1_USB_PKT_END		1
+#define CONST_GPO1_RESEED		2
+#define CONST_GPO1_SEED_VAL		3
+#define CONST_GPO1_SEED_CLK		4
+#define CONST_GPO1_TX_FLUSH		5
+#define CONST_GPO1_S2P_PKT_ACK		6
+
+#define CONST_GPO2_PSOC_DATA		0
+#define CONST_GPO2_PSOC_CLOCK		1
+#define CONST_GPO2_PSOC_WRITE		2
+#define CONST_GPO2_PSOC_RESET		3
+
+#define CONST_GPI2_PSOC_DATA		0

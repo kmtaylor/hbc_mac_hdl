@@ -26,8 +26,8 @@
 .options noacct
 .control
     let tolerance = 0.01			    $ Plot scope is const
-    let brute_force = true			    $ Global to all plots
-    let loops = 16
+    let brute_force = false			    $ Global to all plots
+    let loops = 2
     let num_vals = 17
     let print_vals = false
     let do_plot = false
@@ -107,23 +107,23 @@
 	    alter c201 = brute(c201_val, tolerance, brute_vect[15])
 	    alter c202 = brute(c202_val, tolerance, brute_vect[16])
 	else
-	    alter r101 = limit(r101_val, tolerance)
-	    alter r102 = limit(r102_val, tolerance)
-	    alter r103 = limit(r103_val, tolerance)
-	    alter r301 = limit(r301_val, tolerance)
-	    alter r302 = limit(r302_val, tolerance)
-	    alter r303 = limit(r303_val, tolerance)
-	    alter r201 = limit(r201_val, tolerance)
-	    alter r202 = limit(r202_val, tolerance)
-	    alter r203 = limit(r203_val, tolerance)
-	    alter r204 = limit(r204_val, tolerance)
-	    alter c101 = limit(c101_val, tolerance)
-	    alter c102 = limit(c102_val, tolerance)
-	    alter c103 = limit(c103_val, tolerance)
-	    alter c301 = limit(c301_val, tolerance)
-	    alter c302 = limit(c302_val, tolerance)
-	    alter c201 = limit(c201_val, tolerance)
-	    alter c202 = limit(c202_val, tolerance)
+	    alter r101 = unif(r101_val, tolerance)
+	    alter r102 = unif(r102_val, tolerance)
+	    alter r103 = unif(r103_val, tolerance)
+	    alter r301 = unif(r301_val, tolerance)
+	    alter r302 = unif(r302_val, tolerance)
+	    alter r303 = unif(r303_val, tolerance)
+	    alter r201 = unif(r201_val, tolerance)
+	    alter r202 = unif(r202_val, tolerance)
+	    alter r203 = unif(r203_val, tolerance)
+	    alter r204 = unif(r204_val, tolerance)
+	    alter c101 = unif(c101_val, tolerance)
+	    alter c102 = unif(c102_val, tolerance)
+	    alter c103 = unif(c103_val, tolerance)
+	    alter c301 = unif(c301_val, tolerance)
+	    alter c302 = unif(c302_val, tolerance)
+	    alter c201 = unif(c201_val, tolerance)
+	    alter c202 = unif(c202_val, tolerance)
 	end
 
 	if print_vals	
@@ -159,7 +159,7 @@
 	else
 	    let dir_vect = floor(run_i/1000)
 	    set dir = $&dir_vect
-	    write {$toplevel_dir}/{$dir}/mc_data_{$run_var}.raw
+	    write mc_rand_{$toplevel_dir}/{$dir}/mc_data_{$run_var}.raw
 	end
 
 	echo finished run: $run_var
