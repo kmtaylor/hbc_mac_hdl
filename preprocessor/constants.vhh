@@ -14,9 +14,12 @@
 #define HEX(val) C_VAL(CONST_HEX_##val)
 #endif
 
-#define INT(val) CONST_INT_##val
-#define GPO(num, val) CONST_GPO##num##_##val
-#define GPI(num, val) CONST_GPI##num##_##val
+#define _INT(val) CONST_INT_##val
+#define INT(val) _INT(val)
+#define _GPO(num, val) CONST_GPO##num##_##val
+#define GPO(num, val) _GPO(num, val)
+#define _GPI(num, val) CONST_GPI##num##_##val
+#define GPI(num, val) _GPI(num, val)
 
 /* ---------------------- IEEE 802.15.6 Constants ------------------------- */
 #define CONST_HEX_PREAMBLE		C4CA5018FAE4B982
@@ -74,9 +77,12 @@
 #define CONST_INT_IRQ_USB_FULL		11
 #define CONST_INT_IRQ_USB_EN		12
 #define CONST_INT_IRQ_USB_EMPTY         13
+#define CONST_INT_IRQ_HBC_CTRL_SPI	10
+#define CONST_INT_IRQ_HBC_DATA_SPI	11
 #define CONST_INT_IRQ_BUTTON_2		14
 
 /* ----------------------- GPIO Mapping ------------------------------------*/
+#define HBC_GPIO			1
 #define CONST_GPO1_P2S_ENABLE		0
 #define CONST_GPO1_USB_PKT_END		1
 #define CONST_GPO1_RESEED		2
@@ -85,9 +91,18 @@
 #define CONST_GPO1_TX_FLUSH		5
 #define CONST_GPO1_S2P_PKT_ACK		6
 
+#define PSOC_GPIO			2
 #define CONST_GPO2_PSOC_DATA		0
-#define CONST_GPO2_PSOC_CLOCK		1
-#define CONST_GPO2_PSOC_WRITE		2
-#define CONST_GPO2_PSOC_RESET		3
+#define CONST_GPO2_PSOC_DATA_DIR	1
+#define CONST_GPO2_PSOC_CLOCK		2
+#define CONST_GPO2_PSOC_CLOCK_DIR	3
+#define CONST_GPO2_PSOC_RESET		4
+#define CONST_GPO2_PSOC_RESET_DIR	5
+#define CONST_GPO2_HBC_DATA_INT		CONST_GPO2_PSOC_CLOCK
+#define CONST_GPO2_HBC_DATA_INT_DIR	CONST_GPO2_PSOC_CLOCK_DIR
 
 #define CONST_GPI2_PSOC_DATA		0
+#define CONST_GPI2_PSOC_CLOCK		1
+#define CONST_GPI2_PSOC_RESET		2
+#define CONST_GPI2_HBC_CTRL_SS		CONST_GPI2_PSOC_DATA
+#define CONST_GPI2_HBC_DATA_SS		CONST_GPI2_PSOC_CLOCK

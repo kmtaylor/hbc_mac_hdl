@@ -2,23 +2,26 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
+library transceiver;
+use transceiver.bits.all;
+
 entity fifo_bus_arbitrator is
 	port (	mod_bus_master	: in std_logic;
 		
-		io_addr    : in std_logic_vector (7 downto 0);
-        	io_d_out   : in std_logic_vector (31 downto 0);
+		io_addr    : in uint8_t;
+        	io_d_out   : in uint32_t;
         	io_addr_strobe : in std_logic;
         	io_write_strobe : in std_logic;
         	io_io_ready : out std_logic;
 
-		mod_addr    : in std_logic_vector (7 downto 0);
-        	mod_d_out   : in std_logic_vector (31 downto 0);
+		mod_addr    : in uint8_t;
+        	mod_d_out   : in uint32_t;
         	mod_addr_strobe : in std_logic;
         	mod_write_strobe : in std_logic;
         	mod_io_ready : out std_logic;
 
-		fifo_addr    : out std_logic_vector (7 downto 0);
-        	fifo_d_out   : out std_logic_vector (31 downto 0);
+		fifo_addr    : out uint8_t;
+        	fifo_d_out   : out uint32_t;
         	fifo_addr_strobe : out std_logic;
         	fifo_write_strobe : out std_logic;
         	fifo_io_ready : in std_logic);

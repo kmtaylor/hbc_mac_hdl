@@ -11,8 +11,8 @@ entity scrambler is
     port (
 	cpu_clk, reset : in std_logic;
 	reseed, seed_val, seed_clk : in std_logic;
-	io_addr : in std_logic_vector (7 downto 0);
-	io_d_out : out std_logic_vector (31 downto 0);
+	io_addr : in uint8_t;
+	io_d_out : out uint32_t;
 	io_addr_strobe : in std_logic;
 	io_read_strobe : in std_logic;
 	io_ready : out std_logic);
@@ -20,17 +20,16 @@ end entity scrambler;
 
 architecture scrambler_arch of scrambler is
 
-    constant SCRAMBLER_SEED_0 : std_logic_vector (31 downto 0) := X"69540152";
-    constant SCRAMBLER_SEED_1 : std_logic_vector (31 downto 0) := X"8A5F621F";
+    constant SCRAMBLER_SEED_0 : uint32_t := X"69540152";
+    constant SCRAMBLER_SEED_1 : uint32_t := X"8A5F621F";
 
-    constant SCRAMBLER_ADDR  : std_logic_vector (7 downto 0) :=
-							HEX(SCRAMBLER_ADDR);
+    constant SCRAMBLER_ADDR  : uint8_t := HEX(SCRAMBLER_ADDR);
 
-    signal io_addr_reg : std_logic_vector (7 downto 0);
+    signal io_addr_reg : uint8_t;
     signal enabled : std_logic;
     signal do_ack : std_logic;
 
-    signal scram_reg : std_logic_vector (31 downto 0);
+    signal scram_reg : uint32_t;
 
     signal inc_scram : std_logic;
     signal scram_update : std_logic;
@@ -40,7 +39,7 @@ begin
     scram_update <= seed_clk or inc_scram;
 
     update_scram : process (scram_update) 
-	variable scram_reg_i : std_logic_vector (31 downto 0);
+	variable scram_reg_i : uint32_t;
 	variable tmp_bit : std_logic;
     begin 
 

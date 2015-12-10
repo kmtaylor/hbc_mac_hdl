@@ -24,12 +24,12 @@ entity ddr is
 
 	-- mem_interface loosely based on Xilinx's MIG
 	app_af_cmd : in std_logic;
-	app_af_addr : in std_logic_vector (31 downto 0);
-	app_wdf_data : in std_logic_vector (31 downto 0);
+	app_af_addr : in uint32_t;
+	app_wdf_data : in uint32_t;
 	app_wdf_wren : in std_logic;
 	app_wdf_mask_data : in std_logic_vector(DDR_BUS_WIDTH*2/8-1 downto 0);
 	rd_data_valid : out std_logic;
-	rd_data_fifo_out : out std_logic_vector (31 downto 0);
+	rd_data_fifo_out : out uint32_t;
 
 	-- Silicon interface
 	ram_clk : out std_logic;

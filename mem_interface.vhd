@@ -4,12 +4,15 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+library transceiver;
+use transceiver.bits.all;
+
 entity mem_interface is
 	port (
 		cpu_clk, reset : in std_logic;
-		io_addr	: in std_logic_vector (7 downto 0);
-		io_d_in	: in std_logic_vector (31 downto 0);
-		io_d_out : out std_logic_vector (31 downto 0);
+		io_addr	: in uint8_t;
+		io_d_in	: in uint32_t;
+		io_d_out : out uint32_t;
 		io_addr_strobe : in std_logic;
 		io_read_strobe, io_write_strobe : in std_logic;
 		io_ready : out std_logic;
@@ -29,24 +32,20 @@ end mem_interface;
 architecture mem_interface_arch of mem_interface is
 
 	-- MEM_ADDR must be word aligned
-	constant MEM_RD_WR_ADDR	: std_logic_vector (7 downto 0)
-							:= HEX(MEM_RD_WR_ADDR);
-	constant MEM_FLAGS_ADDR	: std_logic_vector (7 downto 0)
-							:= HEX(MEM_FLAGS_ADDR);
-	constant MEM_RD_P_ADDR	: std_logic_vector (7 downto 0)
-							:= HEX(MEM_RD_P_ADDR);
-	constant MEM_WR_P_ADDR	: std_logic_vector (7 downto 0) 
-							:= HEX(MEM_WR_P_ADDR);
+	constant MEM_RD_WR_ADDR	: uint8_t := HEX(MEM_RD_WR_ADDR);
+	constant MEM_FLAGS_ADDR	: uint8_t := HEX(MEM_FLAGS_ADDR);
+	constant MEM_RD_P_ADDR	: uint8_t := HEX(MEM_RD_P_ADDR);
+	constant MEM_WR_P_ADDR	: uint8_t := HEX(MEM_WR_P_ADDR);
 
-	signal io_addr_reg : std_logic_vector (7 downto 0);
-	signal io_write_reg : std_logic_vector (31 downto 0);
-	signal mem_data_reg : std_logic_vector (31 downto 0);
+	signal io_addr_reg : uint8_t;
+	signal io_write_reg : uint32_t;
+	signal mem_data_reg : uint32_t;
 		
 	signal enabled : std_logic;
 
 	signal flags : std_logic_vector (1 downto 0);
-	signal rd_p : std_logic_vector (31 downto 0);
-	signal wr_p : std_logic_vector (31 downto 0);
+	signal rd_p : uint32_t;
+	signal wr_p : uint32_t;
 
 	signal latch_flags : std_logic;
 	signal latch_wr_p : std_logic;

@@ -22,20 +22,20 @@ end phase_align;
 
 architecture phase_align_arch of phase_align is
 
-    function wrap (val : natural) return natural is begin
-	if (val = 7) then
-	    return 0;
-	else 
-	    return val + 1;
-	end if;
-    end function wrap;
-
     constant COMMA : std_logic_vector (COMMA_SIZE-1 downto 0) := HEX(PREAMBLE);
     constant COMMA_WEIGHT_BITS : natural := bits_for_val(COMMA_SIZE);
 
     constant EARLY_SYMBOL_SIZE : natural := 8;
     constant EARLY_SYMBOL_INDEX_BITS : natural := 
 			    bits_for_val(EARLY_SYMBOL_SIZE-1);
+
+    function wrap (val : natural) return natural is begin
+	if (val = EARLY_SYMBOL_SIZE-1) then
+	    return 0;
+	else 
+	    return val + 1;
+	end if;
+    end function wrap;
 
     subtype demod_reg_t is std_logic_vector (COMMA_SIZE-1 downto 0);
     subtype phase_index_t is unsigned (EARLY_SYMBOL_INDEX_BITS-1 downto 0);
@@ -97,7 +97,7 @@ begin
 
     early_compare_phase : process (serial_clk) begin
 	if serial_clk'event and serial_clk = '1' then
-	    if s2p_align_index = 7 then
+	    if s2p_align_index = EARLY_SYMBOL_SIZE-1 then
 		phase_sum(0) <= (others => '0');
 		expected_phase <= not invert_data;
 	    else

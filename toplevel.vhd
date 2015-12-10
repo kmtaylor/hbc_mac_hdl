@@ -47,6 +47,9 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
+library transceiver;
+use transceiver.bits.all;
+
 entity toplevel is
     port(
 	clkin : in std_logic
@@ -59,16 +62,16 @@ entity toplevel is
 	; serial_clk_out : out std_logic
 #endif
 #if USE_SWITCH
-	; sw : in std_logic_vector (7 downto 0)
+	; sw : in uint8_t
 #endif
 #if USE_8BIT_LED
-	; Led : out std_logic_vector (7 downto 0)
+	; Led : out uint8_t
 #endif
 #if USE_1BIT_LED
 	; Led : out std_logic
 #endif
 #if USE_LCD
-	; LCDD : inout std_logic_vector (7 downto 0)
+	; LCDD : inout uint8_t
 	; LCDEN, LCDRW, LCDRS : out std_logic
 #endif
 #if USE_BUTTON
@@ -106,7 +109,7 @@ entity toplevel is
 	; UsbWR	    : out std_logic
 	; UsbRD	    : out std_logic
 	; UsbPktEnd : out std_logic
-	; UsbDB	    : inout std_logic_vector (7 downto 0)
+	; UsbDB	    : inout uint8_t
 #endif
 #if USE_SPI
 	; hbc_ctrl_sclk : in std_logic
@@ -118,8 +121,8 @@ entity toplevel is
 #endif
 #if USE_PSOC
 	; psoc_swdio : inout std_logic
-	; psoc_swdck : out std_logic
-	; psoc_reset : out std_logic
+	; psoc_swdck : inout std_logic
+	; psoc_reset : inout std_logic
 #endif
 	);
 end toplevel;
@@ -190,27 +193,27 @@ architecture toplevel_arch of toplevel is
 
     signal io_read_strobe, io_write_strobe : std_logic;
     signal io_ready, io_addr_strobe : std_logic;
-    signal io_address : std_logic_vector (31 downto 0);
-    signal io_write_data : std_logic_vector (31 downto 0);
-    signal io_read_data : std_logic_vector (31 downto 0);
+    signal io_address : uint32_t;
+    signal io_write_data : uint32_t;
+    signal io_read_data : uint32_t;
 
     signal clk_lock_int : std_logic;
     signal usb_irq : std_logic;
     
-    signal bus1_data : std_logic_vector (31 downto 0);
+    signal bus1_data : uint32_t;
     signal bus1_ready : std_logic;
-    signal bus2_data : std_logic_vector (31 downto 0);
+    signal bus2_data : uint32_t;
     signal bus2_ready : std_logic;
-    signal bus3_data : std_logic_vector (31 downto 0);
+    signal bus3_data : uint32_t;
     signal bus3_ready : std_logic;
-    signal bus4_data : std_logic_vector (31 downto 0);
+    signal bus4_data : uint32_t;
     signal bus4_ready : std_logic;
-    signal bus5_data : std_logic_vector (31 downto 0);
+    signal bus5_data : uint32_t;
     signal bus5_ready : std_logic;
     signal bus6_ready : std_logic;
-    signal bus7_data : std_logic_vector (31 downto 0);
+    signal bus7_data : uint32_t;
     signal bus7_ready : std_logic;
-    signal bus8_data : std_logic_vector (31 downto 0);
+    signal bus8_data : uint32_t;
     signal bus8_ready : std_logic;
     
     -- Internal memory signals
@@ -230,8 +233,8 @@ architecture toplevel_arch of toplevel is
     signal app_wdf_data    : std_logic_vector (127 downto 0);
     signal app_wdf_mask_data : std_logic_vector (15 downto 0);
     
-    signal to_tx_fifo : std_logic_vector (31 downto 0);
-    signal from_tx_fifo : std_logic_vector (31 downto 0);
+    signal to_tx_fifo : uint32_t;
+    signal from_tx_fifo : uint32_t;
     signal tx_fifo_rden : std_logic;
     signal tx_fifo_wren : std_logic;
     signal tx_fifo_full : std_logic;
@@ -241,7 +244,7 @@ architecture toplevel_arch of toplevel is
     signal tx_fifo_underflow : std_logic;
     signal tx_fifo_flush : std_logic;
 
-    signal from_rx_fifo : std_logic_vector (31 downto 0);
+    signal from_rx_fifo : uint32_t;
     signal rx_fifo_rden : std_logic;
     signal rx_fifo_wren : std_logic;
     signal rx_fifo_full : std_logic;
@@ -251,18 +254,18 @@ architecture toplevel_arch of toplevel is
     signal rx_fifo_underflow : std_logic;
     signal rx_fifo_flush : std_logic;
 
-    signal s2p_fifo_data : std_logic_vector (31 downto 0);
+    signal s2p_fifo_data : uint32_t;
     signal s2p_pkt_ready : std_logic;
     signal s2p_pkt_ack : std_logic;
 
     signal mod_bus_master : std_logic;
-    signal fifo_bus_addr : std_logic_vector (7 downto 0);
-    signal fifo_d_out : std_logic_vector (31 downto 0);
+    signal fifo_bus_addr : uint8_t;
+    signal fifo_d_out : uint32_t;
     signal fifo_addr_strobe : std_logic;
     signal fifo_write_strobe : std_logic;
     signal fifo_io_ready : std_logic;
-    signal mod_bus_addr : std_logic_vector (7 downto 0);
-    signal mod_d_out : std_logic_vector (31 downto 0);
+    signal mod_bus_addr : uint8_t;
+    signal mod_d_out : uint32_t;
     signal mod_addr_strobe : std_logic;
     signal mod_write_strobe : std_logic;
     signal mod_io_ready : std_logic;
@@ -300,9 +303,11 @@ architecture toplevel_arch of toplevel is
     signal serial_dcm_locked : std_logic;
     signal cpu_dcm_locked : std_logic;
 
-    signal psoc_write : std_logic;
-    signal psoc_gpi : std_logic;
-    signal psoc_gpo : std_logic;
+    signal psoc_swdio_dir, psoc_swdck_dir, psoc_xres_dir : std_logic;
+    signal psoc_swdio_i, psoc_swdck_i, psoc_xres_i : std_logic;
+    signal psoc_swdio_o, psoc_swdck_o, psoc_xres_o : std_logic;
+
+    signal hbc_ctrl_spi_int, hbc_data_spi_int : std_logic;
 
     signal btn1_d : std_logic;
     signal btn2_d : std_logic;
@@ -448,13 +453,13 @@ begin
 #if USE_SWITCH
 	    GPI2 => sw,
 #endif
-	    GPO1 (GPO(1, P2S_ENABLE)) => parallel_to_serial_enable,
-	    GPO1 (GPO(1, USB_PKT_END)) => usb_pkt_end,
-	    GPO1 (GPO(1, RESEED)) => reseed,
-	    GPO1 (GPO(1, SEED_VAL)) => seed_val,
-	    GPO1 (GPO(1, SEED_CLK)) => seed_clk,
-	    GPO1 (GPO(1, TX_FLUSH)) => tx_fifo_flush,
-	    GPO1 (GPO(1, S2P_PKT_ACK)) => s2p_pkt_ack,
+	    GPO1 (GPO(HBC_GPIO, P2S_ENABLE)) => parallel_to_serial_enable,
+	    GPO1 (GPO(HBC_GPIO, USB_PKT_END)) => usb_pkt_end,
+	    GPO1 (GPO(HBC_GPIO, RESEED)) => reseed,
+	    GPO1 (GPO(HBC_GPIO, SEED_VAL)) => seed_val,
+	    GPO1 (GPO(HBC_GPIO, SEED_CLK)) => seed_clk,
+	    GPO1 (GPO(HBC_GPIO, TX_FLUSH)) => tx_fifo_flush,
+	    GPO1 (GPO(HBC_GPIO, S2P_PKT_ACK)) => s2p_pkt_ack,
 #if USE_1BIT_LED
 	    GPO1 (7) => Led,
 #else
@@ -464,13 +469,17 @@ begin
 	    GPO2 => Led,
 #endif
 #if USE_PSOC
-	    GPI2 (GPI(2, PSOC_DATA)) => psoc_gpi,
-	    GPI2 (7 downto 1) => (others => '0'),
-	    GPO2 (GPO(2, PSOC_DATA)) => psoc_gpo,
-	    GPO2 (GPO(2, PSOC_CLOCK)) => psoc_swdck,
-	    GPO2 (GPO(2, PSOC_WRITE)) => psoc_write,
-	    GPO2 (GPO(2, PSOC_RESET)) => psoc_reset,
-	    GPO2 (7 downto 4) => open,
+	    GPI2 (GPI(PSOC_GPIO, PSOC_DATA)) => psoc_swdio_i,
+	    GPI2 (GPI(PSOC_GPIO, PSOC_CLOCK)) => psoc_swdck_i,
+	    GPI2 (GPI(PSOC_GPIO, PSOC_RESET)) => psoc_xres_i,
+	    GPI2 (7 downto 3) => (others => '0'),
+	    GPO2 (GPO(PSOC_GPIO, PSOC_DATA)) => psoc_swdio_o,
+	    GPO2 (GPO(PSOC_GPIO, PSOC_DATA_DIR)) => psoc_swdio_dir,
+	    GPO2 (GPO(PSOC_GPIO, PSOC_CLOCK)) => psoc_swdck_o,
+	    GPO2 (GPO(PSOC_GPIO, PSOC_CLOCK_DIR)) => psoc_swdck_dir,
+	    GPO2 (GPO(PSOC_GPIO, PSOC_RESET)) => psoc_xres_o,
+	    GPO2 (GPO(PSOC_GPIO, PSOC_RESET_DIR)) => psoc_xres_dir,
+	    GPO2 (7 downto 6) => open,
 #endif
 	    INTC_Interrupt (INT(IRQ_BUTTON)) => btn1_d,
 	    INTC_Interrupt (INT(IRQ_FIFO_FULL)) => tx_fifo_full,
@@ -487,6 +496,11 @@ begin
 	    INTC_Interrupt (INT(IRQ_USB_FULL)) => UsbFull,
 	    INTC_Interrupt (INT(IRQ_USB_EN)) => UsbEN,
 	    INTC_Interrupt (INT(IRQ_USB_EMPTY)) => UsbEmpty,
+#elif USE_SPI
+	    INTC_Interrupt (INT(IRQ_HBC_CTRL_SPI)) => hbc_ctrl_spi_int,
+	    INTC_Interrupt (INT(IRQ_HBC_DATA_SPI)) => hbc_data_spi_int,
+	    INTC_Interrupt (INT(IRQ_USB_EN)) => '0',
+	    INTC_Interrupt (INT(IRQ_USB_EMPTY)) => '0',
 #else
 	    INTC_Interrupt (INT(IRQ_USB_INT)) => '0',
 	    INTC_Interrupt (INT(IRQ_USB_FULL)) => '0',
@@ -636,10 +650,18 @@ begin
 #if USE_PSOC
     psoc_interface : entity work.psoc_interface
 	port map (
-	    write => psoc_write,
-	    gpo => psoc_gpo,
-	    gpi => psoc_gpi,
-	    swdio => psoc_swdio);
+	    swdio_dir => psoc_swdio_dir,
+	    swdck_dir => psoc_swdck_dir,
+	    xres_dir => psoc_xres_dir,
+	    swdio_i => psoc_swdio_i,
+	    swdio_o => psoc_swdio_o,
+	    swdck_i => psoc_swdck_i,
+	    swdck_o => psoc_swdck_o,
+	    xres_i => psoc_xres_i,
+	    xres_o => psoc_xres_o,
+	    swdio => psoc_swdio,
+	    swdck => psoc_swdck,
+	    xres => psoc_reset);
 #endif
 
     fifo_int_0 : entity work.tx_fifo_interface
@@ -834,15 +856,21 @@ begin
 	    reset => cpu_reset,
 	    io_addr => io_address (7 downto 0),
 	    io_d_out => bus8_data,
+	    io_d_in => io_write_data,
 	    io_addr_strobe => io_addr_strobe,
 	    io_read_strobe => io_read_strobe,
+	    io_write_strobe => io_write_strobe,
 	    io_ready => bus8_ready,
+	    hbc_data_int => hbc_data_spi_int,
+	    hbc_ctrl_int => hbc_ctrl_spi_int,
 	    hbc_data_sclk => hbc_data_sclk,
 	    hbc_data_mosi => hbc_data_mosi,
 	    hbc_data_miso => hbc_data_miso,
+	    hbc_data_ss => psoc_swdck,
 	    hbc_ctrl_sclk => hbc_ctrl_sclk,
 	    hbc_ctrl_mosi => hbc_ctrl_mosi,
-	    hbc_ctrl_miso => hbc_ctrl_miso);
+	    hbc_ctrl_miso => hbc_ctrl_miso,
+	    hbc_ctrl_ss => psoc_swdio);
 #endif
 
 #if USE_BUTTON

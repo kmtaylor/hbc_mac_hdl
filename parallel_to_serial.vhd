@@ -10,7 +10,7 @@ entity parallel_to_serial is
 		clk, reset : in std_logic;
 		trigger : in std_logic;
 		trig_clk : in std_logic;
-		fifo_d_in : in std_logic_vector (31 downto 0);
+		fifo_d_in : in uint32_t;
 		fifo_rden : out std_logic;
 		fifo_empty : in std_logic;
 		data_out : out std_logic);
@@ -30,8 +30,7 @@ architecture parallel_to_serial_arch of parallel_to_serial is
     signal state, next_state : state_type; 
     signal data_out_i : std_logic;
 	
-    signal tmp_data, tmp_data_i : std_logic_vector (31 downto 0)
-							:= (others => '0');
+    signal tmp_data, tmp_data_i : uint32_t := (others => '0');
 	
     type cur_bit_type is range 0 to 31;
     signal cur_bit, cur_bit_i : cur_bit_type := 0;

@@ -7,15 +7,15 @@ use ieee.numeric_std.all;
 entity usb_fifo is
 	port (
 		usb_clk, cpu_clk, reset : in std_logic;
-		io_addr	: in std_logic_vector (7 downto 0);
-		io_d_in	: in std_logic_vector (31 downto 0);
-		io_d_out	: out std_logic_vector (31 downto 0);
+		io_addr	: in uint8_t;
+		io_d_in	: in uint32_t;
+		io_d_out	: out uint32_t;
 		io_addr_strobe : in std_logic;
 		io_read_strobe, io_write_strobe : in std_logic;
 		io_ready : out std_logic;
 		pkt_end : in std_logic;
 		UsbIRQ : out std_logic;
-		UsbDB : inout std_logic_vector (7 downto 0);
+		UsbDB : inout uint8_t;
 		UsbAdr : out std_logic_vector (1 downto 0);
 		UsbOE : out std_logic;
 		UsbWR : out std_logic;
@@ -24,17 +24,17 @@ entity usb_fifo is
 		UsbEmpty : in std_logic;
 		UsbFull : in std_logic;
 		UsbEN : in std_logic;
-		UsbDBG : out std_logic_vector (7 downto 0));
+		UsbDBG : out uint8_t);
 end usb_fifo;
 
 architecture usb_fifo_arch of usb_fifo is
 
 	-- USB_ADDR must be word aligned
-	constant USB_ADDR : std_logic_vector (7 downto 0) := HEX(USB_ADDR);
+	constant USB_ADDR : uint8_t := HEX(USB_ADDR);
 
-	signal io_addr_reg : std_logic_vector (7 downto 0);
-	signal usb_read_data : std_logic_vector (31 downto 0);
-	signal usb_write_data : std_logic_vector (31 downto 0);
+	signal io_addr_reg : uint8_t;
+	signal usb_read_data : uint32_t;
+	signal usb_write_data : uint32_t;
 	signal do_read_data : std_logic;
 	signal reading : std_logic := '0';
 	signal enabled : std_logic;

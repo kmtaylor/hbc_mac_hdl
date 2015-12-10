@@ -62,11 +62,12 @@ architecture data_synchroniser_arch of data_synchroniser is
     signal delay_d_270 : std_logic_vector (1 downto 0);
 
 #if SLOW_SHIFT
+    constant SLOW_SHIFT_BITS : natural := bits_for_val(SLOW_SHIFT-1);
     signal use_0_valid, use_90_valid, use_180_valid, use_270_valid : std_logic;
-    signal use_0_valid_sum : unsigned (bits_for_val(SLOW_SHIFT-1)-1 downto 0);
-    signal use_90_valid_sum : unsigned (bits_for_val(SLOW_SHIFT-1)-1 downto 0);
-    signal use_180_valid_sum : unsigned (bits_for_val(SLOW_SHIFT-1)-1 downto 0);
-    signal use_270_valid_sum : unsigned (bits_for_val(SLOW_SHIFT-1)-1 downto 0);
+    signal use_0_valid_sum : unsigned (SLOW_SHIFT_BITS-1 downto 0);
+    signal use_90_valid_sum : unsigned (SLOW_SHIFT_BITS-1 downto 0);
+    signal use_180_valid_sum : unsigned (SLOW_SHIFT_BITS-1 downto 0);
+    signal use_270_valid_sum : unsigned (SLOW_SHIFT_BITS-1 downto 0);
     signal reset_valid : std_logic;
 #endif
 

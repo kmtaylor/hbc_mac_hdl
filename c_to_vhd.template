@@ -5,9 +5,9 @@ use ieee.numeric_std.all;
 entity c_to_vhd is
     port (
 	cpu_clk, reset : in std_logic;
-	io_addr : in std_logic_vector (7 downto 0);
-	io_d_out : out std_logic_vector (31 downto 0);
-	io_d_in : in std_logic_vector (31 downto 0);
+	io_addr : in uint8_t;
+	io_d_out : out uint32_t;
+	io_d_in : in uint32_t;
 	io_addr_strobe : in std_logic;
 	io_read_strobe, io_write_strobe : in std_logic;
 	io_ready : out std_logic);
@@ -15,14 +15,14 @@ end entity c_to_vhd;
 
 architecture c_to_vhd_arch of c_to_vhd is
 
-    constant COMMA_ADDR  : std_logic_vector (7 downto 0) := X"1C";
+    constant COMMA_ADDR  : uint8_t := X"1C";
 
-    signal io_addr_reg : std_logic_vector (7 downto 0);
+    signal io_addr_reg : uint8_t;
     signal enabled : std_logic;
     signal do_ack : std_logic;
 
     signal writing : std_logic;
-    signal io_data_reg : std_logic_vector (31 downto 0); 
+    signal io_data_reg : uint32_t; 
 
 begin
     

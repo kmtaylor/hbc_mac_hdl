@@ -70,7 +70,7 @@ architecture testbench of receiver_tb is
     -- Clock period definitions
     constant clk_period : time := 10 ns;
 #ifndef SERIAL_CLK_NS
-#define SERIAL_CLK_NS 23.82
+#define SERIAL_CLK_NS 23.81
 #endif
     constant s_clk_period : time := SERIAL_CLK_NS ns;
     
