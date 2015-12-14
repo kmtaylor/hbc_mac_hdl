@@ -46,6 +46,7 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 library transceiver;
 use transceiver.bits.all;
@@ -62,16 +63,16 @@ entity toplevel is
 	; serial_clk_out : out std_logic
 #endif
 #if USE_SWITCH
-	; sw : in uint8_t
+	; sw : in vec8_t
 #endif
 #if USE_8BIT_LED
-	; Led : out uint8_t
+	; Led : out vec8_t
 #endif
 #if USE_1BIT_LED
 	; Led : out std_logic
 #endif
 #if USE_LCD
-	; LCDD : inout uint8_t
+	; LCDD : inout vec8_t
 	; LCDEN, LCDRW, LCDRS : out std_logic
 #endif
 #if USE_BUTTON
@@ -109,7 +110,7 @@ entity toplevel is
 	; UsbWR	    : out std_logic
 	; UsbRD	    : out std_logic
 	; UsbPktEnd : out std_logic
-	; UsbDB	    : inout uint8_t
+	; UsbDB	    : inout vec8_t
 #endif
 #if USE_SPI
 	; hbc_ctrl_sclk : in std_logic
@@ -128,6 +129,29 @@ entity toplevel is
 end toplevel;
 
 architecture toplevel_arch of toplevel is
+
+    constant NUM_PERIPHERALS : natural := 8;
+    constant PERIPH_HBC_TXFIFO	    : natural := 0;
+    constant PERIPH_HBC_TXMOD	    : natural := 1;
+    constant PERIPH_HBC_RXFIFO	    : natural := 2;
+    constant PERIPH_HBC_SCRAMBLER   : natural := 3;
+    constant PERIPH_MEM		    : natural := 4;
+    constant PERIPH_SPI		    : natural := 5;
+    constant PERIPH_LCD		    : natural := 6;
+    constant PERIPH_PAR_USB	    : natural := 7;
+
+    type vec32n_t is array (NUM_PERIPHERALS-1 downto 0) of vec32_t;
+
+    function peripheral_select (data : vec32n_t; ready : std_logic_vector) 
+	return vec32_t is
+    begin
+	for i in ready'range loop
+	    if ready(i) = '1' then
+		return data(i);
+	    end if;
+	end loop;
+	return (others => 'Z');
+    end function peripheral_select;
 
     COMPONENT mcs_0
 	PORT (
@@ -152,69 +176,20 @@ architecture toplevel_arch of toplevel is
 	);
     END COMPONENT;
     
-    COMPONENT fifo_tx
-	PORT (
-	    rst : IN STD_LOGIC;
-	    wr_clk : IN STD_LOGIC;
-	    rd_clk : IN STD_LOGIC;
-	    din : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-	    wr_en : IN STD_LOGIC;
-	    rd_en : IN STD_LOGIC;
-	    dout : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-	    full : OUT STD_LOGIC;
-	    prog_full : OUT STD_LOGIC;
-	    overflow : OUT STD_LOGIC;
-	    empty : OUT STD_LOGIC;
-	    underflow : OUT STD_LOGIC
-	);
-    END COMPONENT;
-
-    COMPONENT fifo_rx
-	PORT (
-	    rst : IN STD_LOGIC;
-	    wr_clk : IN STD_LOGIC;
-	    rd_clk : IN STD_LOGIC;
-	    din : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-	    wr_en : IN STD_LOGIC;
-	    rd_en : IN STD_LOGIC;
-	    dout : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-	    full : OUT STD_LOGIC;
-	    prog_full : OUT STD_LOGIC;
-	    overflow : OUT STD_LOGIC;
-	    empty : OUT STD_LOGIC;
-	    underflow : OUT STD_LOGIC
-	);
-    END COMPONENT;
-
     constant RESET_DELAY : natural := 16;
 #if !RESET_BUTTON
     signal rstbtn : std_logic;
 #endif
 
+    -- CPU interface
     signal io_read_strobe, io_write_strobe : std_logic;
     signal io_ready, io_addr_strobe : std_logic;
-    signal io_address : uint32_t;
-    signal io_write_data : uint32_t;
-    signal io_read_data : uint32_t;
-
-    signal clk_lock_int : std_logic;
-    signal usb_irq : std_logic;
-    
-    signal bus1_data : uint32_t;
-    signal bus1_ready : std_logic;
-    signal bus2_data : uint32_t;
-    signal bus2_ready : std_logic;
-    signal bus3_data : uint32_t;
-    signal bus3_ready : std_logic;
-    signal bus4_data : uint32_t;
-    signal bus4_ready : std_logic;
-    signal bus5_data : uint32_t;
-    signal bus5_ready : std_logic;
-    signal bus6_ready : std_logic;
-    signal bus7_data : uint32_t;
-    signal bus7_ready : std_logic;
-    signal bus8_data : uint32_t;
-    signal bus8_ready : std_logic;
+    signal io_address : vec32_t;
+    signal io_write_data : vec32_t;
+    signal io_read_data : vec32_t;
+    signal irq_bus : std_logic_vector (15 downto 0);
+    signal peripheral_data : vec32n_t;
+    signal peripheral_ready : std_logic_vector (NUM_PERIPHERALS-1 downto 0);
     
     -- Internal memory signals
     signal phy_init_done    : std_logic;
@@ -233,56 +208,32 @@ architecture toplevel_arch of toplevel is
     signal app_wdf_data    : std_logic_vector (127 downto 0);
     signal app_wdf_mask_data : std_logic_vector (15 downto 0);
     
-    signal to_tx_fifo : uint32_t;
-    signal from_tx_fifo : uint32_t;
-    signal tx_fifo_rden : std_logic;
-    signal tx_fifo_wren : std_logic;
-    signal tx_fifo_full : std_logic;
-    signal tx_fifo_almost_full : std_logic;
-    signal tx_fifo_overflow : std_logic;
-    signal tx_fifo_empty : std_logic;
-    signal tx_fifo_underflow : std_logic;
-    signal tx_fifo_flush : std_logic;
+    -- HBC TX
+    signal hbc_tx_fifo_flush : std_logic;
+    signal hbc_tx_trigger : std_logic;
+    signal hbc_tx_fifo_full : std_logic;
+    signal hbc_tx_fifo_almost_full : std_logic;
+    signal hbc_tx_fifo_overflow : std_logic;
 
-    signal from_rx_fifo : uint32_t;
-    signal rx_fifo_rden : std_logic;
-    signal rx_fifo_wren : std_logic;
-    signal rx_fifo_full : std_logic;
-    signal rx_fifo_almost_full : std_logic;
-    signal rx_fifo_overflow : std_logic;
-    signal rx_fifo_empty : std_logic;
-    signal rx_fifo_underflow : std_logic;
-    signal rx_fifo_flush : std_logic;
+    -- HBC RX
+    signal hbc_rx_fifo_almost_full : std_logic;
+    signal hbc_rx_fifo_empty : std_logic;
+    signal hbc_rx_pkt_ready : std_logic;
+    signal hbc_rx_pkt_ack : std_logic;
 
-    signal s2p_fifo_data : uint32_t;
-    signal s2p_pkt_ready : std_logic;
-    signal s2p_pkt_ack : std_logic;
-
-    signal mod_bus_master : std_logic;
-    signal fifo_bus_addr : uint8_t;
-    signal fifo_d_out : uint32_t;
-    signal fifo_addr_strobe : std_logic;
-    signal fifo_write_strobe : std_logic;
-    signal fifo_io_ready : std_logic;
-    signal mod_bus_addr : uint8_t;
-    signal mod_d_out : uint32_t;
-    signal mod_addr_strobe : std_logic;
-    signal mod_write_strobe : std_logic;
-    signal mod_io_ready : std_logic;
-
-    signal parallel_to_serial_enable : std_logic;
-
+    -- PAR_USB
     signal usb_pkt_end : std_logic;
+    signal usb_irq : std_logic;
+    signal usb_clk : std_logic;
     
-    signal reseed, seed_val, seed_clk : std_logic;
+    -- Scrambler
+    signal scram_reseed, scram_seed_val, scram_seed_clk : std_logic;
 
-    signal s_data_in_sync : std_logic;
-
+    -- Infrastructure
     signal serial_reset : std_logic;
     signal cpu_reset : std_logic;
     signal c_reset_shift_r : std_logic_vector(RESET_DELAY-1 downto 0);
     signal s_reset_shift_r : std_logic_vector(RESET_DELAY-1 downto 0);
-
     attribute equivalent_register_removal : string;
     attribute max_fanout : string;
     attribute shreg_extract : string;
@@ -292,21 +243,21 @@ architecture toplevel_arch of toplevel is
     attribute equivalent_register_removal of serial_reset : signal is "no";
     attribute max_fanout of serial_reset : signal is "10";
     attribute shreg_extract of serial_reset : signal is "no";
-
-    signal pkt_reset : std_logic;
     signal clk_debounce, clkin_ibufg : std_logic;
     signal pll_clk, cpu_clk, serial_clk, serial_clk_90 : std_logic;
-    signal usb_clk : std_logic;
     signal serial_clk_tmp : std_logic;
     signal mem_clk0, mem_clk90, mem_clkdiv0, mem_clk200 : std_logic;
     signal pll_locked, mem_pll_locked : std_logic;
     signal serial_dcm_locked : std_logic;
     signal cpu_dcm_locked : std_logic;
+    signal clk_lock_int : std_logic;
 
+    -- PSOC HSSP interface
     signal psoc_swdio_dir, psoc_swdck_dir, psoc_xres_dir : std_logic;
     signal psoc_swdio_i, psoc_swdck_i, psoc_xres_i : std_logic;
     signal psoc_swdio_o, psoc_swdck_o, psoc_xres_o : std_logic;
 
+    -- SPI interface
     signal hbc_ctrl_spi_int, hbc_data_spi_int : std_logic;
 
     signal btn1_d : std_logic;
@@ -453,118 +404,72 @@ begin
 #if USE_SWITCH
 	    GPI2 => sw,
 #endif
-	    GPO1 (GPO(HBC_GPIO, P2S_ENABLE)) => parallel_to_serial_enable,
-	    GPO1 (GPO(HBC_GPIO, USB_PKT_END)) => usb_pkt_end,
-	    GPO1 (GPO(HBC_GPIO, RESEED)) => reseed,
-	    GPO1 (GPO(HBC_GPIO, SEED_VAL)) => seed_val,
-	    GPO1 (GPO(HBC_GPIO, SEED_CLK)) => seed_clk,
-	    GPO1 (GPO(HBC_GPIO, TX_FLUSH)) => tx_fifo_flush,
-	    GPO1 (GPO(HBC_GPIO, S2P_PKT_ACK)) => s2p_pkt_ack,
+	    GPO(HBC_TX_TRIGGER, hbc_tx_trigger),
+	    GPO(HBC_TX_FLUSH, hbc_tx_fifo_flush),
+	    GPO(SCRAM_RESEED, scram_reseed),
+	    GPO(SCRAM_SEED_VAL, scram_seed_val),
+	    GPO(SCRAM_SEED_CLK, scram_seed_clk),
+	    GPO(HBC_RX_PKT_ACK, hbc_rx_pkt_ack),
+	    GPO(USB_PKT_END, usb_pkt_end),
 #if USE_1BIT_LED
-	    GPO1 (7) => Led,
+	    GPO1(7) => Led,
 #else
-	    GPO1 (7) => open,
+	    GPO1(7) => open,
 #endif
 #if USE_8BIT_LED
 	    GPO2 => Led,
 #endif
 #if USE_PSOC
-	    GPI2 (GPI(PSOC_GPIO, PSOC_DATA)) => psoc_swdio_i,
-	    GPI2 (GPI(PSOC_GPIO, PSOC_CLOCK)) => psoc_swdck_i,
-	    GPI2 (GPI(PSOC_GPIO, PSOC_RESET)) => psoc_xres_i,
-	    GPI2 (7 downto 3) => (others => '0'),
-	    GPO2 (GPO(PSOC_GPIO, PSOC_DATA)) => psoc_swdio_o,
-	    GPO2 (GPO(PSOC_GPIO, PSOC_DATA_DIR)) => psoc_swdio_dir,
-	    GPO2 (GPO(PSOC_GPIO, PSOC_CLOCK)) => psoc_swdck_o,
-	    GPO2 (GPO(PSOC_GPIO, PSOC_CLOCK_DIR)) => psoc_swdck_dir,
-	    GPO2 (GPO(PSOC_GPIO, PSOC_RESET)) => psoc_xres_o,
-	    GPO2 (GPO(PSOC_GPIO, PSOC_RESET_DIR)) => psoc_xres_dir,
-	    GPO2 (7 downto 6) => open,
+	    GPI(PSOC_DATA, psoc_swdio_i),
+	    GPI(PSOC_CLOCK, psoc_swdck_i),
+	    GPI(PSOC_RESET, psoc_xres_i),
+	    GPI2(7 downto 3) => (others => '0'),
+	    GPO(PSOC_DATA, psoc_swdio_o),
+	    GPO(PSOC_DATA_DIR, psoc_swdio_dir),
+	    GPO(PSOC_CLOCK, psoc_swdck_o),
+	    GPO(PSOC_CLOCK_DIR, psoc_swdck_dir),
+	    GPO(PSOC_RESET, psoc_xres_o),
+	    GPO(PSOC_RESET_DIR, psoc_xres_dir),
+	    GPO2(7 downto 6) => open,
 #endif
-	    INTC_Interrupt (INT(IRQ_BUTTON)) => btn1_d,
-	    INTC_Interrupt (INT(IRQ_FIFO_FULL)) => tx_fifo_full,
-	    INTC_Interrupt (INT(IRQ_FIFO_ALMOST_FULL)) => tx_fifo_almost_full,
-	    INTC_Interrupt (INT(IRQ_FIFO_OVERFLOW)) => tx_fifo_overflow,
-	    INTC_Interrupt (INT(IRQ_RX_DATA_READY)) => not(rx_fifo_empty),
-	    INTC_Interrupt (INT(IRQ_RX_PKT_READY)) => s2p_pkt_ready,
-	    INTC_Interrupt (INT(IRQ_RX_FIFO_FULL)) => rx_fifo_almost_full,
-	    INTC_Interrupt (INT(IRQ_CLOCK_LOSS)) => clk_lock_int,
-	    INTC_Interrupt (INT(IRQ_RAM_INIT)) => not(phy_init_done),
-	    INTC_Interrupt (INT(IRQ_RAM_FIFO_FULL)) => mem_fifo_full,
+	    INTC_Interrupt => irq_bus,
+	    GPI1 => irq_bus);
+
+    IRQ(IRQ_BUTTON, btn1_d);
+    IRQ(IRQ_TX_FIFO_FULL, hbc_tx_fifo_full);
+    IRQ(IRQ_TX_FIFO_ALMOST_FULL, hbc_tx_fifo_almost_full);
+    IRQ(IRQ_TX_FIFO_OVERFLOW, hbc_tx_fifo_overflow);
+    IRQ(IRQ_RX_DATA_READY, not(hbc_rx_fifo_empty));
+    IRQ(IRQ_RX_PKT_READY, hbc_rx_pkt_ready);
+    IRQ(IRQ_RX_FIFO_FULL, hbc_rx_fifo_almost_full);
+    IRQ(IRQ_CLOCK_LOSS, clk_lock_int);
+    IRQ(IRQ_RAM_INIT, not(phy_init_done));
+    IRQ(IRQ_RAM_FIFO_FULL, mem_fifo_full);
+    IRQ(IRQ_BUTTON_2, btn2_d);
 #if USE_PAR_USB
-	    INTC_Interrupt (INT(IRQ_USB_INT)) => usb_irq,
-	    INTC_Interrupt (INT(IRQ_USB_FULL)) => UsbFull,
-	    INTC_Interrupt (INT(IRQ_USB_EN)) => UsbEN,
-	    INTC_Interrupt (INT(IRQ_USB_EMPTY)) => UsbEmpty,
+    IRQ(IRQ_USB_INT, usb_irq);
+    IRQ(IRQ_USB_FULL, UsbFull);
+    IRQ(IRQ_USB_EN, UsbEN);
+    IRQ(IRQ_USB_EMPTY, UsbEmpty);
 #elif USE_SPI
-	    INTC_Interrupt (INT(IRQ_HBC_CTRL_SPI)) => hbc_ctrl_spi_int,
-	    INTC_Interrupt (INT(IRQ_HBC_DATA_SPI)) => hbc_data_spi_int,
-	    INTC_Interrupt (INT(IRQ_USB_EN)) => '0',
-	    INTC_Interrupt (INT(IRQ_USB_EMPTY)) => '0',
-#else
-	    INTC_Interrupt (INT(IRQ_USB_INT)) => '0',
-	    INTC_Interrupt (INT(IRQ_USB_FULL)) => '0',
-	    INTC_Interrupt (INT(IRQ_USB_EN)) => '0',
-	    INTC_Interrupt (INT(IRQ_USB_EMPTY)) => '0',
+    IRQ(IRQ_HBC_CTRL_SPI, hbc_ctrl_spi_int);
+    IRQ(IRQ_HBC_DATA_SPI, hbc_data_spi_int);
 #endif
-	    INTC_Interrupt (INT(IRQ_BUTTON_2)) => btn2_d,
-	    INTC_Interrupt (15) => '0',
-	    GPI1 (INT(IRQ_BUTTON)) => btn1_d,
-	    GPI1 (INT(IRQ_FIFO_FULL)) => tx_fifo_full,
-	    GPI1 (INT(IRQ_FIFO_ALMOST_FULL)) => tx_fifo_almost_full,
-	    GPI1 (INT(IRQ_FIFO_OVERFLOW)) => tx_fifo_overflow,
-	    GPI1 (INT(IRQ_RX_DATA_READY)) => not(rx_fifo_empty),
-	    GPI1 (INT(IRQ_RX_PKT_READY)) => s2p_pkt_ready,
-	    GPI1 (INT(IRQ_RX_FIFO_FULL)) => rx_fifo_almost_full,
-	    GPI1 (INT(IRQ_CLOCK_LOSS)) => clk_lock_int,
-	    GPI1 (INT(IRQ_RAM_INIT)) => not(phy_init_done),
-	    GPI1 (INT(IRQ_RAM_FIFO_FULL)) => mem_fifo_full,
-#if USE_PAR_USB
-	    GPI1 (INT(IRQ_USB_INT)) => usb_irq,
-	    GPI1 (INT(IRQ_USB_FULL)) => UsbFull,
-	    GPI1 (INT(IRQ_USB_EN)) => UsbEN,
-	    GPI1 (INT(IRQ_USB_EMPTY)) => UsbEmpty,
-#else
-	    GPI1 (INT(IRQ_USB_INT)) => '0',
-	    GPI1 (INT(IRQ_USB_FULL)) => '0',
-	    GPI1 (INT(IRQ_USB_EN)) => '0',
-	    GPI1 (INT(IRQ_USB_EMPTY)) => '0',
-#endif
-	    GPI1 (INT(IRQ_BUTTON_2)) => btn2_d,
-	    GPI1 (15) => '0');
+
+    io_read_data <= peripheral_select(peripheral_data, peripheral_ready);
+    io_ready <= bool_to_bit(peripheral_ready /= zeros(peripheral_ready'length));
     
-    ba_0 : entity work.io_bus_arbitrator
-	port map (
-	    io_d_out => io_read_data,
-	    io_ready => io_ready,
-	    bus1_d_in => bus1_data,
-	    bus1_ready => bus1_ready,
-	    bus2_d_in => bus2_data,
-	    bus2_ready => bus2_ready,
-	    bus3_d_in => bus3_data,
-	    bus3_ready => bus3_ready,
-	    bus4_d_in => bus4_data,
-	    bus4_ready => bus4_ready,
-	    bus5_d_in => bus5_data,
-	    bus5_ready => bus5_ready,
-	    bus6_d_in => (others => '0'),
-	    bus6_ready => bus6_ready,
-	    bus7_d_in => bus7_data,
-	    bus7_ready => bus7_ready,
-	    bus8_d_in => bus8_data,
-	    bus8_ready => bus8_ready);
-	    
     mem_if : entity work.mem_interface
 	port map (
 	    cpu_clk => cpu_clk,
 	    reset => cpu_reset,
 	    io_addr => io_address (7 downto 0),
 	    io_d_in => io_write_data,
-	    io_d_out => bus3_data,
+	    io_d_out => peripheral_data(PERIPH_MEM),
 	    io_addr_strobe => io_addr_strobe,
 	    io_read_strobe => io_read_strobe,
 	    io_write_strobe => io_write_strobe,
-	    io_ready => bus3_ready,
+	    io_ready => peripheral_ready(PERIPH_MEM),
 	    app_af_cmd => app_af_cmd,
 	    app_af_addr => app_af_addr,
 	    app_af_wren => app_af_wren,
@@ -644,7 +549,82 @@ begin
 	    ram_dm => ddr2_dm,
 	    ram_dqs => ddr2_dqs,
 	    ram_dq => ddr2_dq);
+#endif
 
+    hbc_tx: entity work.hbc_tx
+	port map (
+	    cpu_clk => cpu_clk,
+	    cpu_reset => cpu_reset,
+	    serial_clk => serial_clk,
+	    serial_reset => serial_reset,
+	    io_addr => io_address (7 downto 0),
+	    io_d_in => io_write_data,
+	    io_d_out => peripheral_data(PERIPH_HBC_TXFIFO),
+	    io_addr_strobe => io_addr_strobe,
+	    io_read_strobe => io_read_strobe,
+	    io_write_strobe => io_write_strobe,
+	    io_ready_fifo => peripheral_ready(PERIPH_HBC_TXFIFO),
+	    io_ready_mod => peripheral_ready(PERIPH_HBC_TXMOD),
+	    hbc_tx_fifo_flush => hbc_tx_fifo_flush,
+	    hbc_tx_trigger => hbc_tx_trigger,
+	    hbc_tx_fifo_full => hbc_tx_fifo_full,
+	    hbc_tx_fifo_almost_full => hbc_tx_fifo_almost_full,
+	    hbc_tx_fifo_overflow => hbc_tx_fifo_overflow,
+	    s_data_out => s_data_out);
+
+    hbc_rx: entity work.hbc_rx
+	port map (
+	    cpu_clk => cpu_clk,
+	    cpu_reset => cpu_reset,
+	    serial_clk => serial_clk,
+	    serial_clk_90 => serial_clk_90,
+	    serial_reset => serial_reset,
+	    io_addr => io_address (7 downto 0),
+	    io_d_out => peripheral_data(PERIPH_HBC_RXFIFO),
+	    io_addr_strobe => io_addr_strobe,
+	    io_read_strobe => io_read_strobe,
+	    io_ready => peripheral_ready(PERIPH_HBC_RXFIFO),
+	    hbc_rx_fifo_almost_full => hbc_rx_fifo_almost_full,
+	    hbc_rx_fifo_empty => hbc_rx_fifo_empty,
+	    hbc_rx_pkt_ready => hbc_rx_pkt_ready,
+	    hbc_rx_pkt_ack => hbc_rx_pkt_ack,
+	    s_data_in => s_data_in);
+
+    scrambler : entity work.scrambler
+	port map (
+	    cpu_clk => cpu_clk,
+	    reset => cpu_reset,
+	    reseed => scram_reseed,
+	    seed_val => scram_seed_val,
+	    seed_clk => scram_seed_clk,
+	    io_addr => io_address (7 downto 0),
+	    io_d_out => peripheral_data(PERIPH_HBC_SCRAMBLER),
+	    io_addr_strobe => io_addr_strobe,
+	    io_read_strobe => io_read_strobe,
+	    io_ready => peripheral_ready(PERIPH_HBC_SCRAMBLER));
+
+#if USE_SPI
+    spi_hbc : entity work.spi_interface
+	port map (
+	    clk => cpu_clk,
+	    reset => cpu_reset,
+	    io_addr => io_address (7 downto 0),
+	    io_d_out => peripheral_data(PERIPH_SPI),
+	    io_d_in => io_write_data,
+	    io_addr_strobe => io_addr_strobe,
+	    io_read_strobe => io_read_strobe,
+	    io_write_strobe => io_write_strobe,
+	    io_ready => peripheral_ready(PERIPH_SPI),
+	    hbc_data_int => hbc_data_spi_int,
+	    hbc_ctrl_int => hbc_ctrl_spi_int,
+	    hbc_data_sclk => hbc_data_sclk,
+	    hbc_data_mosi => hbc_data_mosi,
+	    hbc_data_miso => hbc_data_miso,
+	    hbc_data_ss => psoc_swdck,
+	    hbc_ctrl_sclk => hbc_ctrl_sclk,
+	    hbc_ctrl_mosi => hbc_ctrl_mosi,
+	    hbc_ctrl_miso => hbc_ctrl_miso,
+	    hbc_ctrl_ss => psoc_swdio);
 #endif
 
 #if USE_PSOC
@@ -664,50 +644,6 @@ begin
 	    xres => psoc_reset);
 #endif
 
-    fifo_int_0 : entity work.tx_fifo_interface
-	port map (
-	    clk => cpu_clk,
-	    reset => cpu_reset,
-	    trigger => tx_fifo_flush,
-	    io_addr => fifo_bus_addr,
-	    io_d_in => fifo_d_out,
-	    io_d_out => bus1_data,
-	    io_addr_strobe => fifo_addr_strobe,
-	    io_read_strobe => io_read_strobe,
-	    io_write_strobe => fifo_write_strobe,
-	    io_ready => fifo_io_ready,
-	    fifo_d_out => to_tx_fifo,
-	    fifo_wren => tx_fifo_wren,
-	    fifo_d_in => from_tx_fifo,
-	    -- Disabled
-	    fifo_rden => open);
-	    
-    tx_fifo : component fifo_tx
-	port map (
-	    rst => cpu_reset,
-	    wr_clk => cpu_clk,
-	    rd_clk => serial_clk,
-	    din => to_tx_fifo,
-	    wr_en => tx_fifo_wren,
-	    rd_en => tx_fifo_rden,
-	    dout => from_tx_fifo,
-	    full => tx_fifo_full,
-	    prog_full => tx_fifo_almost_full,
-	    overflow => tx_fifo_overflow,
-	    empty => tx_fifo_empty,
-	    underflow => tx_fifo_underflow);
-
-    p_to_s : entity work.parallel_to_serial
-	port map (
-	    clk => serial_clk,
-	    reset => serial_reset,
-	    trigger => parallel_to_serial_enable,
-	    trig_clk => cpu_clk,
-	    fifo_d_in => from_tx_fifo,
-	    fifo_rden => tx_fifo_rden,
-	    fifo_empty => tx_fifo_empty,
-	    data_out => s_data_out);
-
 #if USE_PAR_USB
     usb_0 : entity work.usb_fifo
 	port map (
@@ -716,11 +652,11 @@ begin
 	    reset => cpu_reset,
 	    io_addr => io_address (7 downto 0),
 	    io_d_in => io_write_data,
-	    io_d_out => bus4_data,
+	    io_d_out => peripheral_data(PERIPH_PAR_USB),
 	    io_addr_strobe => io_addr_strobe,
 	    io_read_strobe => io_read_strobe,
 	    io_write_strobe => io_write_strobe,
-	    io_ready => bus4_ready,
+	    io_ready => peripheral_ready(PERIPH_PAR_USB),
 	    pkt_end => usb_pkt_end,
 	    UsbIRQ => usb_irq,
 	    UsbDB => UsbDB,
@@ -741,138 +677,18 @@ begin
 	    clk => cpu_clk,
 	    reset => cpu_reset,
 	    io_addr => io_address (7 downto 0),
-	    io_d_in => io_write_data (7 downto 0),
-	    -- offset of 2 if MEM_FLAGS_ADDR := X"02"
-	    io_d_out => bus2_data (23 downto 16),
+	    io_d_in => io_write_data,
+	    io_d_out => peripheral_data(PERIPH_LCD),
 	    io_addr_strobe => io_addr_strobe,
 	    io_read_strobe => io_read_strobe,
 	    io_write_strobe => io_write_strobe,
-	    io_ready => bus2_ready,
+	    io_ready => peripheral_ready(PERIPH_LCD),
 	    lcd_data => LCDD,
 	    lcd_en => LCDEN,
 	    lcd_rw => LCDRW,
 	    lcd_rs => LCDRS);
 #endif
 	
-    scrambler : entity work.scrambler
-	port map (
-	    cpu_clk => cpu_clk,
-	    reset => cpu_reset,
-	    reseed => reseed,
-	    seed_val => seed_val,
-	    seed_clk => seed_clk,
-	    io_addr => io_address (7 downto 0),
-	    io_d_out => bus5_data,
-	    io_addr_strobe => io_addr_strobe,
-	    io_read_strobe => io_read_strobe,
-	    io_ready => bus5_ready);
-
-    ba_1 : entity work.fifo_bus_arbitrator
-	port map (
-	    mod_bus_master => mod_bus_master,
-	    io_addr => io_address (7 downto 0),
-	    io_d_out => io_write_data,
-	    io_addr_strobe => io_addr_strobe,
-	    io_write_strobe => io_write_strobe,
-	    io_io_ready => bus1_ready,
-	    mod_addr => mod_bus_addr,
-	    mod_d_out => mod_d_out,
-	    mod_addr_strobe => mod_addr_strobe,
-	    mod_write_strobe => mod_write_strobe,
-	    mod_io_ready => mod_io_ready,
-	    fifo_addr => fifo_bus_addr,
-	    fifo_d_out => fifo_d_out,
-	    fifo_addr_strobe => fifo_addr_strobe,
-	    fifo_write_strobe => fifo_write_strobe,
-	    fifo_io_ready => fifo_io_ready);
-    
-    modulator : entity work.modulator
-	port map (
-	    clk => cpu_clk,
-	    reset => cpu_reset,
-	    io_addr => io_address (7 downto 0),
-	    io_d_in => io_write_data,
-	    io_addr_strobe => io_addr_strobe,
-	    io_write_strobe => io_write_strobe,
-	    io_ready => bus6_ready,
-	    bus_master => mod_bus_master,
-	    sub_addr_out => mod_bus_addr,
-	    sub_d_out => mod_d_out,
-	    sub_addr_strobe => mod_addr_strobe,
-	    sub_write_strobe => mod_write_strobe,
-	    sub_io_ready => mod_io_ready);
-
-    rx_fifo : component fifo_rx
-	port map (
-	    rst => cpu_reset,
-	    wr_clk => serial_clk,
-	    rd_clk => cpu_clk,
-	    din => s2p_fifo_data,
-	    wr_en => rx_fifo_wren,
-	    rd_en => rx_fifo_rden,
-	    dout => from_rx_fifo,
-	    full => rx_fifo_full,
-	    prog_full => rx_fifo_almost_full,
-	    overflow => rx_fifo_overflow,
-	    empty => rx_fifo_empty,
-	    underflow => rx_fifo_underflow);
-
-    cdr0 : entity work.data_synchroniser
-	port map (
-	    reset => pkt_reset,
-	    serial_clk => serial_clk,
-	    serial_clk_90 => serial_clk_90,
-	    data_in => s_data_in,
-	    data_out => s_data_in_sync);
-
-    s_to_p : entity work.serial_to_parallel
-	port map (
-	    reset_i => serial_reset,
-	    pkt_reset => pkt_reset,
-	    serial_clk => serial_clk,
-	    fifo_d_out => s2p_fifo_data,
-	    fifo_wren => rx_fifo_wren,
-	    fifo_full => '0',
-	    data_in => s_data_in_sync,
-	    pkt_ack => s2p_pkt_ack,
-	    pkt_ready => s2p_pkt_ready);
-
-    fifo_int_1 : entity work.rx_fifo_interface
-	port map (
-	    clk => cpu_clk,
-	    reset => cpu_reset,
-	    io_addr => io_address (7 downto 0),
-	    io_d_out => bus7_data,
-	    io_addr_strobe => io_addr_strobe,
-	    io_read_strobe => io_read_strobe,
-	    io_ready => bus7_ready,
-	    fifo_d_in => from_rx_fifo,
-	    fifo_rden => rx_fifo_rden);
-
-#if USE_SPI
-    spi_hbc : entity work.spi_interface
-	port map (
-	    clk => cpu_clk,
-	    reset => cpu_reset,
-	    io_addr => io_address (7 downto 0),
-	    io_d_out => bus8_data,
-	    io_d_in => io_write_data,
-	    io_addr_strobe => io_addr_strobe,
-	    io_read_strobe => io_read_strobe,
-	    io_write_strobe => io_write_strobe,
-	    io_ready => bus8_ready,
-	    hbc_data_int => hbc_data_spi_int,
-	    hbc_ctrl_int => hbc_ctrl_spi_int,
-	    hbc_data_sclk => hbc_data_sclk,
-	    hbc_data_mosi => hbc_data_mosi,
-	    hbc_data_miso => hbc_data_miso,
-	    hbc_data_ss => psoc_swdck,
-	    hbc_ctrl_sclk => hbc_ctrl_sclk,
-	    hbc_ctrl_mosi => hbc_ctrl_mosi,
-	    hbc_ctrl_miso => hbc_ctrl_miso,
-	    hbc_ctrl_ss => psoc_swdio);
-#endif
-
 #if USE_BUTTON
     db_btn1 : entity work.debounce
 	port map (

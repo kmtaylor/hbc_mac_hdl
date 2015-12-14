@@ -10,9 +10,9 @@ use transceiver.bits.all;
 entity spi_interface is
     port (
 	clk, reset  : in std_logic;
-	io_addr	    : in uint8_t;
-	io_d_out    : out uint32_t;
-	io_d_in	    : in uint32_t;
+	io_addr	    : in vec8_t;
+	io_d_out    : out vec32_t;
+	io_d_in	    : in vec32_t;
 	io_addr_strobe : in std_logic;
 	io_read_strobe, io_write_strobe : in std_logic;
 	io_ready    : out std_logic;
@@ -31,11 +31,11 @@ end spi_interface;
 architecture spi_interface_arch of spi_interface is
 
     -- FIFO_ADDR must be word aligned
-    constant SPI_DATA_ADDR : uint8_t := HEX(SPI_DATA_ADDR);
-    constant SPI_CTRL_ADDR : uint8_t := HEX(SPI_CTRL_ADDR);
+    constant SPI_DATA_ADDR : vec8_t := HEX(SPI_DATA_ADDR);
+    constant SPI_CTRL_ADDR : vec8_t := HEX(SPI_CTRL_ADDR);
 	    
-    signal io_addr_reg : uint8_t;
-    signal io_data_reg : uint32_t;
+    signal io_addr_reg : vec8_t;
+    signal io_data_reg : vec32_t;
 	
     signal io_write : std_logic;
     signal enabled : std_logic;
@@ -43,7 +43,7 @@ architecture spi_interface_arch of spi_interface is
     signal ctrl_op : std_logic;
 
     signal ctrl_do_valid : std_logic;
-    signal ctrl_do, ctrl_do_r : uint8_t;
+    signal ctrl_do, ctrl_do_r : vec8_t;
     signal ctrl_wren : std_logic;
 
 begin

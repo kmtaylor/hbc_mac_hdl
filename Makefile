@@ -24,7 +24,9 @@ TRANSCEIVER_FILES += \
 	processed/walsh_enc_lut_pp.vhd					\
 	processed/spi_slave_core_pp.vhd					\
 	processed/spi_interface_pp.vhd					\
-	processed/psoc_interface_pp.vhd
+	processed/psoc_interface_pp.vhd					\
+	processed/hbc_tx_pp.vhd						\
+	processed/hbc_rx_pp.vhd
 
 all: $(TRANSCEIVER_FILES)
 

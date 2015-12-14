@@ -11,26 +11,26 @@ entity tx_fifo_interface is
     port (
 	clk, reset  : in std_logic;
 	trigger	    : in std_logic;
-	io_addr	    : in uint8_t;
-	io_d_in	    : in uint32_t;
-	io_d_out    : out uint32_t;
+	io_addr	    : in vec8_t;
+	io_d_in	    : in vec32_t;
+	io_d_out    : out vec32_t;
 	io_addr_strobe : in std_logic;
 	io_read_strobe, io_write_strobe : in std_logic;
 	io_ready    : out std_logic;
-	fifo_d_out  : out uint32_t;
+	fifo_d_out  : out vec32_t;
 	fifo_wren   : out std_logic;
-	fifo_d_in   : in uint32_t;
+	fifo_d_in   : in vec32_t;
 	fifo_rden   : out std_logic);
 end tx_fifo_interface;
 
 architecture tx_fifo_interface_arch of tx_fifo_interface is
 
     -- FIFO_ADDR must be word aligned
-    constant FIFO_ADDR : uint8_t := HEX(FIFO_ADDR);
-    constant FIFO_MASK_ADDR : uint8_t := HEX(FIFO_MASK_ADDR);
+    constant FIFO_ADDR : vec8_t := HEX(FIFO_ADDR);
+    constant FIFO_MASK_ADDR : vec8_t := HEX(FIFO_MASK_ADDR);
 	    
-    signal io_addr_reg : uint8_t;
-    signal io_d_in_r : uint32_t;
+    signal io_addr_reg : vec8_t;
+    signal io_d_in_r : vec32_t;
 	
     signal enabled : std_logic;
     signal mask_op : std_logic;
@@ -45,18 +45,18 @@ architecture tx_fifo_interface_arch of tx_fifo_interface is
     signal num_bits : counter_type := reset_32;
     signal bit_p : counter_type := reset_32;
     signal bit_p_i : counter_type;
-    signal cur_buf : uint32_t;
-    signal cur_buf_i : uint32_t;
-    signal wrap_buf : uint32_t;
-    signal wrap_buf_i : uint32_t;
+    signal cur_buf : vec32_t;
+    signal cur_buf_i : vec32_t;
+    signal wrap_buf : vec32_t;
+    signal wrap_buf_i : vec32_t;
     signal write_wrap_buf : std_logic;
     signal write_wrap_buf_i : std_logic;
     signal flush_i : std_logic;
     signal clear_cur_buf : std_logic;
     signal clear_cur_buf_i : std_logic;
-    signal wrap_mask : uint32_t;
-    signal nowrap_mask : uint32_t;
-    signal new_mask : uint32_t;
+    signal wrap_mask : vec32_t;
+    signal nowrap_mask : vec32_t;
+    signal new_mask : vec32_t;
     signal flush_req : std_logic;
     signal flush_req_reset : std_logic;
 

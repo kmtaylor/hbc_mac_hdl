@@ -10,21 +10,21 @@ use transceiver.bits.all;
 entity rx_fifo_interface is
     port (
 	clk, reset  : in std_logic;
-	io_addr	    : in uint8_t;
-	io_d_out    : out uint32_t;
+	io_addr	    : in vec8_t;
+	io_d_out    : out vec32_t;
 	io_addr_strobe : in std_logic;
 	io_read_strobe : in std_logic;
 	io_ready    : out std_logic;
-	fifo_d_in   : in uint32_t;
+	fifo_d_in   : in vec32_t;
 	fifo_rden   : out std_logic);
 end rx_fifo_interface;
 
 architecture rx_fifo_interface_arch of rx_fifo_interface is
 
     -- FIFO_ADDR must be word aligned
-    constant RX_FIFO_ADDR : uint8_t := HEX(RX_FIFO_ADDR);
+    constant RX_FIFO_ADDR : vec8_t := HEX(RX_FIFO_ADDR);
 	    
-    signal io_addr_reg : uint8_t;
+    signal io_addr_reg : vec8_t;
 	
     signal enabled : std_logic;
     signal do_fifo_rden : std_logic := '0';

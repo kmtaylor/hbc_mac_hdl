@@ -13,7 +13,7 @@ use transceiver.bits.all;
 entity serial_to_parallel is
 	port (
 		serial_clk, reset_i : in std_logic;
-		fifo_d_out : out uint32_t;
+		fifo_d_out : out vec32_t;
 		fifo_wren : out std_logic;
 		fifo_full : in std_logic;
 		data_in : in std_logic;

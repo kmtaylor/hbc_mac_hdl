@@ -11,14 +11,14 @@ use transceiver.bits.all;
 entity modulator is
     port (
 	clk, reset  : in std_logic;
-	io_addr	    : in uint8_t;
-	io_d_in	    : in uint32_t;
+	io_addr	    : in vec8_t;
+	io_d_in	    : in vec32_t;
 	io_addr_strobe : in std_logic;
 	io_write_strobe : in std_logic;
 	io_ready    : out std_logic;
 	bus_master  : out std_logic;
-	sub_addr_out: out uint8_t;
-	sub_d_out   : out uint32_t;
+	sub_addr_out: out vec8_t;
+	sub_d_out   : out vec32_t;
 	sub_addr_strobe : out std_logic;
 	sub_write_strobe : out std_logic;
 	sub_io_ready : in std_logic);
@@ -27,20 +27,20 @@ end modulator;
 architecture modulator_arch of modulator is
 
     -- FIFO_ADDR must be word aligned
-    constant MODULATOR_ADDR : uint8_t := HEX(MODULATOR_ADDR);
-    constant MODULATOR_SF_ADDR : uint8_t := HEX(MODULATOR_SF_ADDR);
-    constant FIFO_ADDR : uint8_t := X"00";
+    constant MODULATOR_ADDR : vec8_t := HEX(MODULATOR_ADDR);
+    constant MODULATOR_SF_ADDR : vec8_t := HEX(MODULATOR_SF_ADDR);
+    constant FIFO_ADDR : vec8_t := X"00";
 
-    constant BIT_MAP_32_1 : uint32_t := X"AAAAAAAA";
-    constant BIT_MAP_32_0 : uint32_t := X"55555555";
+    constant BIT_MAP_32_1 : vec32_t := X"AAAAAAAA";
+    constant BIT_MAP_32_0 : vec32_t := X"55555555";
     
-    constant DOUBLE_WRITE : uint8_t := X"00";
+    constant DOUBLE_WRITE : vec8_t := X"00";
 
     constant SYM_LIMIT : integer := 32 / WALSH_SYM_SIZE;
 	    
-    signal io_addr_reg : uint8_t;
-    signal io_d_in_r : uint32_t;
-    signal sf : uint8_t;
+    signal io_addr_reg : vec8_t;
+    signal io_d_in_r : vec32_t;
+    signal sf : vec8_t;
 	
     signal enabled : std_logic;
     signal set_sf_op : std_logic;
@@ -69,7 +69,7 @@ architecture modulator_arch of modulator is
     signal walsh_data, walsh_data_r : walsh_code_t;
     signal walsh_bit : std_logic;
     signal symbol : walsh_sym_t;
-    signal symbol_r : uint32_t;
+    signal symbol_r : vec32_t;
 
 begin
     io_ready <= io_ready_s or io_ready_d;

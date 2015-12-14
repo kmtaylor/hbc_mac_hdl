@@ -6,6 +6,7 @@ cat ../transceiver_spartan/toplevel.syr | grep WARNING | sort -u | sed \
     '/internal tristates are replaced/d' | sed \
     '/No primary, secondary unit/d' | sed \
     '/Instantiating black box module/d' | sed \
-    '/ddr2/d'
+    '/ddr2/d' | sed \
+    '/is neither a static name nor a globally static expression/d'
 #    '/Maxfanout/d' | sed \
 #    '/not supported by the current software release/d' | sed \

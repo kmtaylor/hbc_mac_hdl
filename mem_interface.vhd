@@ -10,9 +10,9 @@ use transceiver.bits.all;
 entity mem_interface is
 	port (
 		cpu_clk, reset : in std_logic;
-		io_addr	: in uint8_t;
-		io_d_in	: in uint32_t;
-		io_d_out : out uint32_t;
+		io_addr	: in vec8_t;
+		io_d_in	: in vec32_t;
+		io_d_out : out vec32_t;
 		io_addr_strobe : in std_logic;
 		io_read_strobe, io_write_strobe : in std_logic;
 		io_ready : out std_logic;
@@ -32,20 +32,20 @@ end mem_interface;
 architecture mem_interface_arch of mem_interface is
 
 	-- MEM_ADDR must be word aligned
-	constant MEM_RD_WR_ADDR	: uint8_t := HEX(MEM_RD_WR_ADDR);
-	constant MEM_FLAGS_ADDR	: uint8_t := HEX(MEM_FLAGS_ADDR);
-	constant MEM_RD_P_ADDR	: uint8_t := HEX(MEM_RD_P_ADDR);
-	constant MEM_WR_P_ADDR	: uint8_t := HEX(MEM_WR_P_ADDR);
+	constant MEM_RD_WR_ADDR	: vec8_t := HEX(MEM_RD_WR_ADDR);
+	constant MEM_FLAGS_ADDR	: vec8_t := HEX(MEM_FLAGS_ADDR);
+	constant MEM_RD_P_ADDR	: vec8_t := HEX(MEM_RD_P_ADDR);
+	constant MEM_WR_P_ADDR	: vec8_t := HEX(MEM_WR_P_ADDR);
 
-	signal io_addr_reg : uint8_t;
-	signal io_write_reg : uint32_t;
-	signal mem_data_reg : uint32_t;
+	signal io_addr_reg : vec8_t;
+	signal io_write_reg : vec32_t;
+	signal mem_data_reg : vec32_t;
 		
 	signal enabled : std_logic;
 
 	signal flags : std_logic_vector (1 downto 0);
-	signal rd_p : uint32_t;
-	signal wr_p : uint32_t;
+	signal rd_p : vec32_t;
+	signal wr_p : vec32_t;
 
 	signal latch_flags : std_logic;
 	signal latch_wr_p : std_logic;

@@ -3,8 +3,8 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 package bits is
-    subtype uint8_t is std_logic_vector (7 downto 0);
-    subtype uint32_t is std_logic_vector (31 downto 0);
+    subtype vec8_t is std_logic_vector (7 downto 0);
+    subtype vec32_t is std_logic_vector (31 downto 0);
 
     function bool_to_bit(input : boolean) return std_logic;
     function ones(length : natural) return std_logic_vector;
@@ -19,8 +19,8 @@ package bits is
 	return std_logic_vector;
     function concat_bit(vector : std_logic_vector; bit : std_logic)
 	return std_logic_vector;
-    function align_byte(input : uint8_t; address : std_logic_vector)
-	return uint32_t;
+    function align_byte(input : vec8_t; address : std_logic_vector)
+	return vec32_t;
 end package bits;
 
 package body bits is
@@ -111,8 +111,8 @@ package body bits is
 	return vector(vector'length-2 downto 0) & bit;
     end function concat_bit;
 
-    function align_byte(input : uint8_t; address : std_logic_vector)
-	return uint32_t is
+    function align_byte(input : vec8_t; address : std_logic_vector)
+	return vec32_t is
 	variable modulus : natural := to_integer(unsigned(address)) mod 4;
     begin
 	if modulus = 0 then

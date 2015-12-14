@@ -8,6 +8,7 @@ use ieee.vital_timing.all;
 
 library transceiver;
 use transceiver.numeric.all;
+use transceiver.bits.all;
 
 entity numeric_tb is
     generic (
