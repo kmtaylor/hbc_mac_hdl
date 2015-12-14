@@ -56,7 +56,7 @@
 #define CONST_HEX_RX_FIFO_ADDR		20
 
 #define CONST_HEX_SPI_DATA_ADDR		24
-#define CONST_HEX_SPI_CTRL_ADDR		25
+#define CONST_HEX_SPI_CTRL_ADDR		26
 
 /* ----------------------- CPU helper macros------------------------------- */
 #ifdef VHDL

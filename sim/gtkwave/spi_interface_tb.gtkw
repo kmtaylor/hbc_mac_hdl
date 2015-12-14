@@ -1,0 +1,58 @@
+[*]
+[*] GTKWave Analyzer v3.3.45 (w)1999-2012 BSI
+[*] Mon Dec 14 07:41:34 2015
+[*]
+[dumpfile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/spi_interface_tb.ghw"
+[dumpfile_mtime] "Mon Dec 14 07:38:22 2015"
+[dumpfile_size] 4297
+[savefile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/gtkwave/spi_interface_tb.gtkw"
+[timestart] 0
+[size] 1680 1024
+[pos] -1 -1
+*-26.000000 160000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.spi_interface_tb.
+[treeopen] top.spi_interface_tb.uut.
+[sst_width] 224
+[signals_width] 166
+[sst_expanded] 1
+[sst_vpaned_height] 291
+@28
+top.spi_interface_tb.clk
+top.spi_interface_tb.reset
+@200
+-
+@22
+#{top.spi_interface_tb.io_addr[7:0]} top.spi_interface_tb.io_addr[7] top.spi_interface_tb.io_addr[6] top.spi_interface_tb.io_addr[5] top.spi_interface_tb.io_addr[4] top.spi_interface_tb.io_addr[3] top.spi_interface_tb.io_addr[2] top.spi_interface_tb.io_addr[1] top.spi_interface_tb.io_addr[0]
+#{top.spi_interface_tb.io_d_in[31:0]} top.spi_interface_tb.io_d_in[31] top.spi_interface_tb.io_d_in[30] top.spi_interface_tb.io_d_in[29] top.spi_interface_tb.io_d_in[28] top.spi_interface_tb.io_d_in[27] top.spi_interface_tb.io_d_in[26] top.spi_interface_tb.io_d_in[25] top.spi_interface_tb.io_d_in[24] top.spi_interface_tb.io_d_in[23] top.spi_interface_tb.io_d_in[22] top.spi_interface_tb.io_d_in[21] top.spi_interface_tb.io_d_in[20] top.spi_interface_tb.io_d_in[19] top.spi_interface_tb.io_d_in[18] top.spi_interface_tb.io_d_in[17] top.spi_interface_tb.io_d_in[16] top.spi_interface_tb.io_d_in[15] top.spi_interface_tb.io_d_in[14] top.spi_interface_tb.io_d_in[13] top.spi_interface_tb.io_d_in[12] top.spi_interface_tb.io_d_in[11] top.spi_interface_tb.io_d_in[10] top.spi_interface_tb.io_d_in[9] top.spi_interface_tb.io_d_in[8] top.spi_interface_tb.io_d_in[7] top.spi_interface_tb.io_d_in[6] top.spi_interface_tb.io_d_in[5] top.spi_interface_tb.io_d_in[4] top.spi_interface_tb.io_d_in[3] top.spi_interface_tb.io_d_in[2] top.spi_interface_tb.io_d_in[1] top.spi_interface_tb.io_d_in[0]
+@28
+top.spi_interface_tb.io_read_strobe
+top.spi_interface_tb.io_write_strobe
+top.spi_interface_tb.io_ready
+@200
+-
+-
+@28
+top.spi_interface_tb.uut.enabled
+top.spi_interface_tb.uut.io_write
+top.spi_interface_tb.uut.do_ack
+top.spi_interface_tb.uut.ctrl_op
+@200
+-
+-
+@28
+top.spi_interface_tb.uut.ctrl_do_valid
+@22
+#{top.spi_interface_tb.uut.ctrl_do_r[7:0]} top.spi_interface_tb.uut.ctrl_do_r[7] top.spi_interface_tb.uut.ctrl_do_r[6] top.spi_interface_tb.uut.ctrl_do_r[5] top.spi_interface_tb.uut.ctrl_do_r[4] top.spi_interface_tb.uut.ctrl_do_r[3] top.spi_interface_tb.uut.ctrl_do_r[2] top.spi_interface_tb.uut.ctrl_do_r[1] top.spi_interface_tb.uut.ctrl_do_r[0]
+@28
+top.spi_interface_tb.uut.ctrl_wren
+@200
+-
+-
+@22
+#{top.spi_interface_tb.uut.cmd_byte[7:0]} top.spi_interface_tb.uut.cmd_byte[7] top.spi_interface_tb.uut.cmd_byte[6] top.spi_interface_tb.uut.cmd_byte[5] top.spi_interface_tb.uut.cmd_byte[4] top.spi_interface_tb.uut.cmd_byte[3] top.spi_interface_tb.uut.cmd_byte[2] top.spi_interface_tb.uut.cmd_byte[1] top.spi_interface_tb.uut.cmd_byte[0]
+#{top.spi_interface_tb.uut.io_data_reg[31:0]} top.spi_interface_tb.uut.io_data_reg[31] top.spi_interface_tb.uut.io_data_reg[30] top.spi_interface_tb.uut.io_data_reg[29] top.spi_interface_tb.uut.io_data_reg[28] top.spi_interface_tb.uut.io_data_reg[27] top.spi_interface_tb.uut.io_data_reg[26] top.spi_interface_tb.uut.io_data_reg[25] top.spi_interface_tb.uut.io_data_reg[24] top.spi_interface_tb.uut.io_data_reg[23] top.spi_interface_tb.uut.io_data_reg[22] top.spi_interface_tb.uut.io_data_reg[21] top.spi_interface_tb.uut.io_data_reg[20] top.spi_interface_tb.uut.io_data_reg[19] top.spi_interface_tb.uut.io_data_reg[18] top.spi_interface_tb.uut.io_data_reg[17] top.spi_interface_tb.uut.io_data_reg[16] top.spi_interface_tb.uut.io_data_reg[15] top.spi_interface_tb.uut.io_data_reg[14] top.spi_interface_tb.uut.io_data_reg[13] top.spi_interface_tb.uut.io_data_reg[12] top.spi_interface_tb.uut.io_data_reg[11] top.spi_interface_tb.uut.io_data_reg[10] top.spi_interface_tb.uut.io_data_reg[9] top.spi_interface_tb.uut.io_data_reg[8] top.spi_interface_tb.uut.io_data_reg[7] top.spi_interface_tb.uut.io_data_reg[6] top.spi_interface_tb.uut.io_data_reg[5] top.spi_interface_tb.uut.io_data_reg[4] top.spi_interface_tb.uut.io_data_reg[3] top.spi_interface_tb.uut.io_data_reg[2] top.spi_interface_tb.uut.io_data_reg[1] top.spi_interface_tb.uut.io_data_reg[0]
+@28
+top.spi_interface_tb.uut.cmd_index
+[pattern_trace] 1
+[pattern_trace] 0

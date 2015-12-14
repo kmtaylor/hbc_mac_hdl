@@ -53,6 +53,12 @@ DATA_SYNCHRONISER_TB_FILES += \
 	data_synchroniser_tb.vhd
 DATA_SYNCHRONISER_SIM_FLAGS += --stop-time=10us
 
+SPI_TB_FILES += \
+	spi_interface.vhd \
+	spi_slave_core.vhd \
+	spi_interface_tb.vhd
+SPI_SIM_FLAGS += --stop-time=1000ns
+
 C_TO_VHD_FILES += \
 	c_to_vhd.vhd \
 	fifo_interface.vhd \
@@ -187,6 +193,10 @@ data_synchroniser_tb: $(XILINX_OBJS) $(LOCAL_OBJS) \
 	$(GHDL) -m $(XILINX_FLAGS) "$@"
 	./"$@" $(DATA_SYNCHRONISER_SIM_FLAGS) --wave="$@".ghw
 
+spi_interface_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(SPI_TB_FILES:.vhd=_pp.o)
+	$(GHDL) -m $(XILINX_FLAGS) "$@"
+	./"$@" $(SPI_SIM_FLAGS) --wave="$@".ghw
+
 # Xilinx libraries
 xilinxcorelib-obj93.cf:
 	$(GHDL) -i --ieee=none --work=XilinxCoreLib \
@@ -213,6 +223,8 @@ work-obj93.cf:
 
 # Analysis
 %_pp.o: ../processed/%_pp.vhd
+	$(GHDL) -i $(XILINX_FLAGS) "$<"
+%_core_pp.o: ../processed/%_core_pp.vhd
 	$(GHDL) -i $(XILINX_FLAGS) "$<"
 %_tb_pp.o: ../testbench/processed/%_tb_pp.vhd
 	$(GHDL) -i $(XILINX_FLAGS) "$<"

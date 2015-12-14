@@ -2,13 +2,11 @@ VHHFLAGS ?= -DXILINX_SPARTAN=1 -DUSE_MEM=1 -DUSE_SPI=1 -DUSE_1BIT_LED -DUSE_PSOC
 
 TRANSCEIVER_FILES += \
 	processed/clk_div_pp.vhd					\
-	processed/c_to_vhd_pp.vhd					\
 	processed/data_synchroniser_pp.vhd				\
 	processed/debounce_pp.vhd					\
 	processed/fifo_bus_arbitrator_pp.vhd				\
 	processed/tx_fifo_interface_pp.vhd				\
 	processed/hamming_lut_pp.vhd					\
-	processed/io_bus_arbitrator_pp.vhd				\
 	processed/lcd_interface_pp.vhd					\
 	processed/mem_interface_pp.vhd					\
 	processed/ddr_pp.vhd						\

@@ -44,7 +44,11 @@ architecture spi_interface_arch of spi_interface is
 
     signal ctrl_do_valid : std_logic;
     signal ctrl_do, ctrl_do_r : vec8_t;
-    signal ctrl_wren : std_logic;
+    signal ctrl_wren, ctrl_wren_status, ctrl_wren_data : std_logic;
+
+    signal ctrl_byte : vec8_t;
+    signal ctrl_index : std_logic;
+    signal ctrl_byte_req : std_logic;
 
 begin
 
@@ -79,16 +83,43 @@ begin
             spi_sck_i => hbc_ctrl_sclk,
             spi_mosi_i => hbc_ctrl_mosi,
             spi_miso_o => hbc_ctrl_miso,
-            di_req_o => open,
-            di_i => io_data_reg (7 downto 0),
+            di_req_o => ctrl_byte_req,
+            di_i => ctrl_byte,
             wren_i => ctrl_wren,
             wr_ack_o => open, 
             do_valid_o => ctrl_do_valid,
             do_o => ctrl_do);
 
+    -- Commands are written as 16 bit vectors. One byte is status, the other
+    -- is data
+    ctrl_index_proc : process (clk, reset) begin
+	if clk'event and clk = '0' then
+	    if (enabled and do_ack and io_write and ctrl_op) = '1' then
+		ctrl_index <= '1';
+	    elsif ctrl_byte_req = '1' then
+		if ctrl_index = '1' then
+		    ctrl_wren_data <= '1';
+		end if;
+		ctrl_index <= '0';
+	    else
+		ctrl_wren_data <= '0';
+	    end if;
+	end if;
+    end process ctrl_index_proc;
+
+    ctrl_data_out_proc : process (ctrl_index) begin
+	if ctrl_index = '1' then
+	    ctrl_byte <= io_data_reg(15 downto 8);
+	else
+	    ctrl_byte <= io_data_reg(7 downto 0);
+	end if;
+    end process ctrl_data_out_proc;
+
+    ctrl_wren <= ctrl_wren_status or ctrl_wren_data;
+
     -- Data has arrived on the control interface. Save it and signal an
     -- interrupt.
-    ctrl_data_in_proc : process (clk, reset) begin
+    ctrl_data_in_proc : process (clk) begin
 	if clk'event and clk = '1' then
 	    if ctrl_do_valid = '1' then
 		ctrl_do_r <= ctrl_do;
@@ -121,7 +152,7 @@ begin
 	if reset = '1' then
 	    io_ready <= '0';
 	    io_d_out <= (others => 'Z');
-	    ctrl_wren <= '0';
+	    ctrl_wren_status <= '0';
 	elsif clk'event and clk = '0' then
 	    if enabled = '1' then
 		if do_ack = '1' then
@@ -134,10 +165,11 @@ begin
 			end if;
 		    else
 			if ctrl_op = '1' then
-			    ctrl_wren <= '1';
+			    ctrl_wren_status <= '1';
 			end if;
 		    end if;
 		else
+		    ctrl_wren_status <= '0';
 		    io_ready <= '0';
 		    io_d_out <= (others => 'Z');
 		end if;
