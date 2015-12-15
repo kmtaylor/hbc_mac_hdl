@@ -107,7 +107,7 @@ begin
 	end if;
     end process ctrl_index_proc;
 
-    ctrl_data_out_proc : process (ctrl_index) begin
+    ctrl_data_out_proc : process (ctrl_index, io_data_reg) begin
 	if ctrl_index = '1' then
 	    ctrl_byte <= io_data_reg(15 downto 8);
 	else

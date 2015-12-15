@@ -54,8 +54,8 @@ Net ddr2_cas_n       LOC=P141 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED
 Net ddr2_we_n        LOC=P142 | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;	# WE
 
 Net ddr2_cke         LOC=P15  | IOSTANDARD=SSTL2_I            | OUT_TERM=UNTUNED_50;
-Net ddr2_ck          LOC=P17  | IOSTANDARD=SSTL2_I;
-Net ddr2_ck_n        LOC=P16  | IOSTANDARD=SSTL2_I;
+Net ddr2_ck          LOC=P16  | IOSTANDARD=SSTL2_I;
+Net ddr2_ck_n        LOC=P17  | IOSTANDARD=SSTL2_I;
 
 #
 # LED

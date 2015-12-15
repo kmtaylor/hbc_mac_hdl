@@ -215,6 +215,7 @@ begin
 
 	wait for clk_period*8;
 		-- simulate data coming with CL=3
+		wait for 5 ns;
 		ram_dq <= X"1234";
 		wait for clk_period/2;
 		ram_dq <= X"5678";

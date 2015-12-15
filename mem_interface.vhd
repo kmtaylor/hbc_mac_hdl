@@ -179,9 +179,8 @@ begin
                         io_ready <= '1';
                         if reading = '1' then
 			    if latch_flags = '1' then
-				-- offset of 1 if MEM_FLAGS_ADDR := X"05"
-				io_d_out (9 downto 8) <= flags;
-				io_d_out (15 downto 10) <= (others => '0');
+				io_d_out <= align_byte("000000" & flags,
+						MEM_FLAGS_ADDR);
 			    elsif latch_rd_p = '1' then
 				io_d_out <= rd_p;
 			    elsif latch_wr_p = '1' then

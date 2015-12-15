@@ -117,7 +117,7 @@ architecture ddr_arch of ddr is
     signal mem_clk_270 : std_logic;
 
     -- FIXME:
-    constant READ_DELAY : natural := 0;
+    constant READ_DELAY : natural := 200;
 
     -- Signals for mem_clk to DDR translation
     signal dqs_ddr : std_logic_vector (DDR_BUS_WIDTH/8-1 downto 0);
@@ -145,8 +145,8 @@ architecture ddr_arch of ddr is
     signal bus_bytes : std_logic_vector(DDR_BUS_WIDTH*2/8-1 downto 0);
     signal bus_data : std_logic_vector (DDR_BUS_WIDTH*2-1 downto 0);
 
-    constant CAS_LATENCY : natural := 3 + 1;
-    signal cas_latency_r : unsigned (CAS_LATENCY-1 downto 0);
+    constant CAS_LATENCY : natural := 3;
+    signal cas_latency_r : unsigned (CAS_LATENCY+1 downto 0);
     signal start_cas_latency : std_logic;
 
     constant MAX_DELAY : natural := 30000;
@@ -209,7 +209,7 @@ architecture ddr_arch of ddr is
 -- DQS start		0.72 to 1.28 cycles	tDQSS
 
 #define DELAY_VAL(val) to_unsigned(val, delay_r'length) 
-    constant DDR_RESET_DELAY	    : natural := 20000; -- FIXME Must be 20000
+    constant DDR_RESET_DELAY	    : natural := 20000;
     constant DDR_INIT_PRCH_DELAY    : natural := 1;
     constant DDR_INIT_EMR_DELAY	    : natural := 1;
     constant DDR_INIT_MR1_DELAY	    : natural := 1;
@@ -260,11 +260,9 @@ begin
 	-- Spartan requires that HI-Z control also be a ODDR
 	DEFAULT_ODDR2_90(dq_ddr_hiz, dq_ddr_hiz(i), dq_io_read, dq_io_read);
 #endif
-	DEFAULT_IDDR2_90(dq_ddr_in_delay, dq_in(i + 16), 
-			dq_in(i), dq_ddr_in_delay(i));
+	DEFAULT_IDDR2_90(dq_ddr_in_delay, dq_in(i), 
+			dq_in(i + 16), dq_ddr_in_delay(i));
 
-	-- If delayed by half a bit period, the sampling should occur at
-	-- mem_clk, not mem_clk_90??
 	dq_delay : IODELAY2
 	    generic map (
 		DATA_RATE => "DDR",

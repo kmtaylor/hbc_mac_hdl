@@ -549,6 +549,8 @@ begin
 	    ram_dm => ddr2_dm,
 	    ram_dqs => ddr2_dqs,
 	    ram_dq => ddr2_dq);
+
+    phy_init_done <= '1';
 #endif
 
     hbc_tx: entity work.hbc_tx
