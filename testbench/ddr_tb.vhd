@@ -23,7 +23,7 @@ architecture testbench of ddr_tb is
     signal app_af_cmd : std_logic;
     signal app_af_addr : std_logic_vector (31 downto 0);
     signal app_wdf_data : std_logic_vector (31 downto 0);
-    signal app_wdf_wren : std_logic;
+    signal app_af_wren : std_logic;
     signal app_wdf_mask_data : std_logic_vector (3 downto 0);
     signal rd_data_valid : std_logic;
     signal rd_data_fifo_out : std_logic_vector (31 downto 0);
@@ -67,7 +67,7 @@ begin
 	app_af_addr => app_af_addr (30 downto 0),
 	app_wdf_data (31 downto 0) => app_wdf_data,
 	app_wdf_data (127 downto 32) => open_3,
-	app_wdf_wren => app_wdf_wren,
+	app_af_wren => app_af_wren,
 	app_wdf_mask_data (3 downto 0) => app_wdf_mask_data,
 	app_wdf_mask_data (15 downto 4) => open_0,
 	rd_data_valid => rd_data_valid,
@@ -77,12 +77,11 @@ begin
     ddr: entity work.ddr port map (
 	reset_i => reset_i,
 	mem_clk => mem_clk,
-	mem_clk_90 => mem_clk_90,
 
 	app_af_cmd => app_af_cmd,
 	app_af_addr => app_af_addr,
 	app_wdf_data => app_wdf_data,
-	app_wdf_wren => app_wdf_wren,
+	app_af_wren => app_af_wren,
 	app_wdf_mask_data => app_wdf_mask_data,
 	rd_data_valid => rd_data_valid,
 	rd_data_fifo_out => rd_data_fifo_out,
@@ -119,7 +118,7 @@ begin
 	wait for clk_period;
 	reset_i <= '0';
 
-	wait for clk_period*250;
+	wait for clk_period*32000;
 		-- set flags 
                 io_write_strobe <= '1';
                 io_addr_strobe <= '1';
@@ -137,7 +136,7 @@ begin
                 io_write_strobe <= '1';
                 io_addr_strobe <= '1';
                 io_addr <= X"08";
-                io_d_in <= X"ABCD1234";
+                io_d_in <= X"12345678";
 
                 wait for clk_period;
 
@@ -149,7 +148,7 @@ begin
                 io_write_strobe <= '1';
                 io_addr_strobe <= '1';
                 io_addr <= X"0C";
-                io_d_in <= X"CFFF3210";
+                io_d_in <= X"12345678";
 
                 wait for clk_period;
 
@@ -215,7 +214,7 @@ begin
 
 	wait for clk_period*8;
 		-- simulate data coming with CL=3
-		wait for 5 ns;
+		wait for 4 ns;
 		ram_dq <= X"1234";
 		wait for clk_period/2;
 		ram_dq <= X"5678";

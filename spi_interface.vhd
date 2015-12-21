@@ -46,6 +46,10 @@ architecture spi_interface_arch of spi_interface is
     signal ctrl_do, ctrl_do_r : vec8_t;
     signal ctrl_wren, ctrl_wren_status, ctrl_wren_data : std_logic;
 
+    signal data_do_valid : std_logic;
+    signal data_do, data_do_r : vec8_t;
+    signal data_wren : std_logic;
+
     signal ctrl_byte : vec8_t;
     signal ctrl_index : std_logic;
     signal ctrl_byte_req : std_logic;
@@ -64,12 +68,12 @@ begin
             spi_sck_i => hbc_data_sclk,
             spi_mosi_i => hbc_data_mosi,
             spi_miso_o => hbc_data_miso,
-            di_req_o => open, -- FIXME
-            di_i => (others => '0'), --FIXME
-            wren_i => '0', -- FIXME
-            wr_ack_o => open, -- FIXME
-            do_valid_o => open, -- FIXME
-            do_o => open); -- FIXME
+            di_req_o => open,
+            di_i => io_data_reg(7 downto 0),
+            wren_i => data_wren,
+            wr_ack_o => open,
+            do_valid_o => data_do_valid,
+            do_o => data_do);
 
     spi_cmd : entity work.spi_slave
         generic map (
@@ -92,7 +96,7 @@ begin
 
     -- Commands are written as 16 bit vectors. One byte is status, the other
     -- is data
-    ctrl_index_proc : process (clk, reset) begin
+    ctrl_index_proc : process (clk) begin
 	if clk'event and clk = '0' then
 	    if (enabled and do_ack and io_write and ctrl_op) = '1' then
 		ctrl_index <= '1';
@@ -128,6 +132,16 @@ begin
     end process ctrl_data_in_proc;
     hbc_ctrl_int <= ctrl_do_valid;
 
+    -- Data has arrived on the data interface. Save it and signal an interrupt
+    data_data_in_proc: process (clk) begin
+	if clk'event and clk = '1' then
+	    if data_do_valid = '1' then
+		data_do_r <= data_do;
+	    end if;
+	end if;
+    end process data_data_in_proc;
+    hbc_data_int <= data_do_valid;
+
     -- Get IO data
     io_proc : process(clk, reset) begin
 	if reset = '1' then
@@ -153,6 +167,7 @@ begin
 	    io_ready <= '0';
 	    io_d_out <= (others => 'Z');
 	    ctrl_wren_status <= '0';
+	    data_wren <= '0';
 	elsif clk'event and clk = '0' then
 	    if enabled = '1' then
 		if do_ack = '1' then
@@ -161,15 +176,18 @@ begin
 			if ctrl_op = '1' then
 			    io_d_out <= align_byte(ctrl_do_r, SPI_CTRL_ADDR);
 			else
-			    io_d_out <= (others => '0'); -- FIXME
+			    io_d_out <= align_byte(data_do_r, SPI_DATA_ADDR);
 			end if;
 		    else
 			if ctrl_op = '1' then
 			    ctrl_wren_status <= '1';
+			else
+			    data_wren <= '1';
 			end if;
 		    end if;
 		else
 		    ctrl_wren_status <= '0';
+		    data_wren <= '0';
 		    io_ready <= '0';
 		    io_d_out <= (others => 'Z');
 		end if;

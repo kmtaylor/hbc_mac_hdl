@@ -90,13 +90,11 @@ begin
 	    elsif cpu_clk'event and cpu_clk = '1' then
                 if mem_op = '1' then
                         app_af_wren <= do_app_op;
-			-- FIXME: Always issue wren, use cmd to determine
-			-- direction. Not compatible with MIG
-			--if reading = '0' then
+			if reading = '0' then
 			    app_wdf_wren <= do_app_op;
-			--else
-			--    app_wdf_wren <= '0';
-			--end if;
+			else
+			    app_wdf_wren <= '0';
+			end if;
                 else
                         app_af_wren <= '0';
                         app_wdf_wren <= '0';
@@ -143,15 +141,23 @@ begin
 		if mem_op = '1' and do_ack = '1' then
 		    if reading = '1' then
 			if flags(1) = '0' then
-			    rd_p <= std_logic_vector(unsigned(rd_p) + 4);
+			    rd_p <= vec32_t(unsigned(rd_p) + 4);
 			else
-			    rd_p <= std_logic_vector(unsigned(rd_p) - 4);
+			    if rd_p(23 downto 0) = X"FFFFFC" then
+				rd_p(23 downto 0) <= (others => '0');
+			    else
+				rd_p <= vec32_t(unsigned(rd_p) + 4);
+			    end if;
 			end if;
 		    else
 			if flags(0) = '0' then
-			    wr_p <= std_logic_vector(unsigned(wr_p) + 4);
+			    wr_p <= vec32_t(unsigned(wr_p) + 4);
 			else
-			    wr_p <= std_logic_vector(unsigned(wr_p) - 4);
+			    if wr_p(23 downto 0) = X"FFFFFC" then
+				wr_p(23 downto 0) <= (others => '0');
+			    else
+				wr_p <= vec32_t(unsigned(wr_p) + 4);
+			    end if;
 			end if;
 		    end if;
 		else

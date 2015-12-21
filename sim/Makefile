@@ -20,7 +20,7 @@ DDR_TB_FILES += \
 	mem_interface.vhd \
 	ddr.vhd \
 	ddr_tb.vhd
-DDR_SIM_FLAGS += --stop-time=200us
+DDR_SIM_FLAGS += --stop-time=350us
 
 RECEIVER_TB_FILES += \
 	data_synchroniser.vhd \

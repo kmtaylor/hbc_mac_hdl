@@ -526,13 +526,12 @@ begin
     ram : entity work.ddr
 	port map (
 	    mem_clk => mem_clk0,
-	    mem_clk_90 => mem_clk90,
 	    reset_i => cpu_reset,
 	    app_af_cmd => app_af_cmd(0),
 	    app_af_addr(30 downto 0) => app_af_addr,
 	    app_af_addr(31) => '0',
 	    app_wdf_data => app_wdf_data(31 downto 0),
-	    app_wdf_wren => app_wdf_wren,
+	    app_af_wren => app_af_wren,
 	    app_wdf_mask_data => app_wdf_mask_data(3 downto 0),
 	    rd_data_valid => rd_data_valid,
 	    rd_data_fifo_out => rd_data_fifo_out(31 downto 0),

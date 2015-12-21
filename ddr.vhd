@@ -20,13 +20,13 @@ entity ddr is
 	RAM_ROW_WIDTH : natural := 13;
 	RAM_COL_WIDTH : natural := 9);
     port (
-	mem_clk, mem_clk_90, reset_i : in std_logic;
+	mem_clk, reset_i : in std_logic;
 
 	-- mem_interface loosely based on Xilinx's MIG
 	app_af_cmd : in std_logic;
 	app_af_addr : in vec32_t;
 	app_wdf_data : in vec32_t;
-	app_wdf_wren : in std_logic;
+	app_af_wren : in std_logic;
 	app_wdf_mask_data : in std_logic_vector(DDR_BUS_WIDTH*2/8-1 downto 0);
 	rd_data_valid : out std_logic;
 	rd_data_fifo_out : out vec32_t;
@@ -44,9 +44,9 @@ entity ddr is
 	ram_dq : inout std_logic_vector (DDR_BUS_WIDTH-1 downto 0));
 end entity ddr;
 
-#define DEFAULT_ODDR2(instance, output, input_0, input_1) \
+#define DEFAULT_ODDR2(instance, output, input_0, input_1, align) \
     instance##_inst : ODDR2						    \
-	generic map (DDR_ALIGNMENT => "C0", SRTYPE => "ASYNC")		    \
+	generic map (DDR_ALIGNMENT => align, SRTYPE => "ASYNC")		    \
 	port map (							    \
 	    Q => output,						    \
 	    D0 => input_0,						    \
@@ -58,23 +58,9 @@ end entity ddr;
 	    S => '0'							    \
 	)
 
-#define DEFAULT_ODDR2_90(instance, output, input_0, input_1) \
-    instance##_inst : ODDR2						    \
-	generic map (DDR_ALIGNMENT => "C0", SRTYPE => "ASYNC")		    \
-	port map (							    \
-	    Q => output,						    \
-	    D0 => input_0,						    \
-	    D1 => input_1,						    \
-	    C0 => mem_clk_90,						    \
-	    C1 => mem_clk_270,						    \
-	    CE => '1',							    \
-	    R => '0',							    \
-	    S => '0'							    \
-	)
-
-#define DEFAULT_IDDR2(instance, output_0, output_1, input) \
+#define DEFAULT_IDDR2(instance, output_0, output_1, input, align) \
     instance##_inst : IDDR2						    \
-	generic map (DDR_ALIGNMENT => "C0", SRTYPE => "ASYNC")		    \
+	generic map (DDR_ALIGNMENT => align, SRTYPE => "ASYNC")		    \
 	port map (							    \
 	    Q0 => output_0,						    \
 	    Q1 => output_1,						    \
@@ -86,18 +72,26 @@ end entity ddr;
 	    S => '0'							    \
 	)
 
-#define DEFAULT_IDDR2_90(instance, output_0, output_1, input) \
-    instance##_inst : IDDR2						    \
-	generic map (DDR_ALIGNMENT => "C0", SRTYPE => "ASYNC")		    \
+#define OUTPUT_DELAY(instance, output, input, delay) \
+    instance##_inst : IODELAY2						    \
+	generic map (							    \
+	    DATA_RATE => "DDR",						    \
+	    DELAY_SRC => "ODATAIN",					    \
+	    ODELAY_VALUE => delay,					    \
+	    SIM_TAPDELAY_VALUE => DDR_SIM_TAP_DELAY			    \
+	)								    \
 	port map (							    \
-	    Q0 => output_0,						    \
-	    Q1 => output_1,						    \
-	    D => input,							    \
-	    C0 => mem_clk_90,						    \
-	    C1 => mem_clk_270,						    \
-	    CE => '1',							    \
-	    R => '0',							    \
-	    S => '0'							    \
+	    ODATAIN => input,						    \
+	    DOUT => output,						    \
+	    CAL => '0',							    \
+	    CE => '0',							    \
+	    CLK => '0',							    \
+	    INC => '0',							    \
+	    IOCLK0 => '0',						    \
+	    IOCLK1 => '0',						    \
+	    IDATAIN => '0',						    \
+	    RST => '0',							    \
+	    T => '0'							    \
 	)
 
 architecture ddr_arch of ddr is
@@ -114,16 +108,21 @@ architecture ddr_arch of ddr is
     attribute shreg_extract of reset : signal is "no";
 
     signal mem_clk_180 : std_logic;
-    signal mem_clk_270 : std_logic;
 
-    -- FIXME:
-    constant READ_DELAY : natural := 200;
+    -- Delay must be complete before the next edge (10ns). On the Spartan-6
+    -- the maximum delay is approx 13.5ns, with READ/WRITE_DELAY set to 255.
+    -- Delay approximation: d = 53ps * DELAY - 27ps
+    constant READ_DELAY : natural := 80;	    -- DATAOUT from IDATAIN
+    constant WRITE_DELAY : natural := 80;	    -- DOUT from ODATAIN
+    constant DDR_SIM_TAP_DELAY : natural := 53;
 
     -- Signals for mem_clk to DDR translation
     signal dqs_ddr : std_logic_vector (DDR_BUS_WIDTH/8-1 downto 0);
     signal dm_ddr : std_logic_vector (DDR_BUS_WIDTH/8-1 downto 0);
+    signal dm_ddr_delay : std_logic_vector (DDR_BUS_WIDTH/8-1 downto 0);
     --signal dm_ddr_hiz : std_logic_vector (DDR_BUS_WIDTH/8-1 downto 0);
     signal dq_ddr_out : std_logic_vector (DDR_BUS_WIDTH-1 downto 0);
+    signal dq_ddr_out_delay : std_logic_vector (DDR_BUS_WIDTH-1 downto 0);
     signal dq_ddr_in : std_logic_vector (DDR_BUS_WIDTH-1 downto 0);
     signal dq_ddr_in_delay : std_logic_vector (DDR_BUS_WIDTH-1 downto 0);
 #if USE_DDR_HIZ
@@ -155,7 +154,7 @@ architecture ddr_arch of ddr is
 
     constant REFRESH_TIME : natural := 640;
     signal refresh_count : unsigned (bits_for_val(REFRESH_TIME)-1 downto 0);
-    signal do_refresh : std_logic;
+    signal do_refresh_i, do_refresh, refresh_done : std_logic;
     signal do_write, do_read : std_logic;
     signal cas_done : std_logic;
 
@@ -222,19 +221,19 @@ architecture ddr_arch of ddr is
 begin
 
     mem_clk_180 <= not mem_clk;
-    mem_clk_270 <= not mem_clk_90;
 
     -- Aligned DDR clock output
-    DEFAULT_ODDR2(ram_clk, ram_clk, '0', '1');
-    DEFAULT_ODDR2(ram_clk_n, ram_clk_n, '1', '0');
+    DEFAULT_ODDR2(ram_clk, ram_clk, '0', '1', "C0");
+    DEFAULT_ODDR2(ram_clk_n, ram_clk_n, '1', '0', "C0");
 
     xilinx_io_2bit_gen : for i in 0 to (DDR_BUS_WIDTH/8 - 1) generate
 
 	-- Double data rate register for strobe
-	DEFAULT_ODDR2(dqs_ddr, dqs_ddr(i), '0', dqs_out);
+	DEFAULT_ODDR2(dqs_ddr, dqs_ddr(i), '0', dqs_out, "C0");
 	-- Double data rate register for strobe hi-Z
 #if USE_DDR_HIZ
-	DEFAULT_ODDR2(dqs_ddr_hiz, dqs_ddr_hiz(i), dq_io_read, dq_io_read);
+	DEFAULT_ODDR2(dqs_ddr_hiz, dqs_ddr_hiz(i),
+			dq_io_read, dq_io_read, "C0");
 #endif
 
 	-- IO buffer for strobe 
@@ -248,31 +247,41 @@ begin
 #endif
 
 	-- Double data rate register for mask bits
-	DEFAULT_ODDR2_90(dm_ddr, dm_ddr(i), ram_be(i), ram_be(i + 2));
-	ram_dm(i) <= dm_ddr(i);
+	DEFAULT_ODDR2(dm_ddr, dm_ddr(i), ram_be(i), ram_be(i + 2), "C0");
+	OUTPUT_DELAY(dm_ddr_delay, dm_ddr_delay(i), dm_ddr(i), WRITE_DELAY);
+
+	dm_obuf : OBUF port map (
+		O => ram_dm(i),
+		I => dm_ddr_delay(i));
 
     end generate xilinx_io_2bit_gen;
 
     xilinx_io_16bit_gen : for i in 0 to (DDR_BUS_WIDTH-1) generate
 
-	DEFAULT_ODDR2_90(dq_ddr_out, dq_ddr_out(i), dq_out(i + 16), dq_out(i));
+	DEFAULT_ODDR2(dq_ddr_out, dq_ddr_out(i),
+			dq_out(i + 16), dq_out(i), "C0");
 #if USE_DDR_HIZ
 	-- Spartan requires that HI-Z control also be a ODDR
-	DEFAULT_ODDR2_90(dq_ddr_hiz, dq_ddr_hiz(i), dq_io_read, dq_io_read);
+	DEFAULT_ODDR2(dq_ddr_hiz, dq_ddr_hiz(i), dq_io_read, dq_io_read, "C0");
 #endif
-	DEFAULT_IDDR2_90(dq_ddr_in_delay, dq_in(i), 
-			dq_in(i + 16), dq_ddr_in_delay(i));
+	DEFAULT_IDDR2(dq_ddr_in, dq_in(i), 
+			dq_in(i + 16), dq_ddr_in_delay(i), "C0");
 
-	dq_delay : IODELAY2
+	dq_ddr_delay : IODELAY2
 	    generic map (
 		DATA_RATE => "DDR",
-		DELAY_SRC => "IDATAIN",
+		DELAY_SRC => "IO",
 		IDELAY_TYPE => "FIXED",
-		IDELAY_VALUE => READ_DELAY
+		IDELAY_VALUE => READ_DELAY,
+		ODELAY_VALUE => WRITE_DELAY,
+		SIM_TAPDELAY_VALUE => DDR_SIM_TAP_DELAY
 	    )
 	    port map (
 		IDATAIN => dq_ddr_in(i),
+		ODATAIN => dq_ddr_out(i),
 		DATAOUT => dq_ddr_in_delay(i),
+		DOUT => dq_ddr_out_delay(i),
+		T => dq_ddr_hiz(i),
 		-- VHDL LRM 1.1.1.2 Ports: Ports without a default vaule must
 		-- be connected. Unisim does not provide default values
 		CAL => '0',
@@ -281,14 +290,12 @@ begin
 		INC => '0',
 		IOCLK0 => '0',
 		IOCLK1 => '0',
-		ODATAIN => '0',
-		RST => '0',
-		T => '0'
+		RST => '0'
 	    );
 
 	dq_iobuf : IOBUF port map (
 		IO => ram_dq(i),
-		I => dq_ddr_out(i),
+		I => dq_ddr_out_delay(i),
 		O => dq_ddr_in(i),
 #if USE_DDR_HIZ
 		T => dq_ddr_hiz(i));
@@ -317,7 +324,7 @@ begin
 		if cas_done = '1' then
 		    do_write <= '0';
 		    do_read <= '0';
-		elsif app_wdf_wren = '1' then
+		elsif app_af_wren = '1' then
 		    if app_af_cmd = '1' then
 			do_read <= '1';
 		    else
@@ -328,13 +335,16 @@ begin
 	end if;
     end process latch_op;
 
-    
-    bus_data <= app_wdf_data;
-    bus_bytes <= app_wdf_mask_data;
-    -- 32 bit aligned
-    bus_column_addr <= app_af_addr(9 downto 2) & '0';
-    bus_bank_addr <= app_af_addr(11 downto 10);
-    bus_row_addr <= app_af_addr(24 downto 12);
+    sync_bus : process (mem_clk) begin 
+	if mem_clk'event and mem_clk = '1' then
+	    bus_data <= app_wdf_data;
+	    bus_bytes <= app_wdf_mask_data;
+	    -- 32 bit aligned
+	    bus_column_addr <= app_af_addr(9 downto 2) & '0';
+	    bus_bank_addr <= app_af_addr(11 downto 10);
+	    bus_row_addr <= app_af_addr(24 downto 12);
+	end if;
+    end process sync_bus;
 
     latch_read_data : process(mem_clk) begin
 	if mem_clk'event and mem_clk = '1' then
@@ -369,6 +379,7 @@ begin
 	cas_done <= '0';
 	rd_data_valid <= '0';
 	start_cas_latency <= '0';
+	refresh_done <= '0';
 
 	case (state) is
 	    when st_reset =>
@@ -392,24 +403,30 @@ begin
 	    when st_init_rfsh_1 | st_init_rfsh_2 | st_refresh =>
 		if new_state = '1' then
 		    ram_cmd <= CMD_RFSH;
+		    refresh_done <= '1';
 		end if;
 	    when st_init_mr2 =>
 		if new_state = '1' then
 		    ram_cmd <= CMD_LMR;
 		    ram_addr <= pad(MR2_ADDR, ram_addr'length);
 		end if;
+	    when st_idle =>
+		ram_addr <= pad(bus_row_addr, ram_addr'length);
+		ram_ba <= bus_bank_addr;
 	    when st_ras =>
 		if new_state = '1' then
 		    ram_cmd <= CMD_RAS; 
 		    ram_addr <= pad(bus_row_addr, ram_addr'length);
-		    ram_ba <= bus_bank_addr;
+		else
+		    ram_addr <= pad(A10_ADDR, ram_addr'length) or 
+				pad(bus_column_addr, ram_addr'length);
 		end if;
+		ram_ba <= bus_bank_addr;
 	    when st_cas =>
 		-- Issue control signal
 		if new_state = '1' then
 		    ram_addr <= pad(A10_ADDR, ram_addr'length) or 
 				pad(bus_column_addr, ram_addr'length);
-		    ram_ba <= bus_bank_addr;
 		    if do_write = '1' then
 			ram_cmd <= CMD_WRITE;
 			dqs_out <= '1';
@@ -418,6 +435,7 @@ begin
 			ram_cmd <= CMD_READ;
 		    end if;
 		end if;
+		ram_ba <= bus_bank_addr;
 		-- Issue data
 		if do_write = '1' then
 		    dq_io_read <= '0';
@@ -511,13 +529,23 @@ begin
 
     update_refresh_count : process(mem_clk) begin
 	if mem_clk'event and mem_clk = '1' then
-	    if reset = '1' then
+	    if (reset or do_refresh) = '1' then
 		refresh_count <= (others => '0');
 	    else
 		refresh_count <= refresh_count + 1;
 	    end if;
 	end if;
     end process update_refresh_count;
-    do_refresh <= bool_to_bit(refresh_count = REFRESH_TIME);
+    do_refresh_i <= bool_to_bit(refresh_count = REFRESH_TIME);
+
+    latch_refresh : process(mem_clk) begin
+	if mem_clk'event and mem_clk = '1' then
+	    if do_refresh_i = '1' then
+		do_refresh <= '1';
+	    elsif refresh_done = '1' then
+		do_refresh <= '0';
+	    end if;
+	end if;
+    end process latch_refresh;
 
 end architecture ddr_arch;
