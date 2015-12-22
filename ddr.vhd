@@ -44,9 +44,9 @@ entity ddr is
 	ram_dq : inout std_logic_vector (DDR_BUS_WIDTH-1 downto 0));
 end entity ddr;
 
-#define DEFAULT_ODDR2(instance, output, input_0, input_1, align) \
+#define DEFAULT_ODDR2(instance, output, input_0, input_1) \
     instance##_inst : ODDR2						    \
-	generic map (DDR_ALIGNMENT => align, SRTYPE => "ASYNC")		    \
+	generic map (DDR_ALIGNMENT => "C0", SRTYPE => "ASYNC")		    \
 	port map (							    \
 	    Q => output,						    \
 	    D0 => input_0,						    \
@@ -58,9 +58,9 @@ end entity ddr;
 	    S => '0'							    \
 	)
 
-#define DEFAULT_IDDR2(instance, output_0, output_1, input, align) \
+#define DEFAULT_IDDR2(instance, output_0, output_1, input) \
     instance##_inst : IDDR2						    \
-	generic map (DDR_ALIGNMENT => align, SRTYPE => "ASYNC")		    \
+	generic map (DDR_ALIGNMENT => "C0", SRTYPE => "ASYNC")		    \
 	port map (							    \
 	    Q0 => output_0,						    \
 	    Q1 => output_1,						    \
@@ -113,7 +113,7 @@ architecture ddr_arch of ddr is
     -- the maximum delay is approx 13.5ns, with READ/WRITE_DELAY set to 255.
     -- Delay approximation: d = 53ps * DELAY - 27ps
     constant READ_DELAY : natural := 80;	    -- DATAOUT from IDATAIN
-    constant WRITE_DELAY : natural := 80;	    -- DOUT from ODATAIN
+    constant WRITE_DELAY : natural := 20;	    -- DOUT from ODATAIN
     constant DDR_SIM_TAP_DELAY : natural := 53;
 
     -- Signals for mem_clk to DDR translation
@@ -223,17 +223,17 @@ begin
     mem_clk_180 <= not mem_clk;
 
     -- Aligned DDR clock output
-    DEFAULT_ODDR2(ram_clk, ram_clk, '0', '1', "C0");
-    DEFAULT_ODDR2(ram_clk_n, ram_clk_n, '1', '0', "C0");
+    DEFAULT_ODDR2(ram_clk, ram_clk, '0', '1');
+    DEFAULT_ODDR2(ram_clk_n, ram_clk_n, '1', '0');
 
     xilinx_io_2bit_gen : for i in 0 to (DDR_BUS_WIDTH/8 - 1) generate
 
 	-- Double data rate register for strobe
-	DEFAULT_ODDR2(dqs_ddr, dqs_ddr(i), '0', dqs_out, "C0");
+	DEFAULT_ODDR2(dqs_ddr, dqs_ddr(i), '0', dqs_out);
 	-- Double data rate register for strobe hi-Z
 #if USE_DDR_HIZ
 	DEFAULT_ODDR2(dqs_ddr_hiz, dqs_ddr_hiz(i),
-			dq_io_read, dq_io_read, "C0");
+			dq_io_read, dq_io_read);
 #endif
 
 	-- IO buffer for strobe 
@@ -247,7 +247,7 @@ begin
 #endif
 
 	-- Double data rate register for mask bits
-	DEFAULT_ODDR2(dm_ddr, dm_ddr(i), ram_be(i), ram_be(i + 2), "C0");
+	DEFAULT_ODDR2(dm_ddr, dm_ddr(i), ram_be(i), ram_be(i + 2));
 	OUTPUT_DELAY(dm_ddr_delay, dm_ddr_delay(i), dm_ddr(i), WRITE_DELAY);
 
 	dm_obuf : OBUF port map (
@@ -259,13 +259,13 @@ begin
     xilinx_io_16bit_gen : for i in 0 to (DDR_BUS_WIDTH-1) generate
 
 	DEFAULT_ODDR2(dq_ddr_out, dq_ddr_out(i),
-			dq_out(i + 16), dq_out(i), "C0");
+			dq_out(i + 16), dq_out(i));
 #if USE_DDR_HIZ
 	-- Spartan requires that HI-Z control also be a ODDR
-	DEFAULT_ODDR2(dq_ddr_hiz, dq_ddr_hiz(i), dq_io_read, dq_io_read, "C0");
+	DEFAULT_ODDR2(dq_ddr_hiz, dq_ddr_hiz(i), dq_io_read, dq_io_read);
 #endif
 	DEFAULT_IDDR2(dq_ddr_in, dq_in(i), 
-			dq_in(i + 16), dq_ddr_in_delay(i), "C0");
+			dq_in(i + 16), dq_ddr_in_delay(i));
 
 	dq_ddr_delay : IODELAY2
 	    generic map (
@@ -281,7 +281,11 @@ begin
 		ODATAIN => dq_ddr_out(i),
 		DATAOUT => dq_ddr_in_delay(i),
 		DOUT => dq_ddr_out_delay(i),
+#if USE_DDR_HIZ
 		T => dq_ddr_hiz(i),
+#else
+		T => dq_io_read,
+#endif
 		-- VHDL LRM 1.1.1.2 Ports: Ports without a default vaule must
 		-- be connected. Unisim does not provide default values
 		CAL => '0',

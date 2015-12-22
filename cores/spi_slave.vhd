@@ -164,7 +164,7 @@ entity spi_slave is
         ; wren_o : out std_logic                                        -- debug: internal state of the wren_i pulse stretcher
         ; rx_bit_next_o : out std_logic                                 -- debug: internal rx bit
         ; state_dbg_o : out std_logic_vector (3 downto 0)               -- debug: internal state register
-        sh_reg_dbg_o : out std_logic_vector (N-1 downto 0)              -- debug: internal shift register
+        ; sh_reg_dbg_o : out std_logic_vector (N-1 downto 0)		-- debug: internal shift register
 #endif
     );                      
 end spi_slave;

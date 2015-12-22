@@ -8,25 +8,25 @@ library transceiver;
 use transceiver.bits.all;
 
 entity mem_interface is
-	port (
-		cpu_clk, reset : in std_logic;
-		io_addr	: in vec8_t;
-		io_d_in	: in vec32_t;
-		io_d_out : out vec32_t;
-		io_addr_strobe : in std_logic;
-		io_read_strobe, io_write_strobe : in std_logic;
-		io_ready : out std_logic;
+    port (
+	cpu_clk, reset : in std_logic;
+	io_addr : in vec8_t;
+	io_d_in : in vec32_t;
+	io_d_out : out vec32_t;
+	io_addr_strobe : in std_logic;
+	io_read_strobe, io_write_strobe : in std_logic;
+	io_ready : out std_logic;
 
-		app_af_cmd : out std_logic_vector (2 downto 0);
-		app_af_addr : out std_logic_vector (30 downto 0);
-		app_af_wren : out std_logic;
+	app_af_cmd : out std_logic_vector (2 downto 0);
+	app_af_addr : out std_logic_vector (30 downto 0);
+	app_af_wren : out std_logic;
 
-		app_wdf_data : out std_logic_vector (127 downto 0);
-		app_wdf_wren : out std_logic;
-		app_wdf_mask_data : out std_logic_vector (15 downto 0);
+	app_wdf_data : out std_logic_vector (127 downto 0);
+	app_wdf_wren : out std_logic;
+	app_wdf_mask_data : out std_logic_vector (15 downto 0);
 
-		rd_data_valid : in std_logic;
-		rd_data_fifo_out : in std_logic_vector (127 downto 0));
+	rd_data_valid : in std_logic;
+	rd_data_fifo_out : in std_logic_vector (127 downto 0));
 end mem_interface;
 
 architecture mem_interface_arch of mem_interface is
@@ -88,19 +88,19 @@ begin
 		app_af_wren <= '0';
 		app_wdf_wren <= '0';
 	    elsif cpu_clk'event and cpu_clk = '1' then
-                if mem_op = '1' then
-                        app_af_wren <= do_app_op;
-			if reading = '0' then
-			    app_wdf_wren <= do_app_op;
-			else
-			    app_wdf_wren <= '0';
-			end if;
-                else
-                        app_af_wren <= '0';
-                        app_wdf_wren <= '0';
-                end if;
+		if mem_op = '1' then
+		    app_af_wren <= do_app_op;
+		    if reading = '0' then
+			app_wdf_wren <= do_app_op;
+		    else
+			app_wdf_wren <= '0';
+		    end if;
+		else
+		    app_af_wren <= '0';
+		    app_wdf_wren <= '0';
+		end if;
 	    end if;
-        end process app_enable;
+	end process app_enable;
 
 	-- Handshake with FIFO / State machine
 	busy_proc : process(cpu_clk, reset) begin
@@ -174,16 +174,16 @@ begin
 	    end if;
 	end process flags_proc;
 			
-        -- ACK process
-        ack_proc : process(cpu_clk, reset) begin
-            if reset = '1' then
+	-- ACK process
+	ack_proc : process(cpu_clk, reset) begin
+	    if reset = '1' then
 		io_ready <= '0';
-                io_d_out <= (others => 'Z');
-            elsif cpu_clk'event and cpu_clk = '0' then
-                if enabled = '1' then
-                    if do_ack = '1' then
-                        io_ready <= '1';
-                        if reading = '1' then
+		io_d_out <= (others => 'Z');
+	    elsif cpu_clk'event and cpu_clk = '0' then
+		if enabled = '1' then
+		    if do_ack = '1' then
+			io_ready <= '1';
+			if reading = '1' then
 			    if latch_flags = '1' then
 				io_d_out <= align_byte("000000" & flags,
 						MEM_FLAGS_ADDR);
@@ -194,66 +194,65 @@ begin
 			    elsif mem_op = '1' then
 				io_d_out <= mem_data_reg;
 			    end if;
-                        end if;
+			end if;
 		    else
-                        io_ready <= '0';
-                        if reading = '1' then
-                            io_d_out <= (others => 'Z');
-                        end if;
-                    end if;
-                end if;
-            end if;
-        end process ack_proc;
+			io_ready <= '0';
+			io_d_out <= (others => 'Z');
+		    end if;
+		end if;
+	    end if;
+	end process ack_proc;
 
 	-- Get IO data
 	io_proc : process(cpu_clk, reset) begin
-		if reset = '1' then
-			do_app_op <= '0';
-		-- Read IO bus on falling edge
-		elsif cpu_clk'event and cpu_clk = '0' then
-			if io_write_strobe = '1' then
-				io_write_reg <= io_d_in;
-				do_app_op <= '1';
-				reading <= '0';
-			elsif io_read_strobe = '1' then
-				do_app_op <= '1';
-				reading <= '1';
-			else
-				do_app_op <= '0';
-			end if;
+	    if reset = '1' then
+		do_app_op <= '0';
+	    -- Read IO bus on falling edge
+	    elsif cpu_clk'event and cpu_clk = '0' then
+		if io_write_strobe = '1' then
+		    io_write_reg <= io_d_in;
+		    do_app_op <= '1';
+		    reading <= '0';
+		elsif io_read_strobe = '1' then
+		    do_app_op <= '1';
+		    reading <= '1';
+		else
+		    do_app_op <= '0';
 		end if;
+	    end if;
 	end process io_proc;
 	
 	-- Get address from IO bus
 	get_io_addr : process(cpu_clk, reset) begin
-		if reset = '1' then
-			io_addr_reg <= (others => '0');
-		elsif cpu_clk'event and cpu_clk = '0' then
-			if io_addr_strobe = '1' then
-				io_addr_reg <= io_addr;
-			end if;
+	    if reset = '1' then
+		io_addr_reg <= (others => '0');
+	    elsif cpu_clk'event and cpu_clk = '0' then
+		if io_addr_strobe = '1' then
+		    io_addr_reg <= io_addr;
 		end if;
+	    end if;
 	end process get_io_addr;
 	
 	-- Assert enabled
 	with io_addr_reg (7 downto 0) select enabled
-		<=	'1' when MEM_RD_WR_ADDR,
-			'1' when MEM_FLAGS_ADDR, 
-			'1' when MEM_RD_P_ADDR, 
-			'1' when MEM_WR_P_ADDR, 
-			'0' when others;
-			
+	    <=  '1' when MEM_RD_WR_ADDR,
+		'1' when MEM_FLAGS_ADDR, 
+		'1' when MEM_RD_P_ADDR, 
+		'1' when MEM_WR_P_ADDR, 
+		'0' when others;
+		
 	with io_addr_reg (7 downto 0) select mem_op
-		<=	'1' when MEM_RD_WR_ADDR, 
-			'0' when others;
+	    <=  '1' when MEM_RD_WR_ADDR, 
+		'0' when others;
 	with io_addr_reg (7 downto 0) select latch_flags
-		<=	'1' when MEM_FLAGS_ADDR, 
-			'0' when others;
+	    <=  '1' when MEM_FLAGS_ADDR, 
+		'0' when others;
 	with io_addr_reg (7 downto 0) select latch_rd_p
-		<=	'1' when MEM_RD_P_ADDR, 
-			'0' when others;
+	    <=  '1' when MEM_RD_P_ADDR, 
+		'0' when others;
 	with io_addr_reg (7 downto 0) select latch_wr_p
-		<=	'1' when MEM_WR_P_ADDR, 
-			'0' when others;
+	    <=  '1' when MEM_WR_P_ADDR, 
+		'0' when others;
+
 end mem_interface_arch;
 

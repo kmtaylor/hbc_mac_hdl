@@ -181,9 +181,7 @@ begin
 		    end if;
 		else
 		    io_ready <= '0';
-		    if reading = '1' then
-			io_d_out <= (others => 'Z');
-		    end if;
+		    io_d_out <= (others => 'Z');
 		end if;
 	    end if;
 	end if;

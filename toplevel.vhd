@@ -44,6 +44,10 @@
 #define USE_PAR_USB 0
 #endif
 
+#ifndef USE_FLASH
+#define USE_FLASH 0
+#endif
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -125,20 +129,27 @@ entity toplevel is
 	; psoc_swdck : inout std_logic
 	; psoc_reset : inout std_logic
 #endif
+#if USE_FLASH
+	; flash_sclk : out std_logic
+	; flash_mosi : out std_logic
+	; flash_miso : in std_logic
+	; flash_ss : out std_logic
+#endif
 	);
 end toplevel;
 
 architecture toplevel_arch of toplevel is
 
-    constant NUM_PERIPHERALS : natural := 8;
+    constant NUM_PERIPHERALS : natural := 9;
     constant PERIPH_HBC_TXFIFO	    : natural := 0;
     constant PERIPH_HBC_TXMOD	    : natural := 1;
     constant PERIPH_HBC_RXFIFO	    : natural := 2;
     constant PERIPH_HBC_SCRAMBLER   : natural := 3;
     constant PERIPH_MEM		    : natural := 4;
     constant PERIPH_SPI		    : natural := 5;
-    constant PERIPH_LCD		    : natural := 6;
-    constant PERIPH_PAR_USB	    : natural := 7;
+    constant PERIPH_FLASH_SPI	    : natural := 6;
+    constant PERIPH_LCD		    : natural := 7;
+    constant PERIPH_PAR_USB	    : natural := 8;
 
     type vec32n_t is array (NUM_PERIPHERALS-1 downto 0) of vec32_t;
 
@@ -430,6 +441,13 @@ begin
 	    GPO(PSOC_CLOCK_DIR, psoc_swdck_dir),
 	    GPO(PSOC_RESET, psoc_xres_o),
 	    GPO(PSOC_RESET_DIR, psoc_xres_dir),
+#else
+	    GPO2(5 downto 0) => open,
+#endif
+#if USE_FLASH
+	    GPO(FLASH_SS, flash_ss),
+	    GPO2(7) => open,
+#else
 	    GPO2(7 downto 6) => open,
 #endif
 	    INTC_Interrupt => irq_bus,
@@ -643,6 +661,25 @@ begin
 	    swdio => psoc_swdio,
 	    swdck => psoc_swdck,
 	    xres => psoc_reset);
+#endif
+
+#if USE_FLASH
+    flash_interface : entity work.flash_interface
+	generic map (DIVIDER => 100)
+	port map (
+	    cpu_clk => cpu_clk,
+	    reset => cpu_reset,
+	    io_addr => io_address (7 downto 0),
+	    io_d_in => io_write_data,
+	    io_d_out => peripheral_data(PERIPH_FLASH_SPI),
+	    io_addr_strobe => io_addr_strobe,
+	    io_read_strobe => io_read_strobe,
+	    io_write_strobe => io_write_strobe,
+	    io_ready => peripheral_ready(PERIPH_FLASH_SPI),
+	    flash_sclk => flash_sclk,
+	    flash_mosi => flash_mosi,
+	    flash_miso => flash_miso,
+	    flash_ss => open);
 #endif
 
 #if USE_PAR_USB

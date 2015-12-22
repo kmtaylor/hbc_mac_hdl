@@ -58,6 +58,8 @@
 #define CONST_HEX_SPI_DATA_ADDR		24
 #define CONST_HEX_SPI_CTRL_ADDR		26
 
+#define CONST_HEX_FLASH_ADDR		28
+
 /* ----------------------- CPU helper macros------------------------------- */
 #ifdef VHDL
 #define __GPO(port, name, signal) GPO##port(INT(GPO_##name)) => signal
@@ -121,6 +123,7 @@
 #define CONST_INT_GPO_PSOC_RESET_DIR	5
 #define CONST_INT_GPO_HBC_DATA_INT	CONST_INT_GPO_PSOC_CLOCK
 #define CONST_INT_GPO_HBC_DATA_INT_DIR	CONST_INT_GPO_PSOC_CLOCK_DIR
+#define CONST_INT_GPO_FLASH_SS		6
 
 #define CONST_INT_GPP_PSOC_DATA		2
 #define CONST_INT_GPP_PSOC_DATA_DIR	2
@@ -130,6 +133,7 @@
 #define CONST_INT_GPP_PSOC_RESET_DIR	2
 #define CONST_INT_GPP_HBC_DATA_INT	CONST_INT_GPP_PSOC_CLOCK
 #define CONST_INT_GPP_HBC_DATA_INT_DIR	CONST_INT_GPP_PSOC_CLOCK_DIR
+#define CONST_INT_GPP_FLASH_SS		2
 
 #define CONST_INT_GPI_PSOC_DATA		0
 #define CONST_INT_GPI_PSOC_CLOCK	1

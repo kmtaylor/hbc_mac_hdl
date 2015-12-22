@@ -1,4 +1,5 @@
-VHHFLAGS ?= -DXILINX_SPARTAN=1 -DUSE_MEM=1 -DUSE_SPI=1 -DUSE_1BIT_LED -DUSE_PSOC
+VHHFLAGS ?= -DXILINX_SPARTAN=1 -DUSE_MEM=1 -DUSE_SPI=1 -DUSE_1BIT_LED \
+	    -DUSE_PSOC -DUSE_FLASH
 
 TRANSCEIVER_FILES += \
 	processed/clk_div_pp.vhd					\
@@ -24,7 +25,9 @@ TRANSCEIVER_FILES += \
 	processed/spi_interface_pp.vhd					\
 	processed/psoc_interface_pp.vhd					\
 	processed/hbc_tx_pp.vhd						\
-	processed/hbc_rx_pp.vhd
+	processed/hbc_rx_pp.vhd						\
+	processed/spi_master_core_pp.vhd				\
+	processed/flash_interface_pp.vhd
 
 all: $(TRANSCEIVER_FILES)
 

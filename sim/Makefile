@@ -65,15 +65,22 @@ C_TO_VHD_FILES += \
 	c_to_vhd_tb.vhd
 C_TO_VHD_SIM_FLAGS += --stop-time=3000ns
 
+FLASH_INTERFACE_FILES += \
+	flash_interface.vhd \
+	spi_master_core.vhd \
+	flash_interface_tb.vhd
+FLASH_INTERFACE_SIM_FLAGS += --stop-time=30us
+
 MODULATOR_TB_FILES += \
 	walsh_enc_lut.vhd \
 	modulator.vhd \
 	parallel_to_serial.vhd \
-	fifo_interface.vhd \
+	tx_fifo_interface.vhd \
 	fifo_tx_sim.vhd \
 	data_synchroniser.vhd \
 	hamming_lut.vhd \
 	walsh_decoder.vhd \
+	phase_align.vhd \
 	serial_to_parallel.vhd \
 	rx_fifo_interface.vhd \
 	modulator_path_tb.vhd
@@ -143,6 +150,11 @@ transmitter_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(TRANSMITTER_TB_FILES:.vhd=_pp.o)
 c_to_vhd_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(C_TO_VHD_FILES:.vhd=_pp.o)
 	$(GHDL) -m $(XILINX_FLAGS) "$@"
 	./"$@" $(C_TO_VHD_SIM_FLAGS) --wave="$@".ghw
+
+flash_interface_tb: $(XILINX_OBJS) $(LOCAL_OBJS) \
+			$(FLASH_INTERFACE_FILES:.vhd=_pp.o)
+	$(GHDL) -m $(XILINX_FLAGS) "$@"
+	./"$@" $(FLASH_INTERFACE_SIM_FLAGS) --wave="$@".ghw
 
 ddr_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(DDR_TB_FILES:.vhd=_pp.o)
 	$(GHDL) -m $(XILINX_FLAGS) "$@"

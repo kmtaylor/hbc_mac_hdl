@@ -71,6 +71,13 @@ Net LED         LOC=P118  | IOSTANDARD=LVCMOS25 | SLEW=QUIETIO | DRIVE=16;
 Net clkin         LOC=P94  | IOSTANDARD=LVCMOS25 | PULLUP;
 #Net XCLK        LOC=P92  | IOSTANDARD=LVCMOS25 | PULLUP;
 
+
+# Flash memory
+Net flash_sclk	    LOC=P70;
+Net flash_mosi	    LOC=P64;
+Net flash_miso	    LOC=P65;
+Net flash_ss	    LOC=P38;
+
 #
 # Pin out of 64 way expansion connector
 #

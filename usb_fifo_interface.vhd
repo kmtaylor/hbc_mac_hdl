@@ -4,6 +4,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+library transceiver;
+use transceiver.bits.all;
+
 entity usb_fifo is
 	port (
 		usb_clk, cpu_clk, reset : in std_logic;
@@ -283,9 +286,7 @@ begin
                     end if;
                 else
                     io_ready <= '0';
-                    if reading = '1' then
-                        io_d_out <= (others => 'Z');
-                    end if;
+                    io_d_out <= (others => 'Z');
                 end if;
             end if;
         end if;

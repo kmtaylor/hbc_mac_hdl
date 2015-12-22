@@ -1,0 +1,63 @@
+[*]
+[*] GTKWave Analyzer v3.3.45 (w)1999-2012 BSI
+[*] Mon Dec 21 23:00:21 2015
+[*]
+[dumpfile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/flash_interface_tb.ghw"
+[dumpfile_mtime] "Mon Dec 21 22:59:48 2015"
+[dumpfile_size] 46441
+[savefile] "/home/kmtaylor/Xilinx/Projects/transceiver/sim/gtkwave/flash_interface_tb.gtkw"
+[timestart] 9502900000
+[size] 1680 1024
+[pos] -1 -1
+*-25.000000 9665000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.flash_interface_tb.
+[treeopen] top.flash_interface_tb.uut.
+[sst_width] 224
+[signals_width] 166
+[sst_expanded] 1
+[sst_vpaned_height] 291
+@28
+top.flash_interface_tb.uut.cpu_clk
+top.flash_interface_tb.uut.reset
+@200
+-
+-
+@28
+top.flash_interface_tb.uut.io_write_strobe
+@29
+top.flash_interface_tb.uut.io_read_strobe
+@22
+#{top.flash_interface_tb.uut.io_addr[7:0]} top.flash_interface_tb.uut.io_addr[7] top.flash_interface_tb.uut.io_addr[6] top.flash_interface_tb.uut.io_addr[5] top.flash_interface_tb.uut.io_addr[4] top.flash_interface_tb.uut.io_addr[3] top.flash_interface_tb.uut.io_addr[2] top.flash_interface_tb.uut.io_addr[1] top.flash_interface_tb.uut.io_addr[0]
+#{top.flash_interface_tb.uut.io_d_in[31:0]} top.flash_interface_tb.uut.io_d_in[31] top.flash_interface_tb.uut.io_d_in[30] top.flash_interface_tb.uut.io_d_in[29] top.flash_interface_tb.uut.io_d_in[28] top.flash_interface_tb.uut.io_d_in[27] top.flash_interface_tb.uut.io_d_in[26] top.flash_interface_tb.uut.io_d_in[25] top.flash_interface_tb.uut.io_d_in[24] top.flash_interface_tb.uut.io_d_in[23] top.flash_interface_tb.uut.io_d_in[22] top.flash_interface_tb.uut.io_d_in[21] top.flash_interface_tb.uut.io_d_in[20] top.flash_interface_tb.uut.io_d_in[19] top.flash_interface_tb.uut.io_d_in[18] top.flash_interface_tb.uut.io_d_in[17] top.flash_interface_tb.uut.io_d_in[16] top.flash_interface_tb.uut.io_d_in[15] top.flash_interface_tb.uut.io_d_in[14] top.flash_interface_tb.uut.io_d_in[13] top.flash_interface_tb.uut.io_d_in[12] top.flash_interface_tb.uut.io_d_in[11] top.flash_interface_tb.uut.io_d_in[10] top.flash_interface_tb.uut.io_d_in[9] top.flash_interface_tb.uut.io_d_in[8] top.flash_interface_tb.uut.io_d_in[7] top.flash_interface_tb.uut.io_d_in[6] top.flash_interface_tb.uut.io_d_in[5] top.flash_interface_tb.uut.io_d_in[4] top.flash_interface_tb.uut.io_d_in[3] top.flash_interface_tb.uut.io_d_in[2] top.flash_interface_tb.uut.io_d_in[1] top.flash_interface_tb.uut.io_d_in[0]
+#{top.flash_interface_tb.uut.io_d_out[31:0]} top.flash_interface_tb.uut.io_d_out[31] top.flash_interface_tb.uut.io_d_out[30] top.flash_interface_tb.uut.io_d_out[29] top.flash_interface_tb.uut.io_d_out[28] top.flash_interface_tb.uut.io_d_out[27] top.flash_interface_tb.uut.io_d_out[26] top.flash_interface_tb.uut.io_d_out[25] top.flash_interface_tb.uut.io_d_out[24] top.flash_interface_tb.uut.io_d_out[23] top.flash_interface_tb.uut.io_d_out[22] top.flash_interface_tb.uut.io_d_out[21] top.flash_interface_tb.uut.io_d_out[20] top.flash_interface_tb.uut.io_d_out[19] top.flash_interface_tb.uut.io_d_out[18] top.flash_interface_tb.uut.io_d_out[17] top.flash_interface_tb.uut.io_d_out[16] top.flash_interface_tb.uut.io_d_out[15] top.flash_interface_tb.uut.io_d_out[14] top.flash_interface_tb.uut.io_d_out[13] top.flash_interface_tb.uut.io_d_out[12] top.flash_interface_tb.uut.io_d_out[11] top.flash_interface_tb.uut.io_d_out[10] top.flash_interface_tb.uut.io_d_out[9] top.flash_interface_tb.uut.io_d_out[8] top.flash_interface_tb.uut.io_d_out[7] top.flash_interface_tb.uut.io_d_out[6] top.flash_interface_tb.uut.io_d_out[5] top.flash_interface_tb.uut.io_d_out[4] top.flash_interface_tb.uut.io_d_out[3] top.flash_interface_tb.uut.io_d_out[2] top.flash_interface_tb.uut.io_d_out[1] top.flash_interface_tb.uut.io_d_out[0]
+@28
+top.flash_interface_tb.uut.io_ready
+@200
+-
+-
+@28
+top.flash_interface_tb.uut.enabled
+top.flash_interface_tb.uut.io_write
+top.flash_interface_tb.uut.do_spi_op
+top.flash_interface_tb.uut.ack_pending
+top.flash_interface_tb.uut.spi_busy
+top.flash_interface_tb.uut.data_wren
+@22
+#{top.flash_interface_tb.uut.io_data_reg[31:0]} top.flash_interface_tb.uut.io_data_reg[31] top.flash_interface_tb.uut.io_data_reg[30] top.flash_interface_tb.uut.io_data_reg[29] top.flash_interface_tb.uut.io_data_reg[28] top.flash_interface_tb.uut.io_data_reg[27] top.flash_interface_tb.uut.io_data_reg[26] top.flash_interface_tb.uut.io_data_reg[25] top.flash_interface_tb.uut.io_data_reg[24] top.flash_interface_tb.uut.io_data_reg[23] top.flash_interface_tb.uut.io_data_reg[22] top.flash_interface_tb.uut.io_data_reg[21] top.flash_interface_tb.uut.io_data_reg[20] top.flash_interface_tb.uut.io_data_reg[19] top.flash_interface_tb.uut.io_data_reg[18] top.flash_interface_tb.uut.io_data_reg[17] top.flash_interface_tb.uut.io_data_reg[16] top.flash_interface_tb.uut.io_data_reg[15] top.flash_interface_tb.uut.io_data_reg[14] top.flash_interface_tb.uut.io_data_reg[13] top.flash_interface_tb.uut.io_data_reg[12] top.flash_interface_tb.uut.io_data_reg[11] top.flash_interface_tb.uut.io_data_reg[10] top.flash_interface_tb.uut.io_data_reg[9] top.flash_interface_tb.uut.io_data_reg[8] top.flash_interface_tb.uut.io_data_reg[7] top.flash_interface_tb.uut.io_data_reg[6] top.flash_interface_tb.uut.io_data_reg[5] top.flash_interface_tb.uut.io_data_reg[4] top.flash_interface_tb.uut.io_data_reg[3] top.flash_interface_tb.uut.io_data_reg[2] top.flash_interface_tb.uut.io_data_reg[1] top.flash_interface_tb.uut.io_data_reg[0]
+@28
+top.flash_interface_tb.uut.data_do_valid
+@22
+#{top.flash_interface_tb.uut.data_do_r[7:0]} top.flash_interface_tb.uut.data_do_r[7] top.flash_interface_tb.uut.data_do_r[6] top.flash_interface_tb.uut.data_do_r[5] top.flash_interface_tb.uut.data_do_r[4] top.flash_interface_tb.uut.data_do_r[3] top.flash_interface_tb.uut.data_do_r[2] top.flash_interface_tb.uut.data_do_r[1] top.flash_interface_tb.uut.data_do_r[0]
+@28
+top.flash_interface_tb.uut.do_ack
+@200
+-
+-
+@28
+top.flash_interface_tb.uut.flash_sclk
+top.flash_interface_tb.uut.flash_mosi
+top.flash_interface_tb.uut.flash_miso
+top.flash_interface_tb.uut.flash_ss
+[pattern_trace] 1
+[pattern_trace] 0

@@ -125,7 +125,7 @@ begin
 	end if;
     end process;
 
-    tx_fifo_interface : entity work.fifo_interface port map (
+    tx_fifo_interface : entity work.tx_fifo_interface port map (
 	clk => clk,
 	reset => reset,
 	trigger => '0',
