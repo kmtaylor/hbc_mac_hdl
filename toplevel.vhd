@@ -61,7 +61,8 @@ entity toplevel is
 #if RESET_BUTTON
 	; rstbtn : in std_logic
 #endif
-	; s_data_out : out std_logic
+	; s_data_out_filt : out std_logic
+	; s_data_out_raw : out std_logic
 	; s_data_in : in std_logic
 #if CLK_OUT
 	; serial_clk_out : out std_logic
@@ -218,6 +219,10 @@ architecture toplevel_arch of toplevel is
     signal rd_data_fifo_out    : std_logic_vector (127 downto 0);
     signal app_wdf_data    : std_logic_vector (127 downto 0);
     signal app_wdf_mask_data : std_logic_vector (15 downto 0);
+
+    -- HBC data out mux
+    signal s_data_out : std_logic;
+    signal s_data_out_switch : std_logic;
     
     -- HBC TX
     signal hbc_tx_fifo_flush : std_logic;
@@ -446,10 +451,10 @@ begin
 #endif
 #if USE_FLASH
 	    GPO(FLASH_SS, flash_ss),
-	    GPO2(7) => open,
 #else
-	    GPO2(7 downto 6) => open,
+	    GPO2(6) => open,
 #endif
+	    GPO(HBC_DATA_SWITCH, s_data_out_switch),
 	    INTC_Interrupt => irq_bus,
 	    GPI1 => irq_bus);
 
@@ -591,6 +596,16 @@ begin
 	    hbc_tx_fifo_overflow => hbc_tx_fifo_overflow,
 	    s_data_out => s_data_out);
 
+    s_data_out_mux : process (s_data_out_switch, s_data_out) begin
+	if s_data_out_switch = '1' then
+	    s_data_out_filt <= 'Z';
+	    s_data_out_raw <= s_data_out;
+	else
+	    s_data_out_filt <= s_data_out;
+	    s_data_out_raw <= 'Z';
+	end if;
+    end process s_data_out_mux;
+
     hbc_rx: entity work.hbc_rx
 	port map (
 	    cpu_clk => cpu_clk,
@@ -665,7 +680,7 @@ begin
 
 #if USE_FLASH
     flash_interface : entity work.flash_interface
-	generic map (DIVIDER => 100)
+	generic map (DIVIDER => 10)
 	port map (
 	    cpu_clk => cpu_clk,
 	    reset => cpu_reset,
