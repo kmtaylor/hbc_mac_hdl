@@ -8,7 +8,7 @@ end rx_fifo_interface_tb;
  
 architecture testbench of rx_fifo_interface_tb is 
  
-    component fifo_tx port (
+    component fifo_rx port (
 	rst : IN STD_LOGIC;
 	wr_clk : IN STD_LOGIC;
 	rd_clk : IN STD_LOGIC;
@@ -22,7 +22,7 @@ architecture testbench of rx_fifo_interface_tb is
 	empty : OUT STD_LOGIC;
 	almost_empty : OUT STD_LOGIC;
 	underflow : OUT STD_LOGIC);
-    end component fifo_tx;
+    end component fifo_rx;
 
    --Inputs
     signal clk : std_logic := '0';
@@ -62,7 +62,7 @@ begin
 	fifo_d_in => fifo_d_in,
 	fifo_rden => fifo_rden);
 
-    tx_fifo : component fifo_tx port map (
+    rx_fifo : component fifo_rx port map (
 	rst => reset,
 	wr_clk => clk,
 	rd_clk => clk,

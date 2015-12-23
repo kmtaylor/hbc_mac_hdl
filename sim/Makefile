@@ -29,6 +29,7 @@ RECEIVER_TB_FILES += \
 	phase_align.vhd \
 	serial_to_parallel.vhd \
 	rx_fifo_interface.vhd \
+	fifo_rx_sim.vhd \
 	hamming_lut.vhd \
 	receiver_tb.vhd
 RECEIVER_SIM_FLAGS += --stop-time=2ms
@@ -77,6 +78,7 @@ MODULATOR_TB_FILES += \
 	parallel_to_serial.vhd \
 	tx_fifo_interface.vhd \
 	fifo_tx_sim.vhd \
+	fifo_rx_sim.vhd \
 	data_synchroniser.vhd \
 	hamming_lut.vhd \
 	walsh_decoder.vhd \
@@ -90,9 +92,13 @@ MODULATOR_SYNTH_TB_FILES += \
 	walsh_enc_lut.vhd \
 	modulator.vhd \
 	parallel_to_serial.vhd \
-	fifo_interface.vhd \
+	tx_fifo_interface.vhd \
 	fifo_tx_sim.vhd \
+	fifo_rx_sim.vhd \
 	data_synchroniser.vhd \
+	hamming_lut.vhd \
+	walsh_encoder.vhd \
+	phase_align.vhd \
 	serial_to_parallel_timesim.vhd \
 	rx_fifo_interface.vhd \
 	modulator_path_tb.vhd
@@ -113,7 +119,7 @@ FIFO_SIM_FLAGS += --stop-time=1000ns
 RX_FIFO_TB_FILES += \
 	rx_fifo_interface.vhd \
 	rx_fifo_interface_tb.vhd \
-	fifo_tx_sim.vhd
+	fifo_rx_sim.vhd
 RX_FIFO_SIM_FLAGS += --stop-time=1000ns
 
 CLK_DIV_TB_FILES += \

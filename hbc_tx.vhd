@@ -60,6 +60,8 @@ architecture hbc_tx_arch of hbc_tx is
     signal tx_fifo_wren : std_logic;
     signal tx_fifo_empty : std_logic;
 
+    signal fifo_almost_full : std_logic;
+
 begin
 
     bus_arb : entity work.fifo_bus_arbitrator
@@ -95,7 +97,8 @@ begin
             sub_d_out => mod_d_out,
             sub_addr_strobe => mod_addr_strobe,
             sub_write_strobe => mod_write_strobe,
-            sub_io_ready => mod_io_ready);
+            sub_io_ready => mod_io_ready,
+	    fifo_almost_full => fifo_almost_full);
 
     fifo_int : entity work.tx_fifo_interface
         port map (
@@ -125,7 +128,7 @@ begin
             rd_en => tx_fifo_rden,
             dout => from_tx_fifo,
             full => hbc_tx_fifo_full,
-            prog_full => hbc_tx_fifo_almost_full,
+            prog_full => fifo_almost_full,
             overflow => hbc_tx_fifo_overflow,
             empty => tx_fifo_empty,
             underflow => open);
@@ -140,5 +143,7 @@ begin
             fifo_rden => tx_fifo_rden,
             fifo_empty => tx_fifo_empty,
             data_out => s_data_out);
+
+    hbc_tx_fifo_almost_full <= fifo_almost_full;    
 
 end architecture hbc_tx_arch;

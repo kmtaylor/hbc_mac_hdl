@@ -464,7 +464,7 @@ begin
     IRQ(IRQ_TX_FIFO_OVERFLOW, hbc_tx_fifo_overflow);
     IRQ(IRQ_RX_DATA_READY, not(hbc_rx_fifo_empty));
     IRQ(IRQ_RX_PKT_READY, hbc_rx_pkt_ready);
-    IRQ(IRQ_RX_FIFO_FULL, hbc_rx_fifo_almost_full);
+    IRQ(IRQ_RX_FIFO_ALMOST_FULL, hbc_rx_fifo_almost_full);
     IRQ(IRQ_CLOCK_LOSS, clk_lock_int);
     IRQ(IRQ_RAM_INIT, not(phy_init_done));
     IRQ(IRQ_RAM_FIFO_FULL, mem_fifo_full);
@@ -622,7 +622,7 @@ begin
 	    hbc_rx_fifo_empty => hbc_rx_fifo_empty,
 	    hbc_rx_pkt_ready => hbc_rx_pkt_ready,
 	    hbc_rx_pkt_ack => hbc_rx_pkt_ack,
-	    s_data_in => s_data_in);
+	    s_data_in => s_data_out); --FIXME loopback
 
     scrambler : entity work.scrambler
 	port map (

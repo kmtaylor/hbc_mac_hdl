@@ -21,7 +21,8 @@ entity modulator is
 	sub_d_out   : out vec32_t;
 	sub_addr_strobe : out std_logic;
 	sub_write_strobe : out std_logic;
-	sub_io_ready : in std_logic);
+	sub_io_ready : in std_logic;
+	fifo_almost_full : in std_logic);
 end modulator;
 
 architecture modulator_arch of modulator is
@@ -143,7 +144,7 @@ begin
 
     next_state_decode : process (state, got_write, sub_io_ready, enabled,
 					set_sf_op, sf, repeat, bit_count,
-					symbol_count) begin
+					symbol_count, fifo_almost_full) begin
         state_i <= state;
 	bit_count_i <= bit_count;
 	symbol_count_i <= symbol_count;
@@ -157,7 +158,9 @@ begin
 		bit_count_i <= to_unsigned(0, bit_count_i'length);
 		symbol_count_i <= to_unsigned(0, symbol_count_i'length);
 	    when st_load =>
-		state_i <= st_fifo_write;
+		if fifo_almost_full = '0' then
+		    state_i <= st_fifo_write;
+		end if;
 	    when st_fifo_write =>
 		state_i <= st_fifo_ack;
 	    when st_fifo_ack =>
