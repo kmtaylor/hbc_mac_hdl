@@ -16,7 +16,9 @@ entity serial_to_parallel is
 		fifo_d_out : out vec32_t;
 		fifo_wren : out std_logic;
 		fifo_full : in std_logic;
+		enable : in std_logic;
 		data_in : in std_logic;
+		pkt_active : out std_logic;
 		pkt_reset : out std_logic;
 		pkt_ready : out std_logic;
 		pkt_ack : in std_logic);
@@ -53,6 +55,7 @@ architecture serial_to_parallel_arch of serial_to_parallel is
     attribute max_fanout of reset : signal is "10";
     attribute shreg_extract of reset : signal is "no"; 
 
+    signal data_in_en : std_logic;
     signal data_in_sync : std_logic;
     signal re_align : std_logic;
     signal expected_phase : std_logic;
@@ -133,8 +136,10 @@ begin
 	chk_pkt_end <= '0';
 	sym_reset_i <= '0';
 	latch_sfd <= '0';
+	pkt_active <= '1';
 	case(state) is
 	    when st_align_1 =>
+		pkt_active <= '0';
 		allow_re_align <= '1';
 	    when st_align_2 =>
 		allow_re_align <= '1';
@@ -146,6 +151,7 @@ begin
 		walsh_detect_i <= '1';
 		chk_pkt_end <= '1';
 	    when st_pkt_end =>
+		pkt_active <= '0';
 		sym_reset_i <= '1';
 	end case;
     end process fifo_control;
@@ -207,12 +213,14 @@ begin
     end process;
 #endif
 
+    data_in_en <= data_in and enable;
+
     -- Demodulator: 
     phase_aligner : entity work.phase_align
 	port map (
 	    pkt_reset => sym_reset,
 	    serial_clk => serial_clk,
-	    data_in => data_in,
+	    data_in => data_in_en,
 	    allow_re_align => allow_re_align,
 	    data_in_sync => data_in_sync,
 	    phase_change => phase_change,

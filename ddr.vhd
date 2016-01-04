@@ -113,7 +113,7 @@ architecture ddr_arch of ddr is
     -- the maximum delay is approx 13.5ns, with READ/WRITE_DELAY set to 255.
     -- Delay approximation: d = 53ps * DELAY - 27ps
     constant READ_DELAY : natural := 80;	    -- DATAOUT from IDATAIN
-    constant WRITE_DELAY : natural := 20;	    -- DOUT from ODATAIN
+    constant WRITE_DELAY : natural := 40;	    -- DOUT from ODATAIN
     constant DDR_SIM_TAP_DELAY : natural := 53;
 
     -- Signals for mem_clk to DDR translation

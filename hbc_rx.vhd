@@ -12,6 +12,8 @@ entity hbc_rx is port (
     io_addr_strobe : in std_logic;
     io_read_strobe : in std_logic;
     io_ready : out std_logic;
+    hbc_rx_enable : in std_logic;
+    hbc_rx_active : out std_logic;
     hbc_rx_fifo_almost_full : out std_logic;
     hbc_rx_fifo_empty : out std_logic;
     hbc_rx_pkt_ready : out std_logic;
@@ -91,7 +93,9 @@ begin
             fifo_d_out => s2p_fifo_data,
             fifo_wren => rx_fifo_wren,
             fifo_full => '0',
+	    enable => hbc_rx_enable,
             data_in => s_data_in_sync,
+	    pkt_active => hbc_rx_active,
             pkt_ack => hbc_rx_pkt_ack,
             pkt_ready => hbc_rx_pkt_ready);
 

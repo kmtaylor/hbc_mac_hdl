@@ -86,7 +86,7 @@ MODULATOR_TB_FILES += \
 	serial_to_parallel.vhd \
 	rx_fifo_interface.vhd \
 	modulator_path_tb.vhd
-MODULATOR_SIM_FLAGS += --stop-time=1000us --ieee-asserts=disable-at-0
+MODULATOR_SIM_FLAGS += --stop-time=3000us --ieee-asserts=disable-at-0
 
 MODULATOR_SYNTH_TB_FILES += \
 	walsh_enc_lut.vhd \

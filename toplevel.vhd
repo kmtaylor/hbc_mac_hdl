@@ -96,11 +96,13 @@ entity toplevel is
 	; ddr2_cas_n	: out std_logic
 	; ddr2_we_n	: out std_logic
 	; ddr2_cs_n	: out std_logic
---	; ddr2_odt	: out std_logic
 	; ddr2_cke	: out std_logic
 	; ddr2_dm	: out std_logic_vector (MEM_BYTES_WIDTH-1 downto 0)
 	; ddr2_dqs	: inout std_logic_vector (MEM_BYTES_WIDTH-1 downto 0)
---	; ddr2_dqs_n	: inout std_logic_vector (MEM_BYTES_WIDTH-1 downto 0)
+#if USE_MIG
+	; ddr2_odt	: out std_logic
+	; ddr2_dqs_n	: inout std_logic_vector (MEM_BYTES_WIDTH-1 downto 0)
+#endif
 	; ddr2_ck	: out std_logic
 	; ddr2_ck_n	: out std_logic
 #endif
@@ -234,6 +236,8 @@ architecture toplevel_arch of toplevel is
     -- HBC RX
     signal hbc_rx_fifo_almost_full : std_logic;
     signal hbc_rx_fifo_empty : std_logic;
+    signal hbc_rx_enable : std_logic;
+    signal hbc_rx_active : std_logic;
     signal hbc_rx_pkt_ready : std_logic;
     signal hbc_rx_pkt_ack : std_logic;
 
@@ -426,9 +430,11 @@ begin
 	    GPO(SCRAM_SEED_VAL, scram_seed_val),
 	    GPO(SCRAM_SEED_CLK, scram_seed_clk),
 	    GPO(HBC_RX_PKT_ACK, hbc_rx_pkt_ack),
-	    GPO(USB_PKT_END, usb_pkt_end),
+	    GPO(HBC_RX_ENABLE, hbc_rx_enable),
 #if USE_1BIT_LED
-	    GPO1(7) => Led,
+	    GPO(LED_1BIT, led),
+#elif USE_PAR_USB
+	    GPO(USB_PKT_END, usb_pkt_end),
 #else
 	    GPO1(7) => open,
 #endif
@@ -462,6 +468,7 @@ begin
     IRQ(IRQ_TX_FIFO_FULL, hbc_tx_fifo_full);
     IRQ(IRQ_TX_FIFO_ALMOST_FULL, hbc_tx_fifo_almost_full);
     IRQ(IRQ_TX_FIFO_OVERFLOW, hbc_tx_fifo_overflow);
+    IRQ(IRQ_RX_ACTIVE, hbc_rx_active);
     IRQ(IRQ_RX_DATA_READY, not(hbc_rx_fifo_empty));
     IRQ(IRQ_RX_PKT_READY, hbc_rx_pkt_ready);
     IRQ(IRQ_RX_FIFO_ALMOST_FULL, hbc_rx_fifo_almost_full);
@@ -618,11 +625,13 @@ begin
 	    io_addr_strobe => io_addr_strobe,
 	    io_read_strobe => io_read_strobe,
 	    io_ready => peripheral_ready(PERIPH_HBC_RXFIFO),
+	    hbc_rx_enable => hbc_rx_enable,
+	    hbc_rx_active => hbc_rx_active,
 	    hbc_rx_fifo_almost_full => hbc_rx_fifo_almost_full,
 	    hbc_rx_fifo_empty => hbc_rx_fifo_empty,
 	    hbc_rx_pkt_ready => hbc_rx_pkt_ready,
 	    hbc_rx_pkt_ack => hbc_rx_pkt_ack,
-	    s_data_in => s_data_out); --FIXME loopback
+	    s_data_in => s_data_in);
 
     scrambler : entity work.scrambler
 	port map (

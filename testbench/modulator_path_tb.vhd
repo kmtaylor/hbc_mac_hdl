@@ -42,6 +42,8 @@ architecture testbench of modulator_tb is
    --Inputs
     signal clk : std_logic := '0';
     signal reset : std_logic := '0';
+    signal pkt_active : std_logic;
+    signal enable : std_logic := '1';
     signal pkt_reset : std_logic;
     signal pkt_ack : std_logic := '0';
     signal io_addr : std_logic_vector(7 downto 0) := (others => '0');
@@ -210,6 +212,8 @@ begin
 	fifo_wren => s2p_fifo_wren,
 	fifo_full => s2p_fifo_full,
 	data_in => s_data_sync,
+	pkt_active => pkt_active,
+	enable => enable, 
 	pkt_ack => pkt_ack);
 
     rx_fifo_int : entity work.rx_fifo_interface port map (
