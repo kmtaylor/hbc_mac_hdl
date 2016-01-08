@@ -26,5 +26,5 @@
 * Packet testing
 *.TRAN 1n 2000u
 * Set V_TX to "AC 1.25 DC 1.25"
-*.AC LIN 100K 5K 500Meg
+.AC LIN 100K 5K 500Meg
 *.SENS v(filter_out) AC LIN 1000 5K 100Meg

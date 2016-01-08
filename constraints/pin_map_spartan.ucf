@@ -82,7 +82,7 @@ Net flash_ss	    LOC=P38;
 # Pin out of 64 way expansion connector
 #
 
-Net s_data_out_filt LOC=P105; # X2
+Net s_data_out_filt LOC=P105 | DRIVE=24; # | SLEW=FAST; # X2
 #Net X4		    LOC=P104;
 #Net X6		    LOC=P102;
 #Net X8		    LOC=P101;

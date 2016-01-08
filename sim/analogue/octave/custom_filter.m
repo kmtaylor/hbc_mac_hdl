@@ -71,5 +71,5 @@ h_db = h_db - max(h_db);
     plot(f(1:1:numel(f)), output_f(1:1:numel(output_f)), f, mask, f, h_db, f_spice, 20*log10(abs(v_filter_out)));
   %  plot(f, output_f, f, mask, f_spice, 20*log10(abs(v_filter_out)));
 %    plot(f, mask, f, h_db, f_spice, 20*log10(v_filter_out));
-    axis([0, 42e6, -130, 0]);
+    axis([0, 200e6, -130, 0]);
 endif

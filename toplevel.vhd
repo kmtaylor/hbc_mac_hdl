@@ -224,12 +224,13 @@ architecture toplevel_arch of toplevel is
 
     -- HBC data out mux
     signal s_data_out : std_logic;
+    signal s_data_active : std_logic;
     signal s_data_out_switch : std_logic;
     
     -- HBC TX
     signal hbc_tx_fifo_flush : std_logic;
     signal hbc_tx_trigger : std_logic;
-    signal hbc_tx_fifo_full : std_logic;
+    signal hbc_tx_fifo_empty : std_logic;
     signal hbc_tx_fifo_almost_full : std_logic;
     signal hbc_tx_fifo_overflow : std_logic;
 
@@ -465,7 +466,7 @@ begin
 	    GPI1 => irq_bus);
 
     IRQ(IRQ_BUTTON, btn1_d);
-    IRQ(IRQ_TX_FIFO_FULL, hbc_tx_fifo_full);
+    IRQ(IRQ_TX_FIFO_EMPTY, hbc_tx_fifo_empty);
     IRQ(IRQ_TX_FIFO_ALMOST_FULL, hbc_tx_fifo_almost_full);
     IRQ(IRQ_TX_FIFO_OVERFLOW, hbc_tx_fifo_overflow);
     IRQ(IRQ_RX_ACTIVE, hbc_rx_active);
@@ -598,17 +599,27 @@ begin
 	    io_ready_mod => peripheral_ready(PERIPH_HBC_TXMOD),
 	    hbc_tx_fifo_flush => hbc_tx_fifo_flush,
 	    hbc_tx_trigger => hbc_tx_trigger,
-	    hbc_tx_fifo_full => hbc_tx_fifo_full,
+	    hbc_tx_fifo_empty => hbc_tx_fifo_empty,
 	    hbc_tx_fifo_almost_full => hbc_tx_fifo_almost_full,
 	    hbc_tx_fifo_overflow => hbc_tx_fifo_overflow,
+	    s_data_active => s_data_active,
 	    s_data_out => s_data_out);
 
-    s_data_out_mux : process (s_data_out_switch, s_data_out) begin
+    s_data_out_mux : process (s_data_out_switch,
+				     s_data_out, s_data_active) begin
 	if s_data_out_switch = '1' then
 	    s_data_out_filt <= 'Z';
-	    s_data_out_raw <= s_data_out;
+	    if s_data_active = '1' then
+		s_data_out_raw <= s_data_out;
+	    else
+		s_data_out_raw <= 'Z';
+	    end if;
 	else
-	    s_data_out_filt <= s_data_out;
+	    if s_data_active = '1' then
+		s_data_out_filt <= s_data_out;
+	    else
+		s_data_out_filt <= 'Z';
+	    end if;
 	    s_data_out_raw <= 'Z';
 	end if;
     end process s_data_out_mux;

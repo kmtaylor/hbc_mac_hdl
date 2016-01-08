@@ -13,6 +13,7 @@ entity parallel_to_serial is
 		fifo_d_in : in vec32_t;
 		fifo_rden : out std_logic;
 		fifo_empty : in std_logic;
+		data_active : out std_logic;
 		data_out : out std_logic);
 end parallel_to_serial;
 
@@ -29,6 +30,7 @@ architecture parallel_to_serial_arch of parallel_to_serial is
 			st_finish_2);
     signal state, next_state : state_type; 
     signal data_out_i : std_logic;
+    signal data_active_i : std_logic;
 	
     signal tmp_data, tmp_data_i : vec32_t := (others => '0');
 	
@@ -60,8 +62,10 @@ begin
 	    (state = st_chain_2) or (state = st_chain_3) or 
 	    (state = st_finish_1) or (state = st_finish_2) then
 	    data_out_i <= tmp_data(31);
+	    data_active_i <= '1';
 	else
 	    data_out_i <= '0';
+	    data_active_i <= '0';
 	end if;
     end process;
  
@@ -118,10 +122,12 @@ begin
 	if reset = '1' then
 	    state <= st_reset;
 	    data_out <= '0';
+	    data_active <= '0';
 	    cur_bit <= 0;
 	    tmp_data <= (others => '0');
 	elsif clk'event and clk = '1' then
 	    state <= next_state;
+	    data_active <= data_active_i;
 	    data_out <= data_out_i;
 	    cur_bit <= cur_bit_i;
 	    tmp_data <= tmp_data_i;

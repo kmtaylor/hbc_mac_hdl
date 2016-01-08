@@ -17,9 +17,10 @@ entity hbc_tx is port (
     io_ready_mod : out std_logic;
     hbc_tx_fifo_flush : in std_logic;
     hbc_tx_trigger : in std_logic;
-    hbc_tx_fifo_full : out std_logic;
+    hbc_tx_fifo_empty : out std_logic;
     hbc_tx_fifo_almost_full : out std_logic;
     hbc_tx_fifo_overflow : out std_logic;
+    s_data_active : out std_logic;
     s_data_out : out std_logic);
 end entity hbc_tx;
 
@@ -127,7 +128,7 @@ begin
             wr_en => tx_fifo_wren,
             rd_en => tx_fifo_rden,
             dout => from_tx_fifo,
-            full => hbc_tx_fifo_full,
+            full => open,
             prog_full => fifo_almost_full,
             overflow => hbc_tx_fifo_overflow,
             empty => tx_fifo_empty,
@@ -142,8 +143,10 @@ begin
             fifo_d_in => from_tx_fifo,
             fifo_rden => tx_fifo_rden,
             fifo_empty => tx_fifo_empty,
+	    data_active => s_data_active,
             data_out => s_data_out);
 
-    hbc_tx_fifo_almost_full <= fifo_almost_full;    
+    hbc_tx_fifo_almost_full <= fifo_almost_full;
+    hbc_tx_fifo_empty <= tx_fifo_empty;
 
 end architecture hbc_tx_arch;

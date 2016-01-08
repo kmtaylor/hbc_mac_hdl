@@ -122,7 +122,8 @@ begin
 	sub_d_out => sub_d_out,
 	sub_addr_strobe => sub_addr_strobe,
 	sub_write_strobe => sub_write_strobe,
-	sub_io_ready => sub_io_ready);
+	sub_io_ready => sub_io_ready,
+	fifo_almost_full => prog_full);
 
     process (bus_master, sub_addr_out, sub_d_out, sub_addr_strobe,
 		    sub_write_strobe, fi_addr, fi_d, fi_addr_strobe,
