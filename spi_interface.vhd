@@ -53,6 +53,8 @@ architecture spi_interface_arch of spi_interface is
     signal ctrl_byte : vec8_t;
     signal ctrl_index : std_logic;
     signal ctrl_byte_req : std_logic;
+    signal ctrl_write_while_busy : std_logic;
+    signal ctrl_write_while_busy_ack : std_logic;
 
 begin
 
@@ -104,8 +106,13 @@ begin
 		if ctrl_index = '1' then
 		    ctrl_wren_data <= '1';
 		end if;
-		ctrl_index <= '0';
+		if ctrl_write_while_busy = '1' then
+		    ctrl_write_while_busy_ack <= '1';
+		else
+		    ctrl_index <= '0';
+		end if;
 	    else
+		ctrl_write_while_busy_ack <= '0';
 		ctrl_wren_data <= '0';
 	    end if;
 	end if;
@@ -168,6 +175,7 @@ begin
 	    io_d_out <= (others => 'Z');
 	    ctrl_wren_status <= '0';
 	    data_wren <= '0';
+	    ctrl_write_while_busy <= '0';
 	elsif clk'event and clk = '0' then
 	    if enabled = '1' then
 		if do_ack = '1' then
@@ -181,6 +189,9 @@ begin
 		    else
 			if ctrl_op = '1' then
 			    ctrl_wren_status <= '1';
+			    if hbc_ctrl_ss = '0' then
+				ctrl_write_while_busy <= '1';
+			    end if;
 			else
 			    data_wren <= '1';
 			end if;
@@ -191,6 +202,9 @@ begin
 		    io_ready <= '0';
 		    io_d_out <= (others => 'Z');
 		end if;
+	    end if;
+	    if ctrl_write_while_busy_ack = '1' then
+		ctrl_write_while_busy <= '0';
 	    end if;
 	end if;
     end process ack_proc;

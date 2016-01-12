@@ -82,16 +82,29 @@ begin
 	io_write_strobe <= '0';
 	io_addr_strobe <= '0';
 
-	wait for clk_period * 6;
+	wait for clk_period * 16;
 	
 	-- Set bits at address 0x01
 	io_write_strobe <= '1';
 	io_addr_strobe <= '1';
-	io_d_in <= X"12345678";
+	io_d_in <= X"00008112";
 	io_addr <= X"26";
 	wait for clk_period;
 	io_write_strobe <= '0';
 	io_addr_strobe <= '0';
+	
+#if 0
+	wait for clk_period * 30;
+	
+	-- Set bits at address 0x01
+	io_write_strobe <= '1';
+	io_addr_strobe <= '1';
+	io_d_in <= X"00008115";
+	io_addr <= X"26";
+	wait for clk_period;
+	io_write_strobe <= '0';
+	io_addr_strobe <= '0';
+#endif
 	
 	wait;
     end process;
@@ -197,6 +210,11 @@ begin
 	hbc_ctrl_sclk <= '1';
 	wait for 20 ns;
 	hbc_ctrl_sclk <= '0';
+
+	wait for 20 ns;
+	hbc_ctrl_ss <= '1';
+
+	wait;
     end process;
 
 

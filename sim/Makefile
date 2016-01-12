@@ -58,7 +58,7 @@ SPI_TB_FILES += \
 	spi_interface.vhd \
 	spi_slave_core.vhd \
 	spi_interface_tb.vhd
-SPI_SIM_FLAGS += --stop-time=1000ns
+SPI_SIM_FLAGS += --stop-time=1500ns
 
 C_TO_VHD_FILES += \
 	c_to_vhd.vhd \
