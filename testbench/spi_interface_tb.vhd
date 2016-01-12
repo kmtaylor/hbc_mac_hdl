@@ -73,18 +73,6 @@ begin
 
 	wait for clk_period * 5.5;
 
-	-- Set SF
-	io_write_strobe <= '1';
-	io_addr_strobe <= '1';
-	io_d_in <= X"00000001";
-	io_addr <= X"19";
-	wait for clk_period;
-	io_write_strobe <= '0';
-	io_addr_strobe <= '0';
-
-	wait for clk_period * 16;
-	
-	-- Set bits at address 0x01
 	io_write_strobe <= '1';
 	io_addr_strobe <= '1';
 	io_d_in <= X"00008112";
@@ -92,24 +80,31 @@ begin
 	wait for clk_period;
 	io_write_strobe <= '0';
 	io_addr_strobe <= '0';
+
+	wait for clk_period * 4;
 	
-#if 0
-	wait for clk_period * 30;
-	
-	-- Set bits at address 0x01
 	io_write_strobe <= '1';
 	io_addr_strobe <= '1';
 	io_d_in <= X"00008115";
-	io_addr <= X"26";
+	io_addr <= X"24";
 	wait for clk_period;
 	io_write_strobe <= '0';
 	io_addr_strobe <= '0';
-#endif
+
+	wait for clk_period * 16;
+	
+	io_write_strobe <= '1';
+	io_addr_strobe <= '1';
+	io_d_in <= X"0000FFFF";
+	io_addr <= X"19";
+	wait for clk_period;
+	io_write_strobe <= '0';
+	io_addr_strobe <= '0';
 	
 	wait;
     end process;
 
-    spi_proc : process begin
+    spi_ctrl_proc : process begin
 	wait for 200 ns;
 	hbc_ctrl_ss <= '0';
 	wait for 20 ns;
@@ -217,7 +212,46 @@ begin
 	wait;
     end process;
 
+    spi_data_proc : process begin
+	wait for 200 ns;
+	hbc_data_ss <= '0';
+	wait for 20 ns;
+	hbc_data_sclk <= '1';
+	wait for 20 ns;
+	hbc_data_sclk <= '0';
+	wait for 20 ns;
+	hbc_data_sclk <= '1';
+	wait for 20 ns;
+	hbc_data_sclk <= '0';
+	wait for 20 ns;
+	hbc_data_sclk <= '1';
+	wait for 20 ns;
+	hbc_data_sclk <= '0';
+	wait for 20 ns;
+	hbc_data_sclk <= '1';
+	wait for 20 ns;
+	hbc_data_sclk <= '0';
+	wait for 20 ns;
+	hbc_data_sclk <= '1';
+	wait for 20 ns;
+	hbc_data_sclk <= '0';
+	wait for 20 ns;
+	hbc_data_sclk <= '1';
+	wait for 20 ns;
+	hbc_data_sclk <= '0';
+	wait for 20 ns;
+	hbc_data_sclk <= '1';
+	wait for 20 ns;
+	hbc_data_sclk <= '0';
+	wait for 20 ns;
+	hbc_data_sclk <= '1';
+	wait for 20 ns;
+	hbc_data_sclk <= '0';
 
+	wait for 20 ns;
+	hbc_data_ss <= '1';
 
+	wait;
+    end process;
 
 end;

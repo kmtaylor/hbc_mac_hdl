@@ -51,6 +51,7 @@ architecture spi_interface_arch of spi_interface is
     signal data_wren : std_logic;
 
     signal ctrl_byte : vec8_t;
+    signal ctrl_byte_r : std_logic_vector(15 downto 0);
     signal ctrl_index : std_logic;
     signal ctrl_byte_req : std_logic;
     signal ctrl_write_while_busy : std_logic;
@@ -100,8 +101,9 @@ begin
     -- is data
     ctrl_index_proc : process (clk) begin
 	if clk'event and clk = '0' then
-	    if (enabled and do_ack and io_write and ctrl_op) = '1' then
+	    if (do_ack and io_write and ctrl_op) = '1' then
 		ctrl_index <= '1';
+		ctrl_byte_r <= io_data_reg(15 downto 0);
 	    elsif ctrl_byte_req = '1' then
 		if ctrl_index = '1' then
 		    ctrl_wren_data <= '1';
@@ -120,9 +122,9 @@ begin
 
     ctrl_data_out_proc : process (ctrl_index, io_data_reg) begin
 	if ctrl_index = '1' then
-	    ctrl_byte <= io_data_reg(15 downto 8);
+	    ctrl_byte <= ctrl_byte_r(15 downto 8);
 	else
-	    ctrl_byte <= io_data_reg(7 downto 0);
+	    ctrl_byte <= ctrl_byte_r(7 downto 0);
 	end if;
     end process ctrl_data_out_proc;
 
@@ -189,9 +191,7 @@ begin
 		    else
 			if ctrl_op = '1' then
 			    ctrl_wren_status <= '1';
-			    if hbc_ctrl_ss = '0' then
-				ctrl_write_while_busy <= '1';
-			    end if;
+			    ctrl_write_while_busy <= '1';
 			else
 			    data_wren <= '1';
 			end if;
