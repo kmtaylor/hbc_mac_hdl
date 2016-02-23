@@ -120,6 +120,6 @@ Net psoc_reset	    LOC=P43; # X43
 Net psoc_swdio	    LOC=P44; # X45
 Net hbc_ctrl_miso  LOC=P45; # X51
 Net hbc_ctrl_mosi  LOC=P46; # X53
-Net hbc_data_miso  LOC=P48; # X59
+Net hbc_data_miso  LOC=P48; # | SLEW=QUIETIO; # X59
 Net hbc_data_mosi  LOC=P47; # X61
 

@@ -3,3 +3,9 @@
 NET "clkin" TNM_NET = "TNM_NET_clkin";
 #TIMESPEC "TS_clkin" = PERIOD "TNM_NET_clkin" 10ns HIGH 50%;
 TIMESPEC "TS_clkin" = PERIOD "TNM_NET_clkin" 16ns HIGH 55% INPUT_JITTER 30.0ps;
+
+NET "hbc_data_sclk" TNM_NET = "TNM_NET_spi_data";
+TIMESPEC "TS_spi_data" = PERIOD "TNM_NET_spi_data" 1us;
+
+NET "hbc_ctrl_sclk" TNM_NET = "TNM_NET_spi_ctrl";
+TIMESPEC "TS_spi_ctrl" = PERIOD "TNM_NET_spi_ctrl" 1us;
