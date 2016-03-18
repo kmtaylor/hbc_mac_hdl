@@ -77,6 +77,8 @@ architecture testbench of transmitter_tb is
     signal sub_write_strobe : std_logic;
     signal bus_master : std_logic;
 
+    signal cho_demod_out : std_logic;
+
     -- FIFO
     signal fifo_d_out : std_logic_vector (31 downto 0);
     signal fifo_wren, fifo_rden : std_logic;
@@ -108,8 +110,13 @@ architecture testbench of transmitter_tb is
 #endif
 begin
  
+    cho_demod : entity work.cho_demod port map (
+	clk => serial_clk,
+	data => s_data_out,
+	output => cho_demod_out);
+
     -- Instantiate the Unit Under Test (UUT)
-    modulator: entity work.modulator port map (
+    modulator : entity work.modulator port map (
 	clk => clk,
 	reset => reset,
 	io_addr => io_addr,

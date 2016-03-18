@@ -192,7 +192,7 @@ device=vac
 T 23000 50150 5 10 0 0 0 0 1
 footprint=none
 T 23000 49550 5 10 1 1 0 0 1
-value=AC 1.00 DC 1.25
+value=external
 }
 C 40000 50100 1 0 0 OPA2356.sym
 {

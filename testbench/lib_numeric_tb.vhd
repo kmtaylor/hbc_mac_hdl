@@ -45,16 +45,18 @@ begin
 	variable w_sym : walsh_sym_t;
 	variable distance : natural;
     begin
-	for j in 0 to 0 loop
-	    --w_sym := std_logic_vector(to_unsigned(j, 4));
-	    --w_code_1 := walsh_encode(w_sym);
-	    w_code_1 := X"FFF1";
+	for j in 0 to 15 loop
+	    w_sym := std_logic_vector(to_unsigned(j, 4));
+	    w_code_1 := walsh_encode(w_sym);
 
 	    for i in 0 to 15 loop
 		w_sym := std_logic_vector(to_unsigned(i, 4));
 		w_code_2 := walsh_encode(w_sym);
+		--w_code_2 := std_logic_vector(
+		--		rotate_left(unsigned(w_code_1), i));
+		--w_code_2 := X"FFF0";
 
-		distance := calc_hamming(w_code_1, w_code_2);
+		distance := w_code_1 xor w_code_2; --calc_hamming(w_code_1, w_code_2);
 
 		write(l, distance);
 		writeline(output, l);
@@ -93,6 +95,24 @@ begin
 	port map (
 	    val => std_logic_vector(val),
 	    weight => weight);
+
+    process
+        variable l : line;
+        variable w_code : walsh_code_t := X"0000";
+        variable w_sym : walsh_sym_t;
+        variable distance : natural;
+    begin
+	for j in 0 to 15 loop
+            w_sym := std_logic_vector(to_unsigned(j, 4));
+            w_code := walsh_encode(w_sym);
+
+            distance := calc_hamming(w_code, X"FFFF");
+
+            write(l, distance);
+            writeline(output, l);
+        end loop;
+	wait;
+    end process;
 
     inc_val : process begin
 	wait for clk_period;

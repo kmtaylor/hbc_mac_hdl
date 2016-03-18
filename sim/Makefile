@@ -31,6 +31,7 @@ RECEIVER_TB_FILES += \
 	rx_fifo_interface.vhd \
 	fifo_rx_sim.vhd \
 	hamming_lut.vhd \
+	cho_demod.vhd \
 	receiver_tb.vhd
 RECEIVER_SIM_FLAGS += --stop-time=2ms
 #RECEIVER_SIM_FLAGS += --stop-time=200us
@@ -41,6 +42,7 @@ TRANSMITTER_TB_FILES += \
 	parallel_to_serial.vhd \
 	tx_fifo_interface.vhd \
 	fifo_tx_sim.vhd \
+	cho_demod.vhd \
 	transmitter_tb.vhd
 TRANSMITTER_SIM_FLAGS += --stop-time=2000us
 

@@ -61,6 +61,7 @@ architecture serial_to_parallel_arch of serial_to_parallel is
     signal expected_phase : std_logic;
     signal phase_sum : unsigned (SYMBOL_INDEX_BITS-1 downto 0);
     signal current_phase : std_logic;
+    signal current_phase_latch : std_logic;
 
     signal s2p_index : unsigned (SYMBOL_INDEX_BITS-1 downto 0);
     signal allow_re_align : std_logic;
@@ -76,13 +77,17 @@ architecture serial_to_parallel_arch of serial_to_parallel is
     signal nibble_ready : std_logic;
     signal nibble_ready_prev : std_logic;
     signal ignore_nibble : std_logic;
+    signal fifo_data_valid : std_logic;
+    signal header_found : std_logic;
+    signal packet_length : unsigned (
+		    bits_for_val(MAX_PACKET_WORDS)-1 downto 0);
     signal decoded_sym : walsh_sym_t;
     signal decoded_word : std_logic_vector (WORD_SIZE-1 downto 0);
 
     signal phase_change : std_logic;
     signal phase_changes : std_logic_vector(PKT_END_THRESH-1 downto 0);
     signal chk_pkt_end : std_logic;
-    signal pkt_end : std_logic;
+    signal pkt_end_phase, pkt_end_bytes, pkt_end : std_logic;
 
     signal sfd_weight : std_logic_vector (COMMA_WEIGHT_BITS-1 downto 0);
     signal sfd_xnor : std_logic_vector (COMMA_SIZE-1 downto 0);
@@ -269,6 +274,7 @@ begin
 		walsh_detect <= '0';
 	    else
 		if s2p_index = r_sf-1 then
+		    current_phase_latch <= not current_phase;
 		    demod_reg <= concat_bit(demod_reg, current_phase);
 		    if walsh_detect_i = '1' then
 			if walsh_count = WALSH_CODE_SIZE-1 then
@@ -429,19 +435,31 @@ begin
     detect_pkt_end : process(serial_clk) begin
 	if serial_clk'event and serial_clk = '1' then
 	    if sym_reset = '1' then
-		pkt_end <= '0';
+		pkt_end_phase <= '0';
 		phase_changes <= (others => '0');
 	    else
 		-- Detect packet ending by receiving 8 by phase_change = '1'
 		phase_changes <= concat_bit(phase_changes, phase_change);
 		if chk_pkt_end = '1' then
 		    if phase_changes = ones(phase_changes'length) then
-			pkt_end <= '1';
+			pkt_end_phase <= '1';
 		    end if;
 		end if;
 	    end if;
 	end if;
     end process detect_pkt_end;
+
+    detect_bytes_read : process(serial_clk) begin
+	if serial_clk'event and serial_clk = '0' then
+	    if sym_reset = '1' then
+		pkt_end_bytes <= '0';
+	    elsif packet_length = 0 then
+		pkt_end_bytes <= '1';
+	    end if;
+	end if;
+    end process detect_bytes_read;
+
+    pkt_end <= pkt_end_phase or pkt_end_bytes;
 
     fifo_d_out <= decoded_word;
 
@@ -449,15 +467,15 @@ begin
 	if serial_clk'event and serial_clk = '0' then
 	    if sym_reset = '1' then
 		nibble_ready_prev <= '0';
-		fifo_wren <= '0';
+		fifo_data_valid <= '0';
 		ignore_nibble <= '1';
 	    else
 		nibble_ready_prev <= nibble_ready;
 		if nibble_ready = '1' then
 		    if nibble_ready_prev = '1' then
-			fifo_wren <= '0';
+			fifo_data_valid <= '0';
 		    else
-			fifo_wren <= not ignore_nibble;
+			fifo_data_valid <= not ignore_nibble;
 		    end if;
 		else
 		    if nibble_ready_prev = '1' then
@@ -467,6 +485,30 @@ begin
 	    end if;
 	end if;
     end process push_fifo;
+
+    fifo_wren <= fifo_data_valid;
+
+    -- Read packet size. Don't worry about error checking, the worst case
+    -- scenario is that a MTU packet will be written out.
+    header_latch : process(serial_clk) begin
+	if serial_clk'event and serial_clk = '0' then
+	    if sym_reset = '1' then
+		packet_length <= to_unsigned(MAX_PACKET_WORDS,
+						packet_length'length);
+		header_found <= '0';
+	    else
+		if fifo_data_valid  = '1' then
+		    if header_found = '0' then
+			header_found <= '1';
+			packet_length <=
+			    words_from_size(decoded_word(23 downto 16));
+		    else
+			packet_length <= packet_length - 1;
+		    end if;
+		end if;
+	    end if;
+	end if;
+    end process header_latch;
 
 end serial_to_parallel_arch;
 

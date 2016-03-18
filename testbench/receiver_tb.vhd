@@ -25,6 +25,7 @@ architecture testbench of receiver_tb is
    --Inputs
     signal clk : std_logic := '0';
     signal reset : std_logic := '0';
+    signal enable : std_logic := '1';
     signal pkt_reset : std_logic;
     signal pkt_reset_2 : std_logic;
     signal pkt_ack : std_logic := '0';
@@ -66,11 +67,13 @@ architecture testbench of receiver_tb is
     signal s2p_from_fifo : std_logic_vector (31 downto 0);
     signal rx_fifo_data : std_logic_vector (31 downto 0);
     signal rx_fifo_io_ready : std_logic;
+
+    signal cho_demod_output : std_logic;
  
     -- Clock period definitions
     constant clk_period : time := 10 ns;
 #ifndef SERIAL_CLK_NS
-#define SERIAL_CLK_NS 23.81
+#define SERIAL_CLK_NS 23.85
 #endif
     constant s_clk_period : time := SERIAL_CLK_NS ns;
     
@@ -125,6 +128,11 @@ architecture testbench of receiver_tb is
     end procedure write_output;
 
 begin
+
+    cho_demod : entity work.cho_demod port map (
+	clk => serial_clk,
+	data => s_data_in,
+	output => cho_demod_output);
  
     sync : entity work.data_synchroniser port map (
 	reset => pkt_reset,
@@ -141,6 +149,7 @@ begin
 	fifo_wren => s2p_fifo_wren,
 	fifo_full => s2p_fifo_full,
 	data_in => s_data_sync,
+	enable => enable,
 	pkt_ack => pkt_ack);
 
     sync_2 : entity work.data_synchroniser port map (
@@ -158,6 +167,7 @@ begin
 	fifo_wren => s2p_fifo_wren_2,
 	fifo_full => s2p_fifo_full_2,
 	data_in => s_data_sync_2,
+	enable => enable,
 	pkt_ack => pkt_ack_2);
 
     rx_fifo : component fifo_rx port map (

@@ -2,10 +2,14 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+library transceiver;
+use transceiver.bits.all;
+
 package numeric is
     constant WALSH_CODE_SIZE : natural := 16;
     constant WALSH_SYM_SIZE : natural := 4;
     constant COMMA_SIZE : natural := 64;
+    constant MAX_PACKET_WORDS : natural := 64;
 
     subtype walsh_code_t is std_logic_vector(WALSH_CODE_SIZE-1 downto 0);
     subtype walsh_sym_t is std_logic_vector(WALSH_SYM_SIZE-1 downto 0);
@@ -20,6 +24,8 @@ package numeric is
     function weight_inverted (weight : std_logic_vector) return std_logic;
     function weight_comp (new_weight, old_weight : std_logic_vector) 
 	return boolean;
+
+    function words_from_size (size : std_logic_vector) return unsigned;
 end package numeric;
 
 package body numeric is
@@ -177,5 +183,19 @@ package body numeric is
 	end if;
 	return "0000";
     end function walsh_decode;
+
+    function words_from_size (size : std_logic_vector) return unsigned is
+	variable tmp : unsigned(size'length-1 downto 0);
+	variable result : unsigned (bits_for_val(MAX_PACKET_WORDS)-1 downto 0);
+	variable increment : std_logic;
+    begin
+	tmp := unsigned(size);
+	increment := tmp(0) or tmp(1);
+	result := '0' & tmp(bits_for_val(MAX_PACKET_WORDS) downto 2);
+	if increment = '1' then
+	    result := result + 1;
+	end if;
+	return result; 
+    end function words_from_size;
 
 end package body numeric;
