@@ -1,36 +1,22 @@
---------------------------------------------------------------------------------
--- Company: 
--- Engineer:
+-- Copyright (C) 2016 Kim Taylor
 --
--- Create Date:   15:06:33 03/24/2014
--- Design Name:   
--- Module Name:   /home/kmtaylor/Xilinx/Projects/cpu_test/parallel_to_serial_tb.vhd
--- Project Name:  cpu_test
--- Target Device:  
--- Tool versions:  
--- Description:   
--- 
--- VHDL Test Bench Created by ISE for module: parallel_to_serial
--- 
--- Dependencies:
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
+-- This file is part of hbc_mac.
 --
--- Notes: 
--- This testbench has been automatically generated using types std_logic and
--- std_logic_vector for the ports of the unit under test.  Xilinx recommends
--- that these types always be used for the top-level I/O of a design in order
--- to guarantee that the testbench will bind correctly to the post-implementation 
--- simulation model.
---------------------------------------------------------------------------------
+-- hbc_mac is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+--
+-- Foobar is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License
+-- along with hbc_mac.  If not, see <http://www.gnu.org/licenses/>.
+
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
- 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---USE ieee.numeric_std.ALL;
  
 ENTITY parallel_to_serial_tb IS
 END parallel_to_serial_tb;
