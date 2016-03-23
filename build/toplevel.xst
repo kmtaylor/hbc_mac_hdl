@@ -1,7 +1,7 @@
 set -tmpdir "xst/projnav.tmp"
 set -xsthdpdir "xst"
 run
--ifn toplevel.prj
+-ifn ../toplevel.prj
 -ofn toplevel
 -ofmt NGC
 -p xc6slx9-2-tqg144
