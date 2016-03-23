@@ -1,8 +1,8 @@
 set -tmpdir "xst/projnav.tmp"
 set -xsthdpdir "xst"
 run
--ifn ../toplevel.prj
--ofn toplevel
+-ifn ../hbc_mac.prj
+-ofn hbc_mac
 -ofmt NGC
 -p xc6slx9-2-tqg144
 -top toplevel

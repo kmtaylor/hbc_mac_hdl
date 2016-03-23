@@ -63,5 +63,3 @@ clean:
 .PHONY: clean cleanall all
 
 .PRECIOUS: %_pp.vhd
-
-#ghdl -e -Wc,-fdump-tree-gimple
