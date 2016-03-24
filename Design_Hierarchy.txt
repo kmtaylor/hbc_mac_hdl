@@ -1,21 +1,21 @@
 HDL Hierarchy map:
 
 toplevel.vhd
-    ->	cpu_clk					(pll_mem.vhd)
-    ->	serial_clk				(pll_serial.vhd)
-    ->	Embedded CPU				(mcs_0.xco)
+    ->	cpu_clk					<pll_mem.xco>
+    ->	serial_clk				<pll_serial.xco>
+    ->	Embedded CPU				<mcs_0.xco>
     ->	CPU/DRAM interface			(mem_interface.vhd)
     ->	DDR Controller				(ddr.vhd)
     ->	HBC TX System				(hbc_tx.vhd)
 	->  CPU/Modulator bus arbitration	(fifo_bus_arbitrator.vhd)
 	->  CPU/TX FIFO interface		(tx_fifo_interface.vhd)
-	->  TX FIFO				(fifo_tx.xco)
+	->  TX FIFO				<fifo_tx.xco>
 	->  Modulator				(modulator.vhd)
 	    ->	Walsh encoder			(walsh_encode_lut.vhd)
 	->  TX shift register			(parallel_to_serial.vhd)
     ->	HBC RX System				(hbc_rx.vhd)
 	->  CPU/RX FIFO interface		(rx_fifo_interface.vhd)
-	->  RX FIFO				(fifo_rx.xco)
+	->  RX FIFO				<fifo_rx.xco>
 	->  Input data to clock synchronisation	(data_synchroniser.vhd)
 	->  RX State machine and control	(serial_to_parallel.vhd)
 	    ->	Phase alignement		(phase_align.vhd)
@@ -26,11 +26,11 @@ toplevel.vhd
 		->  Hamming distance logic	(hamming_lut.vhd)
     ->	Scrambler				(scrambler.vhd)
     ->	SPI/Host interface			(spi_interface.vhd)
-	->  Data interface			(spi_slave_core.vhd)
-	->  Command interface			(spi_slave_core.vhd)
+	->  Data interface			<spi_slave_core.vhd>
+	->  Command interface			<spi_slave_core.vhd>
     ->	PSoC memory programming interface	(psoc_interface.vhd)
     ->	Flash memory interface			(flash_interface.vhd)
-	->  Flash SPI core			(spi_master_core.vhd)
+	->  Flash SPI core			<spi_master_core.vhd>
     ->	Timing constraints file			(timing.ucf)
     ->	Pin map constraints file		(pin_map_spartan.vhd)
 
