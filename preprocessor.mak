@@ -15,28 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with hbc_mac.  If not, see <http://www.gnu.org/licenses/>.
 
-include preprocessor.mak
+VHDL_INPUT_FILES := $(wildcard *.vhd.in)
+VHDL_OUTPUT_FILES := $(VHDL_INPUT_FILES:.vhd.in=.vhd)
 
-VHHFLAGS ?= -DXILINX_SPARTAN=1 -DUSE_MEM=1 -DUSE_SPI=1 -DUSE_1BIT_LED \
-	    -DUSE_PSOC -DUSE_FLASH
-export
-
-all: $(VHDL_OUTPUT_FILES) cores testbench
-
-cores:
-	make -C cores
-
-testbench:
-	make -C testbench
-
-clean:
-	rm -f $(VHDL_OUTPUT_FILES)
-	make -C cores clean
-	make -C testbench clean
-
-cleanall: clean
-	make -C sim cleanall
-	make -C sim/analogue clean
-	make -C build cleanall
-
-.PHONY: clean cores testbench
+# Preprocessing
+%.vhd: %.vhd.in
+	cpp $(VHHFLAGS) -DVHDL -D_QUOTE=\" -x assembler-with-cpp \
+		-P -I ./ "$<" -o "$@"

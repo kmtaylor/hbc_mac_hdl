@@ -15,13 +15,24 @@
 -- You should have received a copy of the GNU General Public License
 -- along with hbc_mac.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <preprocessor/constants.vhh>
+#include "send_packet.vhh"
+
+#ifndef SERIAL_CLK_NS
+#define SERIAL_CLK_NS 24
+#endif
+
+#ifndef STIMULUS
+#define STIMULUS 1
+#endif
+
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity modulator_tb is
-end modulator_tb;
+entity transmitter_stim_tb is
+end transmitter_stim_tb;
  
-architecture testbench of modulator_tb is 
+architecture testbench of transmitter_stim_tb is 
  
    --Inputs
     signal clk : std_logic := '0';
@@ -29,29 +40,26 @@ architecture testbench of modulator_tb is
     signal io_addr : std_logic_vector(7 downto 0) := (others => '0');
     signal io_d_in : std_logic_vector(31 downto 0) := (others => '0');
     signal io_addr_strobe : std_logic := '0';
-    signal io_read_strobe : std_logic := '0';
     signal io_write_strobe : std_logic := '0';
     signal io_ready : std_logic;
-    signal sub_io_ready : std_logic;
 
-    --Outputs
-    signal sub_addr_out: std_logic_vector (7 downto 0);
-    signal sub_d_out   : std_logic_vector (31 downto 0);
-    signal sub_addr_strobe : std_logic;
-    signal sub_write_strobe : std_logic;
-    signal bus_master : std_logic;
+    signal fi_addr : std_logic_vector (7 downto 0) := (others => '0');
+    signal fi_d : std_logic_vector (31 downto 0) := (others => '0');
+    signal fi_addr_strobe : std_logic := '0';
+    signal fi_write_strobe : std_logic := '0';
+    signal prog_full : std_logic;
 
-    -- FIFO
-    signal fifo_d_out : std_logic_vector (31 downto 0);
-    signal fifo_wren, fifo_rden : std_logic;
- 
+    signal serial_clk, parallel_to_serial_enable : std_logic;
+    signal s_data_out : std_logic;
+
     -- Clock period definitions
     constant clk_period : time := 10 ns;
+    constant s_clk_period : time := SERIAL_CLK_NS ns;
     
 begin
  
     -- Instantiate the Unit Under Test (UUT)
-    uut: entity work.modulator port map (
+    transmitter_tb: entity work.transmitter_tb port map (
 	clk => clk,
 	reset => reset,
 	io_addr => io_addr,
@@ -59,28 +67,14 @@ begin
 	io_addr_strobe => io_addr_strobe,
 	io_write_strobe => io_write_strobe,
 	io_ready => io_ready,
-	bus_master => bus_master,
-	sub_addr_out => sub_addr_out,
-	sub_d_out => sub_d_out,
-	sub_addr_strobe => sub_addr_strobe,
-	sub_write_strobe => sub_write_strobe,
-	sub_io_ready => sub_io_ready);
-
-    resp_unit : entity work.fifo_interface port map (
-	clk => clk,
-	reset => reset,
-	trigger => '0',
-	io_addr => sub_addr_out,
-	io_d_in => sub_d_out,
-	io_d_out => open,
-	io_addr_strobe => sub_addr_strobe,
-	io_read_strobe => '0',
-	io_write_strobe => sub_write_strobe,
-	io_ready => sub_io_ready,
-	fifo_d_out => fifo_d_out,
-	fifo_d_in => (others => '0'),
-	fifo_wren => fifo_wren,
-	fifo_rden => fifo_rden);
+	fi_addr_strobe => fi_addr_strobe,
+	fi_write_strobe => fi_write_strobe,
+	fi_addr => fi_addr,
+	fi_d => fi_d,
+	prog_full => prog_full,
+	parallel_to_serial_enable => parallel_to_serial_enable,
+	serial_clk => serial_clk,
+	s_data_out => s_data_out);
 
     -- Clock process definitions
     clk_process : process begin
@@ -90,35 +84,29 @@ begin
 	wait for clk_period/2;
     end process;
 
+    s_clk_process : process begin
+	serial_clk <= '0';
+	wait for s_clk_period/2;
+	serial_clk <= '1';
+	wait for s_clk_period/2;
+    end process;
+
     -- Stimulus process
     stim_proc: process begin	
-	-- hold reset state for 20 ns.
+	-- hold reset state for 60 ns.
 	reset <= '1';
-	wait for 20 ns;
+	parallel_to_serial_enable <= '0';
+	wait for 60 ns;
 	reset <= '0';
 
 	wait for clk_period * 5.5;
 
-	-- Set SF
-	io_write_strobe <= '1';
-	io_addr_strobe <= '1';
-	io_d_in <= X"00000001";
-	io_addr <= X"19";
-	wait for clk_period;
-	io_write_strobe <= '0';
-	io_addr_strobe <= '0';
+	-- Trigger P2S
+#if STIMULUS
+	TRIGGER()
+	SEND_PACKET()
+#endif
 
-	wait for clk_period * 6;
-	
-	-- Set bits at address 0x01
-	io_write_strobe <= '1';
-	io_addr_strobe <= '1';
-	io_d_in <= X"12345678";
-	io_addr <= X"18";
-	wait for clk_period;
-	io_write_strobe <= '0';
-	io_addr_strobe <= '0';
-	
 	wait;
     end process;
 

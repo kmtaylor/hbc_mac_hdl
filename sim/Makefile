@@ -7,7 +7,7 @@
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# Foobar is distributed in the hope that it will be useful,
+# hbc_mac is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
@@ -15,16 +15,39 @@
 # You should have received a copy of the GNU General Public License
 # along with hbc_mac.  If not, see <http://www.gnu.org/licenses/>.
 
-XILINX_FLAGS += --ieee=none -fexplicit --warn-no-binding --warn-no-vital-generic
+TESTBENCHES := clk_div_tb.vhd \
+	       data_synchroniser_tb.vhd \
+	       ddr_tb.vhd \
+	       flash_interface_tb.vhd \
+	       lib_numeric_tb.vhd \
+	       loopback_tb.vhd \
+	       parallel_to_serial_tb.vhd \
+	       receiver_tb.vhd \
+	       rx_fifo_interface_tb.vhd \
+	       scrambler_tb.vhd \
+	       spi_interface_tb.vhd \
+	       transmitter_tb.vhd \
+	       tx_fifo_interface_tb.vhd \
+	       usb_fifo_interface_tb.vhd
+
+IEEE_LIB := --ieee=synopsys
+XILINX_FLAGS += $(IEEE_LIB) -fexplicit --warn-no-binding --warn-no-vital-generic
+
+GHDL := ghdl
+GHDL_MCODE := ghdl_mcode
+
 GHDL_DIR := $(shell dirname `ghdl --dispconfig | grep "default prefix" | \
 		sed 's/.*: //'`)
 GHDL_MCODE_DIR := $(shell ghdl_mcode --dispconfig | grep "library directory" | \
 		sed 's/.*: //')
-GHDL := ghdl
-GHDL_MCODE := ghdl_mcode
 
+XILINX_LIB_DIR := /opt/Xilinx/14.7/ISE_DS/ISE/vhdl/src
+
+XILINX_IEEE_FILES := numeric_std.vhd \
+		     std_logic_1164.vhd std_logic_unsigned.vhd
+
+#ieee-obj93.cf
 XILINX_OBJS += \
-	ieee-obj93.cf \
 	xilinxcorelib-obj93.cf \
 	unisim-obj93.cf \
 	simprim-obj93.cf
@@ -33,265 +56,79 @@ LOCAL_OBJS += \
 	transceiver-obj93.cf \
 	work-obj93.cf
 
-DDR_TB_FILES += \
-	mem_interface.vhd \
-	ddr.vhd \
-	ddr_tb.vhd
-DDR_SIM_FLAGS += --stop-time=350us
-
-RECEIVER_TB_FILES += \
-	data_synchroniser.vhd \
-	walsh_enc_lut.vhd \
-	walsh_decoder.vhd \
-	phase_align.vhd \
-	serial_to_parallel.vhd \
-	rx_fifo_interface.vhd \
-	fifo_rx_sim.vhd \
-	hamming_lut.vhd \
-	cho_demod.vhd \
-	receiver_tb.vhd
-RECEIVER_SIM_FLAGS += --stop-time=2ms
-#RECEIVER_SIM_FLAGS += --stop-time=200us
-
-TRANSMITTER_TB_FILES += \
-	walsh_enc_lut.vhd \
-	modulator.vhd \
-	parallel_to_serial.vhd \
-	tx_fifo_interface.vhd \
-	fifo_tx_sim.vhd \
-	cho_demod.vhd \
-	transmitter_tb.vhd
-TRANSMITTER_SIM_FLAGS += --stop-time=2000us
-
-SCRAMBLER_TB_FILES += \
-	scrambler.vhd \
-	scrambler_tb.vhd
-SCRAMBLER_SIM_FLAGS += --stop-time=1000ns
-
-DATA_SYNCHRONISER_TB_FILES += \
-	data_synchroniser.vhd \
-	data_synchroniser_tb.vhd
-DATA_SYNCHRONISER_SIM_FLAGS += --stop-time=10us
-
-SPI_TB_FILES += \
-	spi_interface.vhd \
-	spi_slave_core.vhd \
-	spi_interface_tb.vhd
-SPI_SIM_FLAGS += --stop-time=1500ns
-
-C_TO_VHD_FILES += \
-	c_to_vhd.vhd \
-	fifo_interface.vhd \
-	c_to_vhd_tb.vhd
-C_TO_VHD_SIM_FLAGS += --stop-time=3000ns
-
-FLASH_INTERFACE_FILES += \
-	flash_interface.vhd \
-	spi_master_core.vhd \
-	flash_interface_tb.vhd
-FLASH_INTERFACE_SIM_FLAGS += --stop-time=30us
-
-MODULATOR_TB_FILES += \
-	walsh_enc_lut.vhd \
-	modulator.vhd \
-	parallel_to_serial.vhd \
-	tx_fifo_interface.vhd \
-	fifo_tx_sim.vhd \
-	fifo_rx_sim.vhd \
-	data_synchroniser.vhd \
-	hamming_lut.vhd \
-	walsh_decoder.vhd \
-	phase_align.vhd \
-	serial_to_parallel.vhd \
-	rx_fifo_interface.vhd \
-	modulator_path_tb.vhd
-MODULATOR_SIM_FLAGS += --stop-time=3000us --ieee-asserts=disable-at-0
-
-MODULATOR_SYNTH_TB_FILES += \
-	walsh_enc_lut.vhd \
-	modulator.vhd \
-	parallel_to_serial.vhd \
-	tx_fifo_interface.vhd \
-	fifo_tx_sim.vhd \
-	fifo_rx_sim.vhd \
-	data_synchroniser.vhd \
-	hamming_lut.vhd \
-	walsh_encoder.vhd \
-	phase_align.vhd \
-	serial_to_parallel_timesim.vhd \
-	rx_fifo_interface.vhd \
-	modulator_path_tb.vhd
-MODULATOR_SYNTH_SIM_FLAGS += --stop-time=1000us --ieee-asserts=disable-at-0 #\
-#			     --disp-time
-
-USB_TB_FILES += \
-	usb_fifo_interface.vhd \
-	usb_fifo_interface_tb.vhd
-USB_SIM_FLAGS += --stop-time=1000ns
-
-FIFO_TB_FILES += \
-	fifo_interface.vhd \
-	fifo_interface_tb.vhd \
-	fifo_tx_sim.vhd
-FIFO_SIM_FLAGS += --stop-time=1000ns
-
-RX_FIFO_TB_FILES += \
-	rx_fifo_interface.vhd \
-	rx_fifo_interface_tb.vhd \
-	fifo_rx_sim.vhd
-RX_FIFO_SIM_FLAGS += --stop-time=1000ns
-
-CLK_DIV_TB_FILES += \
-	clk_div.vhd \
-	clk_div_tb.vhd
-CLK_DIV_SIM_FLAGS += --stop-time=100ns
-
-P2S_TB_FILES += \
-	parallel_to_serial.vhd \
-	parallel_to_serial_tb.vhd \
-	fifo_tx_sim.vhd
-P2S_SIM_FLAGS += --stop-time=5000ns
-
-NUMERIC_TB_FILES += \
-	lib_numeric_tb.vhd
-NUMERIC_SIM_FLAGS += --stop-time=100ns
-
 all:
-	@make -qp | awk -F ':' '/^[a-zA-Z0-9][^$$#\/\t=]*:([^=]|$$)/ \
-	{split($$1,A,/ /); for(i in A) print A[i]}' | sed '/\.o/d' | grep tb
+	@echo -e $(subst $(space),$(newline),$(TESTBENCHES:.vhd=))
 
-# Test Benches (Elaboration)
-receiver_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(RECEIVER_TB_FILES:.vhd=_pp.o)
-	$(GHDL) -m $(XILINX_FLAGS) "$@"
-	./"$@" $(RECEIVER_SIM_FLAGS) --wave="$@".ghw
-	./interpret_output > scrambler_data
+ghdl_extract = $(shell grep $(1) $(2) | sed 's/.*$(1)://' | tr -d '\n')
 
-transmitter_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(TRANSMITTER_TB_FILES:.vhd=_pp.o)
-	$(GHDL) -m $(XILINX_FLAGS) "$@"
-	./"$@" $(TRANSMITTER_SIM_FLAGS) --wave="$@".ghw
-#	$(GHDL_MCODE) -c $(XILINX_FLAGS) -r $@ \
-#	$(TRANSMITTER_SIM_FLAGS) --vcd=$@.vcd
+-include $(addprefix deps/,$(TESTBENCHES:.vhd=.d))
 
-c_to_vhd_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(C_TO_VHD_FILES:.vhd=_pp.o)
-	$(GHDL) -m $(XILINX_FLAGS) "$@"
-	./"$@" $(C_TO_VHD_SIM_FLAGS) --wave="$@".ghw
+%.vhd: %.vhd.in
+	make -C $(dir $@) $(notdir $@)
+.PRECIOUS: %.vhd
 
-flash_interface_tb: $(XILINX_OBJS) $(LOCAL_OBJS) \
-			$(FLASH_INTERFACE_FILES:.vhd=_pp.o)
-	$(GHDL) -m $(XILINX_FLAGS) "$@"
-	./"$@" $(FLASH_INTERFACE_SIM_FLAGS) --wave="$@".ghw
+deps/%.d: ../testbench/%.vhd
+	@mkdir -p deps
+	$(eval testbench = $(notdir $(basename $@)))
+	$(eval flags = $(call ghdl_extract, ghdl_flags, $<))
+	$(eval deps = $(call ghdl_extract, ghdl_deps, $<))
+	@echo $(testbench): $(addprefix ../, $(deps)) > $@
+	@echo $(testbench)_deps  += $(addprefix ../, $(deps)) >> $@
+	@echo $(testbench)_flags += $(flags) >> $@
 
-ddr_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(DDR_TB_FILES:.vhd=_pp.o)
-	$(GHDL) -m $(XILINX_FLAGS) "$@"
-	./"$@" $(DDR_SIM_FLAGS) --wave="$@".ghw
+%_tb: $(XILINX_OBJS) $(LOCAL_OBJS) 
+	$(eval dep_list = $@_deps)
+	$(GHDL) -i $(XILINX_FLAGS) ../testbench/$@.vhd $($@_deps)
+	$(GHDL) -m $(XILINX_FLAGS) $@
+	./$@ $($@_flags)
 
-scrambler_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(SCRAMBLER_TB_FILES:.vhd=_pp.o)
-	$(GHDL) -m $(XILINX_FLAGS) "$@"
-	./"$@" $(SCRAMBLER_SIM_FLAGS) --wave="$@".ghw
-
-usb_fifo_interface_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(USB_TB_FILES:.vhd=_pp.o)
-	$(GHDL) -m $(XILINX_FLAGS) "$@"
-	./"$@" $(USB_SIM_FLAGS) --wave="$@".ghw
-
-fifo_interface_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(FIFO_TB_FILES:.vhd=_pp.o)
-	$(GHDL) -m $(XILINX_FLAGS) "$@"
-	./"$@" $(FIFO_SIM_FLAGS) --wave="$@".ghw
-
-rx_fifo_interface_tb: $(XILINX_OBJS) $(LOCAL_OBJS) \
-			$(RX_FIFO_TB_FILES:.vhd=_pp.o)
-	$(GHDL) -m $(XILINX_FLAGS) "$@"
-	./"$@" $(FIFO_SIM_FLAGS) --wave="$@".ghw
-
-clk_div_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(CLK_DIV_TB_FILES:.vhd=_pp.o)
-	$(GHDL) -m $(XILINX_FLAGS) "$@"
-	./"$@" $(CLK_DIV_SIM_FLAGS) --wave="$@".ghw
-
-modulator_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(MODULATOR_TB_FILES:.vhd=_pp.o)
-	$(GHDL) -m $(XILINX_FLAGS) "$@"
-	./"$@" $(MODULATOR_SIM_FLAGS) --wave="$@".ghw
-
-modulator_synth_tb: $(XILINX_OBJS) $(LOCAL_OBJS) \
-		$(MODULATOR_SYNTH_TB_FILES:.vhd=_pp.o)
-	$(GHDL_MCODE) -c $(XILINX_FLAGS) -r modulator_tb \
-	$(MODULATOR_SYNTH_SIM_FLAGS) --fst="$@".fst \
-	--sdf=s_to_p=netgen/par/processed/serial_to_parallel_timesim_pp.sdf
-
-parallel_to_serial_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(P2S_TB_FILES:.vhd=_pp.o)
-	$(GHDL) -m $(XILINX_FLAGS) "$@"
-	./"$@" $(P2S_SIM_FLAGS) --wave="$@".ghw
-
-numeric_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(NUMERIC_TB_FILES:.vhd=_pp.o)
-	$(GHDL) -m $(XILINX_FLAGS) "$@"
-	$(GHDL) -r "$@" $(NUMERIC_SIM_FLAGS) --wave="$@".ghw #\
-#		--sdf=typ==../testbench/lib_numeric_tb.sdf
-
-data_synchroniser_tb: $(XILINX_OBJS) $(LOCAL_OBJS) \
-		$(DATA_SYNCHRONISER_TB_FILES:.vhd=_pp.o)
-	$(GHDL) -m $(XILINX_FLAGS) "$@"
-	./"$@" $(DATA_SYNCHRONISER_SIM_FLAGS) --wave="$@".ghw
-
-spi_interface_tb: $(XILINX_OBJS) $(LOCAL_OBJS) $(SPI_TB_FILES:.vhd=_pp.o)
-	$(GHDL) -m $(XILINX_FLAGS) "$@"
-	./"$@" $(SPI_SIM_FLAGS) --wave="$@".ghw
+%_synth_tb: $(XILINX_OBJS) $(LOCAL_OBJS)
+	$(eval dep_list = $@_deps)
+	$(GHDL_MCODE) -i $(XILINX_FLAGS) ../testbench/$@.vhd $($@_deps)
+	$(GHDL_MCODE) -c $(XILINX_FLAGS) -r $@ $($@_flags)
 
 # Xilinx libraries
 xilinxcorelib-obj93.cf:
-	$(GHDL) -i --ieee=none --work=XilinxCoreLib \
-		../Xilinx/sim/XilinxCoreLib/*.vhd
+	$(GHDL) -i $(IEEE_LIB) --work=XilinxCoreLib \
+		$(XILINX_LIB_DIR)/XilinxCoreLib/*.vhd
 unisim-obj93.cf:
-	$(GHDL) -i --ieee=none --work=unisim ../Xilinx/sim/unisims/*.vhd \
-		../Xilinx/sim/unisims/primitive/*.vhd
+	$(GHDL) -i $(IEEE_LIB) --work=unisim \
+		$(XILINX_LIB_DIR)/unisims/*.vhd \
+		$(XILINX_LIB_DIR)/unisims/primitive/*.vhd
 simprim-obj93.cf:
-	$(GHDL) -i --ieee=none --work=simprim ../Xilinx/sim/simprims/*.vhd \
-		../Xilinx/sim/simprims/primitive/*.vhd
+	$(GHDL) -i $(IEEE_LIB) --work=simprim \
+		$(XILINX_LIB_DIR)/simprims/*.vhd \
+		$(XILINX_LIB_DIR)/simprims/primitive/other/*.vhd
 ieee-obj93.cf:
-	$(GHDL) -i --ieee=none --work=ieee ../Xilinx/sim/ieee/*.vhd \
+	$(GHDL) -i $(IEEE_LIB) --work=ieee  \
+		$(patsubst %, $(XILINX_LIB_DIR)/ieee/%, $(XILINX_IEEE_FILES)) \
 		$(GHDL_DIR)/src/vital2000/*.vhdl
 
 transceiver-obj93.cf:
-	$(GHDL) -i --ieee=none --work=transceiver ../lib/*.vhd
+	$(GHDL) -i $(IEEE_LIB) --work=transceiver ../lib/*.vhd
 
 work-obj93.cf:
 
-# Preprocessing
-%_pp.vhd: ../%.vhd
-	cpp $(VHHFLAGS) -DVHDL -D_QUOTE=\" -x assembler-with-cpp \
-		-P -I ../ "$<" -o "$@"
-
-# Analysis
-%_pp.o: ../processed/%_pp.vhd
-	$(GHDL) -i $(XILINX_FLAGS) "$<"
-%_core_pp.o: ../processed/%_core_pp.vhd
-	$(GHDL) -i $(XILINX_FLAGS) "$<"
-%_tb_pp.o: ../testbench/processed/%_tb_pp.vhd
-	$(GHDL) -i $(XILINX_FLAGS) "$<"
-%_sim_pp.o: ../Xilinx/sim/processed/%_sim_pp.vhd
-	$(GHDL) -i $(XILINX_FLAGS) "$<"
-%_synthesis_pp.o: netgen/synthesis/processed/%_synthesis_pp.vhd
-	$(GHDL) -i $(XILINX_FLAGS) "$<"
-%_timesim_pp.o: netgen/par/processed/%_timesim_pp.vhd
-	$(GHDL) -i $(XILINX_FLAGS) "$<"
-
-# Spice imports
-%.time: FORCE
-	$(eval SPICE_DIR = $(dir $(subst ghdl/,,$@)))
-	$(MAKE) -C $(SPICE_DIR) $(subst $(SPICE_DIR),,$@)
-%.value: FORCE
-	$(eval SPICE_DIR = $(dir $(subst ghdl/,,$@)))
-	$(MAKE) -C $(SPICE_DIR) $(subst $(SPICE_DIR),,$@)
-FORCE:
-
 # Other Targets
+interpret_output:
+
 clean:
 	$(GHDL) --remove
 cleanall:
 	$(GHDL) --remove
-#rm -f *.ghw
+	rm -rf deps
+	rm -f *.ghw
 	rm -f *.cf
 	rm -f *.o
+	rm -f *.time
+	rm -f *.value
+	rm -f output_data
+	rm -f interpret_output
 
 .PHONY: clean cleanall all
 
-.PRECIOUS: %_pp.vhd
+newline := \\n
+empty :=
+space := $(empty) $(empty)
 
 #ghdl -e -Wc,-fdump-tree-gimple

@@ -1,0 +1,142 @@
+-- Copyright (C) 2016 Kim Taylor
+--
+-- This file is part of hbc_mac.
+--
+-- hbc_mac is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+--
+-- hbc_mac is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License
+-- along with hbc_mac.  If not, see <http://www.gnu.org/licenses/>.
+
+-- ghdl_flags: --stop-time=100ns
+
+use std.textio.all;
+
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+use ieee.vital_primitives.all;
+use ieee.vital_timing.all;
+
+library transceiver;
+use transceiver.numeric.all;
+use transceiver.bits.all;
+
+entity lib_numeric_tb is
+    generic (
+	tperiod_CLK_posedge : VitalDelayType := 0.000 ns);
+    port (
+	CLK : in std_ulogic);
+    attribute VITAL_LEVEL0 of lib_numeric_tb : entity is true;
+end lib_numeric_tb;
+
+architecture test of lib_numeric_tb is 
+
+    type val_ft is file of std_logic;
+    type time_ft is file of time;
+    file val_file : val_ft open WRITE_MODE is "modulator_tb_stim.value";
+    file time_file : time_ft open WRITE_MODE is "modulator_tb_stim.time";
+
+    procedure write_val(val : std_logic) is 
+    begin
+	write(val_file, val);
+	write(time_file, now);
+    end procedure write_val;
+
+    signal val : unsigned (63 downto 0) := X"FFFFFFFFFFFFFFFF";
+    signal weight : std_logic_vector (6 downto 0);
+    constant clk_period : time := 10 ns;
+ 
+begin
+
+#if TEST_WALSH
+    process
+	variable l : line;
+	variable w_code_1 : walsh_code_t := X"0000";
+	variable w_code_2 : walsh_code_t := X"0000";
+	variable w_sym : walsh_sym_t;
+	variable distance : natural;
+    begin
+	for j in 0 to 15 loop
+	    w_sym := std_logic_vector(to_unsigned(j, 4));
+	    w_code_1 := walsh_encode(w_sym);
+
+	    for i in 0 to 15 loop
+		w_sym := std_logic_vector(to_unsigned(i, 4));
+		w_code_2 := walsh_encode(w_sym);
+		--w_code_2 := std_logic_vector(
+		--		rotate_left(unsigned(w_code_1), i));
+		--w_code_2 := X"FFF0";
+
+		distance := w_code_1 xor w_code_2; --calc_hamming(w_code_1, w_code_2);
+
+		write(l, distance);
+		writeline(output, l);
+	    end loop;
+	    write(l, string'("Next..."));
+	    writeline(output, l);
+	end loop;
+
+	wait;
+    end process;
+#endif
+
+#if TEST_VITAL
+    process
+	variable l : line;
+    begin
+	write(l, string'("bits_for_val(15) = "));
+	write(l, bits_for_val(16));
+	writeline(output, l);
+	write(l, string'("tperiod_CLK_posedge = "));
+	write(l, tperiod_CLK_posedge);
+	writeline(output, l);
+
+	write_val('1');
+	wait for 10 ns;
+	write_val('0');
+	wait for 10 ns;
+	write_val('1');
+
+	wait;
+    end process;
+#endif
+
+#if TEST_HAMMING
+    test_hamming : entity work.hamming_lut
+	port map (
+	    val => std_logic_vector(val),
+	    weight => weight);
+
+    process
+        variable l : line;
+        variable w_code : walsh_code_t := X"0000";
+        variable w_sym : walsh_sym_t;
+        variable distance : natural;
+    begin
+	for j in 0 to 15 loop
+            w_sym := std_logic_vector(to_unsigned(j, 4));
+            w_code := walsh_encode(w_sym);
+
+            distance := calc_hamming(w_code, X"FFFF");
+
+            write(l, distance);
+            writeline(output, l);
+        end loop;
+	wait;
+    end process;
+
+    inc_val : process begin
+	wait for clk_period;
+	val <= val + 1;
+    end process inc_val;
+#endif
+
+end;

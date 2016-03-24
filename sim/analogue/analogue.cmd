@@ -15,10 +15,10 @@
 *.OPTIONS ACCURATE=1 GMIN=1e-9
 
 * Remove the .SAVE commands when doing a sensitivity analysis
-*.SAVE v(filter_in) v(filter_out)
-*.SAVE v(filter_out_100) v(filter_out_200) v(filter_out_300) v(filter_out_400)
-*.SAVE v(filter_out_400_att) v(filter_out_100_att) v(filter_in_att)
-*.SAVE v(rx_data)
+.SAVE v(filter_in) v(filter_out)
+.SAVE v(filter_out_100) v(filter_out_200) v(filter_out_300) v(filter_out_400)
+.SAVE v(filter_out_400_att) v(filter_out_100_att) v(filter_in_att)
+.SAVE v(rx_data)
 
 * Set V_TX to "external"
 * Filter testing
