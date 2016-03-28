@@ -58,7 +58,7 @@ $(MAPPED_NETLIST): $(XILINX_DATABASE)
 		-pr off -lc off -power off -o ../$@ ../$< ../$(PHYS_CONSTRAINTS)
 
 # Link and read constraints
-$(XILINX_DATABASE): $(TARGET_CORE) $(IP_CORES)
+$(XILINX_DATABASE): $(TARGET_CORE) $(IP_CORES) $(TIMING_UCF) $(PIN_MAP_UCF)
 	mkdir -p ngd
 	cd ngd ; ngdbuild -dd ngo -sd ../cores -nt timestamp \
 		-uc ../$(TIMING_UCF) -uc ../$(PIN_MAP_UCF) \
