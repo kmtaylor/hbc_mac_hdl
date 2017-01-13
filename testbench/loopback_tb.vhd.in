@@ -275,7 +275,7 @@ begin
 	wait for s_clk_period/2;
     end process;
 
-#if 1
+#if 0
     serial_clk_dly <= serial_clk after 0 ns;
 #else
     s_clk_dly_process : process begin

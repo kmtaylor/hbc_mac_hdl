@@ -36,7 +36,7 @@ XILINX_FLAGS += $(IEEE_LIB) -fexplicit --warn-no-binding --warn-no-vital-generic
 GHDL := ghdl
 GHDL_MCODE := ghdl_mcode
 
-GHDL_DIR := $(shell dirname `ghdl --dispconfig | grep "default prefix" | \
+GHDL_DIR := $(shell dirname `ghdl --dispconfig | grep "library directory" | \
 		sed 's/.*: //'`)
 GHDL_MCODE_DIR := $(shell ghdl_mcode --dispconfig | grep "library directory" | \
 		sed 's/.*: //')
@@ -78,7 +78,7 @@ deps/%.d: ../testbench/%.vhd
 
 %_tb: $(XILINX_OBJS) $(LOCAL_OBJS) 
 	$(eval dep_list = $@_deps)
-	$(GHDL) -i $(XILINX_FLAGS) ../testbench/$@.vhd $($@_deps)
+	$(GHDL) -i ../testbench/$@.vhd $($@_deps)
 	$(GHDL) -m $(XILINX_FLAGS) $@
 	./$@ $($@_flags)
 
